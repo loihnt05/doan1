@@ -26,4 +26,23 @@ export class RedisService {
       fromCache: false,
     };
   }
+
+  async setCacheKey() {
+    const key = 'my-key';
+    const value = 'my-value';
+
+    await this.cacheManager.set(key, value, 60000);
+
+    return { message: `Cache key '${key}' set successfully.` };
+  }
+
+  async getCacheKey() {
+    const key = 'my-key';
+    const value = await this.cacheManager.get<string>(key);
+
+    if (value) {
+      return { key, value };
+    }
+    return { message: `Cache key '${key}' not found.` };
+  }
 }

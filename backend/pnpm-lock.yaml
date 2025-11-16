@@ -38,9 +38,6 @@ importers:
       cache-manager-memcached-store:
         specifier: ^6.0.1
         version: 6.0.1
-      cache-manager-redis-store:
-        specifier: ^3.0.1
-        version: 3.0.1
       cache-manager-redis-yet:
         specifier: ^5.1.5
         version: 5.1.5
