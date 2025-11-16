@@ -3,11 +3,11 @@ import { RedisService } from './redis.service';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('redis')
-@UseInterceptors(CacheInterceptor)
 export class RedisController {
   constructor(private readonly redisService: RedisService) {}
 
   @Get('get-number-cache')
+  @UseInterceptors(CacheInterceptor)
   @CacheTTL(60)
   getNumberCache() {
     return this.redisService.getNumberCache();
@@ -17,6 +17,7 @@ export class RedisController {
   setCacheKey() {
     return this.redisService.setCacheKey();
   }
+
   @Get('get-cache-key')
   getCacheKey() {
     return this.redisService.getCacheKey();

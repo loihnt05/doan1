@@ -31,14 +31,24 @@ export class RedisService {
     const key = 'my-key';
     const value = 'my-value';
 
+    console.log('Setting cache key:', key, 'with value:', value);
     await this.cacheManager.set(key, value, 60000);
 
-    return { message: `Cache key '${key}' set successfully.` };
+    // Verify it was set
+    const verify = await this.cacheManager.get(key);
+    console.log('Verification after set:', verify);
+
+    return {
+      message: `Cache key '${key}' set successfully.`,
+      verified: verify,
+    };
   }
 
   async getCacheKey() {
     const key = 'my-key';
+    console.log('Getting cache key:', key);
     const value = await this.cacheManager.get<string>(key);
+    console.log('Retrieved value:', value);
 
     if (value) {
       return { key, value };
