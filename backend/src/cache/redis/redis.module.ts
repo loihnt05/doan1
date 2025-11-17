@@ -5,6 +5,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import Keyv from 'keyv';
 import { CacheableMemory } from 'cacheable';
 import KeyvRedis from '@keyv/redis';
+import { redisProvider } from './redis.provider';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import KeyvRedis from '@keyv/redis';
     }),
   ],
   controllers: [RedisController],
-  providers: [RedisService],
+  providers: [RedisService, redisProvider],
+  exports: [redisProvider],
 })
 export class RedisModule {}
