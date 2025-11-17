@@ -1,6 +1,13 @@
-import { Body, Controller, Get, Param, Post, UseInterceptors } from '@nestjs/common';
-import { RedisService } from './redis.service';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
+import { RedisService } from './redis.service';
 
 @Controller('redis')
 export class RedisController {
@@ -54,10 +61,21 @@ export class RedisController {
   getList(@Param('key') key: string) {
     return this.redisService.getList(key);
   }
+  @Post('list/:key')
+  setList(@Param('key') key: string, @Body('values') values: string[]) {
+    return this.redisService.setList(key, values);
+  }
 
   @Get('set/:key')
   getSet(@Param('key') key: string) {
     return this.redisService.getSet(key);
+  }
+  @Post('set/:key')
+  setSet(
+    @Param('key') key: string,
+    @Body('members') members: Array<{ value: string; score: number }>,
+  ) {
+    return this.redisService.setSet(key, members);
   }
 
   @Get('zset/:key')

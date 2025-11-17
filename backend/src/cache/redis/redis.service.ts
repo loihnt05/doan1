@@ -104,6 +104,15 @@ export class RedisService {
     console.log('Getting set for key:', key);
     return await this.redis.sMembers(key);
   }
+  async setSet(key: string, members: Array<{ value: string; score: number }>) {
+    console.log('Setting set for key:', key, 'with members:', members);
+    if (!members || members.length === 0)
+      return { message: 'No members provided' };
+    for (const m of members) {
+      await this.redis.zAdd(key, m);
+    }
+    return { message: `Set created for key '${key}'.` };
+  }
   //sorted set
   async getSortedSet(key: string) {
     console.log('Getting sorted set for key:', key);
