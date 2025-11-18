@@ -1,4 +1,40 @@
-# Genesis Node · Design & Build System (Node.js v23.7.0)
+# doan1 - Monorepo Project
+
+> A modern monorepo setup using pnpm workspaces with NestJS backend and Docusaurus frontend.
+
+## 🚀 Quick Start
+
+```bash
+# Install all dependencies
+pnpm install
+
+# Start both backend and frontend in development mode
+pnpm dev
+
+# Or start them individually
+pnpm dev:backend   # Backend on port 8080
+pnpm dev:frontend  # Frontend on port 3000
+```
+
+## 📁 Project Structure
+
+This is a monorepo containing:
+
+- **[backend/](./backend)** - NestJS API (Node.js v23.7.0)
+  - Distributed caching with Redis
+  - User management
+  - RESTful API endpoints
+  
+- **[handbook/](./handbook)** - Docusaurus documentation site
+  - Project documentation
+  - Technical guides
+  - Tutorial content
+
+For detailed monorepo setup and commands, see **[MONOREPO.md](./MONOREPO.md)**.
+
+---
+
+# Backend: Genesis Node · Design & Build System (Node.js v23.7.0)
 
 The goal of this document is to capture how the Node.js v23.7.0 stack in this repository is designed, how it is built, and the tooling expectations for contributors. It focuses on the backend NestJS service that lives in `./backend` and highlights the Node 23.7–specific nuances you need to be aware of when developing or deploying.
 
