@@ -1,0 +1,45 @@
+{
+  "name": "doan1",
+  "version": "1.0.0",
+  "description": "Monorepo for backend (NestJS) and frontend applications",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter backend --filter handbook dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter handbook dev",
+    "build": "pnpm -r build",
+    "build:backend": "pnpm --filter backend build",
+    "build:frontend": "pnpm --filter handbook build",
+    "start:backend": "pnpm --filter backend start:prod",
+    "start:frontend": "pnpm --filter handbook serve",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "clean": "pnpm -r exec -- rm -rf dist node_modules .docusaurus build",
+    "install:all": "pnpm install",
+    "docker:redis": "docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest",
+    "docker:redis:stop": "docker stop redis-stack && docker rm redis-stack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loihnt05/doan1.git"
+  },
+  "keywords": [
+    "monorepo",
+    "nestjs",
+    "react",
+    "pnpm-workspace"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/loihnt05/doan1/issues"
+  },
+  "homepage": "https://github.com/loihnt05/doan1#readme",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}
