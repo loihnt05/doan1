@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 
 import { AppService } from './app.service';
-import { RedisModule } from './cache/redis/redis.module';
+import { MemcachedModule } from './cache/memcached/memcached.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [RedisModule, UserModule],
+  imports: [MemcachedModule, UserModule],
   controllers: [AppController],
   providers: [AppService],
 })
