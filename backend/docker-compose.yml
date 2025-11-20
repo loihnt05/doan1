@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  hazelcast:
+    image: hazelcast/hazelcast:5.3.0
+    container_name: hazelcast
+    ports:
+      - "5701:5701"
+    environment:
+      - JAVA_OPTS=-Dhazelcast.config=/opt/hazelcast/config_ext/hazelcast.xml
+    volumes:
+      - ./hazelcast-config.xml:/opt/hazelcast/config_ext/hazelcast.xml
+    networks:
+      - cache-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - cache-network
+
+  memcached:
+    image: memcached:1.6-alpine
+    container_name: memcached
+    ports:
+      - "11211:11211"
+    command: memcached -m 64
+    networks:
+      - cache-network
+
+networks:
+  cache-network:
+    driver: bridge
+
+volumes:
+  redis-data:
