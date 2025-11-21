@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 
 import { AppService } from './app.service';
-import { HazelcastModule } from './cache/hazelcast/hazelcast.module';
+import { CloudCacheModule } from './cache/cloud-cache/cloud-cache.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [HazelcastModule, UserModule],
+  imports: [CloudCacheModule, UserModule],
   controllers: [AppController],
   providers: [AppService],
 })
