@@ -197,11 +197,3 @@ curl http://localhost:3000/redis/zset/leaderboard
 ```
 
 Để chỉ xem set dưới dạng `SMEMBERS`, gọi: `curl http://localhost:3000/redis/set/leaderboard`.
-
-## Gợi ý mở rộng
-
-- Di chuyển URL Redis vào `ConfigModule` để dễ cấu hình nhiều môi trường.
-- Bổ sung `setZSet` riêng biệt hoặc dùng DTOs để tránh nhầm lẫn giữa Set/ZSet.
-- Tạo e2e test cho từng endpoint để đảm bảo hành vi nhất quán khi refactor.
-
-Tài liệu này nhằm giúp bạn có cái nhìn end-to-end: chạy Redis Stack, cấu hình NestJS, và thử nghiệm từng cấu trúc dữ liệu ngay qua REST API.
