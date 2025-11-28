@@ -65,17 +65,6 @@ export class AppModule {}
 
 ## NestJS Setup
 
-### Module Structure
-
-```
-backend/src/cache/cloud-cache/
-├── cloud-cache.controller.ts       # HTTP endpoints
-├── cloud-cache.service.ts          # Core caching logic
-├── cloud-cache.module.ts           # NestJS module
-├── cloud-cache.config.ts           # Configuration
-└── cloud-cache.examples.ts         # Usage examples
-```
-
 ### Service Implementation
 
 ```typescript
@@ -338,12 +327,12 @@ export class ProductService {
     // Kiểm tra cache trước
     const cached = this.cloudCache.match(cacheKey);
     if (cached) {
-      console.log('✅ Cache HIT');
+      console.log('Cache HIT');
       return JSON.parse(cached.body);
     }
 
     // Fetch từ database/API
-    console.log('❌ Cache MISS');
+    console.log('Cache MISS');
     const products = await this.fetchFromDatabase();
 
     // Lưu vào cache với TTL 5 phút

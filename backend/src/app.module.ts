@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CacheInvalidationInterceptor } from './cache/interceptors/cache-invalidation.interceptor';
 import { CacheInterceptor } from './cache/interceptors/cache.interceptor';
+import { CacheStrategiesModule } from './cache/strategies/cache-strategies.module';
 import { ConfigModule } from './config/config.module';
 import { UserModule } from './user/user.module';
 
@@ -19,6 +20,7 @@ import { UserModule } from './user/user.module';
     ]),
     ConfigModule,
     UserModule,
+    CacheStrategiesModule,
     CacheModule.register({
       isGlobal: true,
     }),
