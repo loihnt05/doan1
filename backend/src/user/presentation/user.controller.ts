@@ -1,15 +1,17 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { UserService } from '../application/user.service';
+import { User } from '../domain/user.entity';
 
 @Controller('user')
 export class UserController {
-  // constructor(private userService: UserService) {}
-
-  // @Get('config')
-  // getConfig() {
-  //   return this.userService.getConfig();
-  // }
-
   constructor(private readonly userService: UserService) {}
 
   @Get('all')
@@ -25,5 +27,15 @@ export class UserController {
   @Post()
   create(@Body() body: { name: string; email: string }) {
     return this.userService.createUser(body.name, body.email);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: number, @Body() body: Partial<User>) {
+    return this.userService.updateUser(+id, body);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.userService.deleteUser(+id);
   }
 }
