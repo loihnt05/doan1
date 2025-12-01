@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Cache Invalidation
 
 Cache invalidation là một trong những khía cạnh quan trọng nhất khi triển khai hệ thống distributed cache. Tài liệu này hướng dẫn cách cache invalidation được triển khai trong backend của chúng ta sử dụng decorators và interceptors của NestJS.

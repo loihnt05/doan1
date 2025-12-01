@@ -65,17 +65,6 @@ export class AppModule {}
 
 ## NestJS Setup
 
-### Module Structure
-
-```
-backend/src/cache/cloud-cache/
-├── cloud-cache.controller.ts       # HTTP endpoints
-├── cloud-cache.service.ts          # Core caching logic
-├── cloud-cache.module.ts           # NestJS module
-├── cloud-cache.config.ts           # Configuration
-└── cloud-cache.examples.ts         # Usage examples
-```
-
 ### Service Implementation
 
 ```typescript
@@ -338,12 +327,12 @@ export class ProductService {
     // Kiểm tra cache trước
     const cached = this.cloudCache.match(cacheKey);
     if (cached) {
-      console.log('✅ Cache HIT');
+      console.log('Cache HIT');
       return JSON.parse(cached.body);
     }
 
     // Fetch từ database/API
-    console.log('❌ Cache MISS');
+    console.log('Cache MISS');
     const products = await this.fetchFromDatabase();
 
     // Lưu vào cache với TTL 5 phút
@@ -576,74 +565,9 @@ class ProductService {
 }
 ```
 
-## Performance Tips
-
-1. **Set appropriate TTLs**: Cân bằng giữa freshness và performance
-2. **Regular cleanup**: Gọi `cleanupExpired()` định kỳ
-3. **Monitor hit rates**: Mục tiêu >70% cache hit rate
-4. **Warm critical caches**: Pre-load dữ liệu thường xuyên truy cập
-5. **Use consistent keys**: Tránh cache fragmentation
-
-## Limitations
-
-- **In-Memory Only**: Dữ liệu mất khi restart application
-- **Single Instance**: Không distributed across multiple servers
-- **No Persistence**: Không có backup hoặc recovery mechanism
-- **Memory Constraints**: Giới hạn bởi RAM available
-
-## Production Considerations
-
-Cho production environments, cân nhắc:
-
-1. **Redis Integration**: Sử dụng Redis cho distributed caching
-2. **Cloudflare Workers**: Deploy edge workers cho global caching
-3. **CDN Integration**: Tận dụng Cloudflare CDN cho static assets
-4. **Memcached**: Cho high-performance distributed caching
-
-## Troubleshooting
-
-### Cache không hoạt động?
-
-```bash
-# Kiểm tra stats
-curl http://localhost:8080/cloud-cache/stats
-
-# Clear và retry
-curl -X DELETE http://localhost:8080/cloud-cache/clear
-```
-
-### Dữ liệu không update?
-
-- Kiểm tra TTL có quá dài không
-- Manually delete cache: `DELETE /cloud-cache/delete?url=...`
-
-### High Memory Usage?
-
-```bash
-# Cleanup expired entries
-curl -X POST http://localhost:8080/cloud-cache/cleanup
-
-# Hoặc clear all
-curl -X DELETE http://localhost:8080/cloud-cache/clear
-```
-
-### Low Cache Hit Rate?
-
-```typescript
-// Tăng TTL
-this.cloudCache.put(url, data, {
-  headers: { 'cache-control': 's-maxage=3600' }
-});
-
-// Warm up cache on startup
-async onModuleInit() {
-  await this.warmUpCache();
-}
-```
-
 ## Resources
 
 - [Cloudflare Workers Cache API](https://developers.cloudflare.com/workers/runtime-apis/cache/)
 - [Cloudflare Cache Examples](https://developers.cloudflare.com/workers/examples/cache-api/)
 - [HTTP Caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching)
-- [Cache-Control Header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+- [Cache-Control Header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control)

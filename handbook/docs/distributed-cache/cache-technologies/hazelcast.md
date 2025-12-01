@@ -1,71 +1,62 @@
+---
+sidebar_position: 3
+---
 # Hazelcast
 
-Hazelcast is an open-source in-memory data grid that provides distributed caching, distributed computing, and messaging capabilities. This guide covers the Hazelcast integration in our NestJS backend.
+Hazelcast là một in-memory data grid mã nguồn mở cung cấp khả năng distributed caching, distributed computing và messaging. Tài liệu này hướng dẫn tích hợp Hazelcast trong backend NestJS của chúng ta.
 
-## Overview
+## Tổng Quan
 
-Our Hazelcast integration provides:
-- **Distributed Map Storage**: Store key-value pairs across multiple nodes
-- **High Availability**: Automatic data replication and failover
-- **Horizontal Scalability**: Add more nodes to increase capacity
-- **Fast Performance**: In-memory storage with microsecond latency
-- **TTL Support**: Automatic expiration of cached data
+Tích hợp Hazelcast của chúng ta cung cấp:
+- **Lưu Trữ Distributed Map**: Lưu trữ các cặp key-value trên nhiều nodes
+- **Tính Sẵn Sàng Cao**: Tự động sao chép dữ liệu và chuyển đổi dự phòng
+- **Khả Năng Mở Rộng Ngang**: Thêm nhiều nodes để tăng dung lượng
+- **Hiệu Suất Nhanh**: Lưu trữ trong bộ nhớ với độ trễ microsecond
+- **Hỗ Trợ TTL**: Tự động hết hạn dữ liệu được lưu cache
 
-## Architecture
+## Yêu Cầu Trước Khi Bắt Đầu
 
-The Hazelcast implementation follows a modular architecture:
-
-```
-backend/src/cache/hazelcast/
-├── hazelcast.module.ts       # NestJS module configuration
-├── hazelcast.provider.ts     # Hazelcast client provider
-├── hazelcast.service.ts      # Business logic and cache operations
-└── hazelcast.controller.ts   # REST API endpoints
-```
-
-## Prerequisites
-
-### 1. Install Dependencies
+### 1. Cài Đặt Dependencies
 
 ```bash
 npm install hazelcast-client
-# or
+# hoặc
 pnpm add hazelcast-client
 ```
 
-### 2. Start Hazelcast Server
+### 2. Khởi Động Hazelcast Server
 
-Using Docker Compose:
+Sử dụng Docker Compose:
 
 ```bash
 cd backend
 docker compose up hazelcast -d
 ```
 
-This will start Hazelcast on `localhost:5701`.
+Lệnh này sẽ khởi động Hazelcast trên `localhost:5701`.
 
-Or using docker hub
+Hoặc sử dụng docker hub
 ```bash
 docker run -p 5701:5701 hazelcast/hazelcast
 ```
 
-### 3. Verify Hazelcast is Running
+### 3. Xác Minh Hazelcast Đang Chạy
 
 ```bash
 docker ps | grep hazelcast
 ```
 
-You should see the container running:
+Bạn sẽ thấy container đang chạy:
 ```
 CONTAINER ID   IMAGE                      STATUS         PORTS
 abc123def456   hazelcast/hazelcast:5.3.0  Up 2 minutes   0.0.0.0:5701->5701/tcp
 ```
 
-## Configuration
+## Cấu Hình
 
-### Provider Configuration
+### Cấu Hình Provider
 
-The Hazelcast client is configured in `hazelcast.provider.ts`:
+Hazelcast client được cấu hình trong `hazelcast.provider.ts`:
 
 ```typescript
 import { Client } from 'hazelcast-client';
@@ -86,14 +77,14 @@ export const hazelcastProvider = {
 };
 ```
 
-**Configuration Options:**
-- `clusterName`: Name of the Hazelcast cluster (default: `dev`)
-- `clusterMembers`: Array of Hazelcast node addresses
-- Additional options: connection timeout, retry settings, SSL/TLS configuration
+**Các Tùy Chọn Cấu Hình:**
+- `clusterName`: Tên của Hazelcast cluster (mặc định: `dev`)
+- `clusterMembers`: Mảng các địa chỉ node Hazelcast
+- Tùy chọn bổ sung: connection timeout, retry settings, cấu hình SSL/TLS
 
-### Module Registration
+### Đăng Ký Module
 
-Import the `HazelcastModule` in your application module:
+Import `HazelcastModule` vào application module của bạn:
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -106,114 +97,11 @@ import { HazelcastModule } from './cache/hazelcast/hazelcast.module';
 export class AppModule {}
 ```
 
-## API Reference
-
-The Hazelcast service provides the following methods:
-
-### Core Operations
-
-#### `get<T>(mapName: string, key: string): Promise<T | null>`
-
-Retrieve a value from the cache.
-
-```typescript
-const user = await hazelcastService.get('users', 'user:123');
-```
-
-#### `set(mapName: string, key: string, value: unknown, ttl?: number): Promise<boolean>`
-
-Store a value in the cache with optional TTL (time-to-live) in milliseconds.
-
-```typescript
-// Without TTL
-await hazelcastService.set('users', 'user:123', { name: 'John', age: 30 });
-
-// With TTL (expires after 1 hour)
-await hazelcastService.set('sessions', 'session:abc', sessionData, 3600000);
-```
-
-#### `delete(mapName: string, key: string): Promise<boolean>`
-
-Remove a key from the cache.
-
-```typescript
-await hazelcastService.delete('users', 'user:123');
-```
-
-#### `containsKey(mapName: string, key: string): Promise<boolean>`
-
-Check if a key exists in the cache.
-
-```typescript
-const exists = await hazelcastService.containsKey('users', 'user:123');
-```
-
-### Advanced Operations
-
-#### `getAllEntries<T>(mapName: string): Promise<Array<[string, T]>>`
-
-Get all key-value pairs from a map.
-
-```typescript
-const entries = await hazelcastService.getAllEntries('users');
-// Returns: [['user:1', {...}], ['user:2', {...}]]
-```
-
-#### `getKeys(mapName: string): Promise<string[]>`
-
-Get all keys from a map.
-
-```typescript
-const keys = await hazelcastService.getKeys('users');
-// Returns: ['user:1', 'user:2', 'user:3']
-```
-
-#### `getValues<T>(mapName: string): Promise<T[]>`
-
-Get all values from a map.
-
-```typescript
-const values = await hazelcastService.getValues('users');
-```
-
-#### `getSize(mapName: string): Promise<number>`
-
-Get the number of entries in a map.
-
-```typescript
-const size = await hazelcastService.getSize('users');
-```
-
-#### `clear(mapName: string): Promise<boolean>`
-
-Remove all entries from a map.
-
-```typescript
-await hazelcastService.clear('users');
-```
-
-#### `putIfAbsent(mapName: string, key: string, value: unknown, ttl?: number): Promise<unknown>`
-
-Set a value only if the key doesn't already exist.
-
-```typescript
-const previousValue = await hazelcastService.putIfAbsent('users', 'user:123', userData);
-// Returns null if key was set, or the existing value if key already existed
-```
-
-#### `getMultiple<T>(mapName: string, keys: string[]): Promise<Map<string, T>>`
-
-Retrieve multiple values in a single operation.
-
-```typescript
-const values = await hazelcastService.getMultiple('users', ['user:1', 'user:2', 'user:3']);
-```
-
 ## REST API Endpoints
 
-The backend exposes the following HTTP endpoints for testing and integration:
+Backend cung cấp các HTTP endpoints sau để kiểm thử và tích hợp:
 
-### Set a Value
+### Đặt Giá Trị
 
 **Endpoint:** `POST /hazelcast/:mapName/:key`
 
@@ -225,7 +113,7 @@ The backend exposes the following HTTP endpoints for testing and integration:
 }
 ```
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl -X POST http://localhost:3000/hazelcast/users/user:123 \
   -H "Content-Type: application/json" \
@@ -240,11 +128,11 @@ curl -X POST http://localhost:3000/hazelcast/users/user:123 \
 }
 ```
 
-### Get a Value
+### Lấy Giá Trị
 
 **Endpoint:** `GET /hazelcast/:mapName/:key`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl http://localhost:3000/hazelcast/users/user:123
 ```
@@ -261,11 +149,11 @@ curl http://localhost:3000/hazelcast/users/user:123
 }
 ```
 
-### Delete a Key
+### Xóa Một Key
 
 **Endpoint:** `DELETE /hazelcast/:mapName/:key`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl -X DELETE http://localhost:3000/hazelcast/users/user:123
 ```
@@ -277,11 +165,11 @@ curl -X DELETE http://localhost:3000/hazelcast/users/user:123
 }
 ```
 
-### Check if Key Exists
+### Kiểm Tra Key Có Tồn Tại
 
 **Endpoint:** `GET /hazelcast/:mapName/:key/exists`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl http://localhost:3000/hazelcast/users/user:123/exists
 ```
@@ -295,11 +183,11 @@ curl http://localhost:3000/hazelcast/users/user:123/exists
 }
 ```
 
-### Get All Entries
+### Lấy Tất Cả Entries
 
 **Endpoint:** `GET /hazelcast/:mapName/entries`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl http://localhost:3000/hazelcast/users/entries
 ```
@@ -316,11 +204,11 @@ curl http://localhost:3000/hazelcast/users/entries
 }
 ```
 
-### Get All Keys
+### Lấy Tất Cả Keys
 
 **Endpoint:** `GET /hazelcast/:mapName/keys`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl http://localhost:3000/hazelcast/users/keys
 ```
@@ -334,11 +222,11 @@ curl http://localhost:3000/hazelcast/users/keys
 }
 ```
 
-### Get All Values
+### Lấy Tất Cả Values
 
 **Endpoint:** `GET /hazelcast/:mapName/values`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl http://localhost:3000/hazelcast/users/values
 ```
@@ -355,11 +243,11 @@ curl http://localhost:3000/hazelcast/users/values
 }
 ```
 
-### Get Map Size
+### Lấy Kích Thước Map
 
 **Endpoint:** `GET /hazelcast/:mapName/size`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl http://localhost:3000/hazelcast/users/size
 ```
@@ -372,11 +260,11 @@ curl http://localhost:3000/hazelcast/users/size
 }
 ```
 
-### Clear All Entries
+### Xóa Tất Cả Entries
 
 **Endpoint:** `DELETE /hazelcast/:mapName/clear`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl -X DELETE http://localhost:3000/hazelcast/users/clear
 ```
@@ -388,7 +276,7 @@ curl -X DELETE http://localhost:3000/hazelcast/users/clear
 }
 ```
 
-### Put If Absent
+### Put If Absent (Đặt Nếu Chưa Có)
 
 **Endpoint:** `POST /hazelcast/:mapName/:key/if-absent`
 
@@ -400,14 +288,14 @@ curl -X DELETE http://localhost:3000/hazelcast/users/clear
 }
 ```
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl -X POST http://localhost:3000/hazelcast/users/user:123/if-absent \
   -H "Content-Type: application/json" \
   -d '{"value": {"name": "Jane Doe"}}'
 ```
 
-**Response (key doesn't exist):**
+**Response (key không tồn tại):**
 ```json
 {
   "message": "Successfully set key 'user:123' in map 'users'",
@@ -415,7 +303,7 @@ curl -X POST http://localhost:3000/hazelcast/users/user:123/if-absent \
 }
 ```
 
-**Response (key already exists):**
+**Response (key đã tồn tại):**
 ```json
 {
   "message": "Key 'user:123' already exists in map 'users'",
@@ -423,11 +311,11 @@ curl -X POST http://localhost:3000/hazelcast/users/user:123/if-absent \
 }
 ```
 
-### Get Multiple Values
+### Lấy Nhiều Giá Trị
 
 **Endpoint:** `GET /hazelcast/:mapName/multiple?keys=key1,key2,key3`
 
-**Example:**
+**Ví dụ:**
 ```bash
 curl "http://localhost:3000/hazelcast/users/multiple?keys=user:1,user:2,user:3"
 ```
@@ -445,11 +333,11 @@ curl "http://localhost:3000/hazelcast/users/multiple?keys=user:1,user:2,user:3"
 }
 ```
 
-## Testing Guide
+## Hướng Dẫn Kiểm Thử
 
-### Manual Testing with cURL
+### Kiểm Thử Thủ Công Với cURL
 
-#### 1. Start Your Backend Server
+#### 1. Khởi Động Backend Server
 
 ```bash
 cd backend
@@ -458,54 +346,54 @@ npm run start:dev
 pnpm run start:dev
 ```
 
-#### 2. Test Basic Operations
+#### 2. Kiểm Thử Các Thao Tác Cơ Bản
 
-**Set a user:**
+**Đặt một user:**
 ```bash
 curl -X POST http://localhost:3000/hazelcast/users/user:1 \
   -H "Content-Type: application/json" \
   -d '{"value": {"id": 1, "name": "Alice", "email": "alice@example.com"}}'
 ```
 
-**Get the user:**
+**Lấy user:**
 ```bash
 curl http://localhost:3000/hazelcast/users/user:1
 ```
 
-**Check if user exists:**
+**Kiểm tra user có tồn tại:**
 ```bash
 curl http://localhost:3000/hazelcast/users/user:1/exists
 ```
 
-**Delete the user:**
+**Xóa user:**
 ```bash
 curl -X DELETE http://localhost:3000/hazelcast/users/user:1
 ```
 
-#### 3. Test TTL (Time-to-Live)
+#### 3. Kiểm Thử TTL (Time-to-Live)
 
-**Set a value with 10-second TTL:**
+**Đặt giá trị với TTL 10 giây:**
 ```bash
 curl -X POST http://localhost:3000/hazelcast/sessions/session:abc \
   -H "Content-Type: application/json" \
   -d '{"value": {"userId": 123, "token": "xyz"}, "ttl": 10000}'
 ```
 
-**Immediately get the value:**
+**Lấy giá trị ngay lập tức:**
 ```bash
 curl http://localhost:3000/hazelcast/sessions/session:abc
 ```
 
-**Wait 11 seconds, then try to get it again:**
+**Chờ 11 giây, sau đó thử lấy lại:**
 ```bash
 sleep 11
 curl http://localhost:3000/hazelcast/sessions/session:abc
-# Should return: {"mapName":"sessions","key":"session:abc","value":null}
+# Nên trả về: {"mapName":"sessions","key":"session:abc","value":null}
 ```
 
-#### 4. Test Batch Operations
+#### 4. Kiểm Thử Các Thao Tác Hàng Loạt
 
-**Add multiple users:**
+**Thêm nhiều users:**
 ```bash
 curl -X POST http://localhost:3000/hazelcast/users/user:1 \
   -H "Content-Type: application/json" \
@@ -520,29 +408,29 @@ curl -X POST http://localhost:3000/hazelcast/users/user:3 \
   -d '{"value": {"name": "Charlie"}}'
 ```
 
-**Get all entries:**
+**Lấy tất cả entries:**
 ```bash
 curl http://localhost:3000/hazelcast/users/entries
 ```
 
-**Get specific users:**
+**Lấy các users cụ thể:**
 ```bash
 curl "http://localhost:3000/hazelcast/users/multiple?keys=user:1,user:2"
 ```
 
-**Get map size:**
+**Lấy kích thước map:**
 ```bash
 curl http://localhost:3000/hazelcast/users/size
 ```
 
-**Clear all:**
+**Xóa tất cả:**
 ```bash
 curl -X DELETE http://localhost:3000/hazelcast/users/clear
 ```
 
-#### 5. Test Put If Absent
+#### 5. Kiểm Thử Put If Absent
 
-**First attempt (should succeed):**
+**Lần thử đầu tiên (nên thành công):**
 ```bash
 curl -X POST http://localhost:3000/hazelcast/config/app:theme/if-absent \
   -H "Content-Type: application/json" \
@@ -550,105 +438,70 @@ curl -X POST http://localhost:3000/hazelcast/config/app:theme/if-absent \
 # Response: "Successfully set key..."
 ```
 
-**Second attempt (should fail):**
+**Lần thử thứ hai (nên thất bại):**
 ```bash
 curl -X POST http://localhost:3000/hazelcast/config/app:theme/if-absent \
   -H "Content-Type: application/json" \
   -d '{"value": "light"}'
 # Response: "Key 'app:theme' already exists..."
 ```
+## Đặc Điểm Hiệu Suất
 
-### Testing with Postman
-
-1. **Import Collection**: Create a new Postman collection named "Hazelcast API"
-2. **Set Base URL**: Create an environment variable `BASE_URL = http://localhost:3000`
-3. **Add requests** for each endpoint listed above
-4. **Create Test Scripts**: Add assertions to verify responses
-
-Example test script for "Set Value" request:
-```javascript
-pm.test("Status code is 200", function () {
-    pm.response.to.have.status(200);
-});
-
-pm.test("Response contains success message", function () {
-    var jsonData = pm.response.json();
-    pm.expect(jsonData.message).to.include("Successfully set key");
-});
-```
-
-### Testing with httpie
-
-If you prefer httpie over cURL:
-
-```bash
-# Set a value
-http POST localhost:3000/hazelcast/users/user:1 value:='{"name":"Alice"}'
-
-# Get a value
-http GET localhost:3000/hazelcast/users/user:1
-
-# Delete a value
-http DELETE localhost:3000/hazelcast/users/user:1
-```
-
-## Performance Characteristics
-
-### Latency
+### Độ Trễ
 
 - **Set Operation**: 1-5 ms
 - **Get Operation**: < 1 ms
 - **Delete Operation**: 1-3 ms
 - **Batch Operations**: 5-20 ms (depending on size)
 
-### Throughput
+### Throughput (Lưu Lượng)
 
 - **Single Node**: ~50,000 ops/sec
-- **3-Node Cluster**: ~150,000 ops/sec (scales linearly)
+- **3-Node Cluster**: ~150,000 ops/sec (mở rộng tuyến tính)
 
-### Memory
+### Bộ Nhớ
 
-Each map entry consumes:
+Mỗi map entry tiêu thụ:
 - Key overhead: ~40 bytes
-- Value: depends on data size
+- Value: phụ thuộc vào kích thước dữ liệu
 - Metadata: ~32 bytes
 
 ## Best Practices
 
-### 1. Map Naming Convention
+### 1. Quy Ước Đặt Tên Map
 
-Use descriptive, namespaced map names:
+Sử dụng tên map mô tả, có namespace:
 
 ```typescript
-// Good
+// Tốt
 await hazelcastService.set('user:profiles', 'user:123', userData);
 await hazelcastService.set('session:tokens', 'token:abc', sessionData);
 
-// Avoid
+// Tránh
 await hazelcastService.set('data', '123', userData);
 ```
 
-### 2. Use TTL for Temporary Data
+### 2. Sử Dụng TTL Cho Dữ Liệu Tạm Thời
 
-Always set TTL for session data, tokens, and temporary caches:
+Luôn đặt TTL cho session data, tokens, và temporary caches:
 
 ```typescript
-// Session expires in 1 hour
+// Session hết hạn sau 1 giờ
 await hazelcastService.set('sessions', sessionId, sessionData, 3600000);
 
-// Verification code expires in 5 minutes
+// Mã xác minh hết hạn sau 5 phút
 await hazelcastService.set('verification', code, data, 300000);
 ```
 
-### 3. Error Handling
+### 3. Xử Lý Lỗi
 
-Always wrap Hazelcast operations in try-catch blocks:
+Luôn bao bọc các thao tác Hazelcast trong try-catch blocks:
 
 ```typescript
 try {
   const user = await hazelcastService.get('users', userId);
   if (!user) {
-    // Handle cache miss
+    // Xử lý cache miss
     const userFromDB = await fetchUserFromDatabase(userId);
     await hazelcastService.set('users', userId, userFromDB, 3600000);
     return userFromDB;
@@ -656,132 +509,68 @@ try {
   return user;
 } catch (error) {
   logger.error('Hazelcast error:', error);
-  // Fallback to database
+  // Fallback về database
   return await fetchUserFromDatabase(userId);
 }
 ```
 
-### 4. Use Batch Operations
+### 4. Sử Dụng Các Thao Tác Hàng Loạt
 
-When fetching multiple keys, use `getMultiple` instead of multiple `get` calls:
+Khi lấy nhiều keys, sử dụng `getMultiple` thay vì nhiều lần gọi `get`:
 
 ```typescript
-// Good
+// Tốt
 const users = await hazelcastService.getMultiple('users', ['user:1', 'user:2', 'user:3']);
 
-// Avoid
+// Tránh
 const user1 = await hazelcastService.get('users', 'user:1');
 const user2 = await hazelcastService.get('users', 'user:2');
 const user3 = await hazelcastService.get('users', 'user:3');
 ```
 
-### 5. Periodic Cleanup
+### 5. Dọn Dẹp Định Kỳ
 
-For maps without TTL, implement periodic cleanup:
+Với các map không có TTL, triển khai dọn dẹp định kỳ:
 
 ```typescript
-// Clear old entries once per day
+// Dọn dẹp các entries cũ mỗi ngày một lần
 @Cron('0 0 * * *')
 async cleanupOldCaches() {
   await this.hazelcastService.clear('temp:data');
 }
 ```
 
-## Troubleshooting
+## Migration Từ Redis/Memcached
 
-### Connection Issues
+Nếu bạn đang migration từ Redis hoặc Memcached:
 
-**Problem:** Cannot connect to Hazelcast server
-
-**Solutions:**
-1. Verify Hazelcast container is running:
-   ```bash
-   docker ps | grep hazelcast
-   ```
-2. Check network connectivity:
-   ```bash
-   telnet localhost 5701
-   ```
-3. Review Hazelcast logs:
-   ```bash
-   docker logs hazelcast
-   ```
-
-### Memory Issues
-
-**Problem:** Hazelcast running out of memory
-
-**Solutions:**
-1. Set appropriate TTL on entries
-2. Increase container memory limit in `docker-compose.yml`:
-   ```yaml
-   hazelcast:
-     image: hazelcast/hazelcast:5.3.0
-     deploy:
-       resources:
-         limits:
-           memory: 2G
-   ```
-3. Implement eviction policies in Hazelcast config
-
-### Slow Performance
-
-**Problem:** Cache operations are slow
-
-**Solutions:**
-1. Check network latency between app and Hazelcast
-2. Use batch operations instead of sequential calls
-3. Monitor Hazelcast cluster health
-4. Consider adding more cluster nodes
-
-## Comparison with Other Caching Solutions
-
-| Feature | Hazelcast | Redis | Memcached |
-|---------|-----------|-------|-----------|
-| Data Structures | Maps, Lists, Sets, Queues | Strings, Hashes, Lists, Sets, Sorted Sets | Key-Value only |
-| Persistence | Optional | Yes (RDB, AOF) | No |
-| Clustering | Built-in | Redis Cluster | Not native |
-| TTL Support | Yes | Yes | Yes |
-| Distributed Computing | Yes | Limited | No |
-| Language | Java | C | C |
-| Client Protocol | Binary | RESP | Text/Binary |
-
-## Migration from Redis/Memcached
-
-If you're migrating from Redis or Memcached:
-
-### From Redis:
+### Từ Redis:
 ```typescript
 // Redis
 await redis.set('user:123', JSON.stringify(user), 'EX', 3600);
 const data = await redis.get('user:123');
 const user = JSON.parse(data);
 
-// Hazelcast (no JSON serialization needed)
+// Hazelcast (không cần JSON serialization)
 await hazelcast.set('users', 'user:123', user, 3600000);
 const user = await hazelcast.get('users', 'user:123');
 ```
 
-### From Memcached:
+### Từ Memcached:
 ```typescript
 // Memcached
 await memcached.set('user:123', user, 3600);
 const user = await memcached.get('user:123');
 
-// Hazelcast (TTL in milliseconds instead of seconds)
+// Hazelcast (TTL tính bằng milliseconds thay vì seconds)
 await hazelcast.set('users', 'user:123', user, 3600000);
 const user = await hazelcast.get('users', 'user:123');
 ```
 
-## Additional Resources
+## Tài Nguyên Bổ Sung
 
-- [Hazelcast Official Documentation](https://docs.hazelcast.com/)
+- [Tài Liệu Chính Thức Hazelcast](https://docs.hazelcast.com/)
 - [Hazelcast Node.js Client](https://github.com/hazelcast/hazelcast-nodejs-client)
 - [Hazelcast Cloud](https://cloud.hazelcast.com/)
-- [Best Practices Guide](https://docs.hazelcast.com/hazelcast/latest/performance)
+- [Hướng Dẫn Best Practices](https://docs.hazelcast.com/hazelcast/latest/performance)
 
-## Next Steps
-
-- [Learn about Redis Integration](./redis.md)
-- [Learn about Memcached Integration](./memcached.md)
-- [Performance Benchmarking](../performance-comparison.md)
