@@ -1,39 +1,38 @@
 ---
 sidebar_position: 4
 ---
-# Graph Model (Neo4j)
+# Mô hình Graph (Neo4j)
 
-The graph model represents data as nodes (entities) and relationships (connections). It excels at managing highly connected data and complex relationship queries.
+Mô hình đồ thị biểu diễn dữ liệu dưới dạng các nút (nodes - thực thể) và các mối quan hệ (relationships - kết nối). Nó xuất sắc trong việc quản lý dữ liệu có nhiều kết nối và các truy vấn quan hệ phức tạp.
 
-## When to Use
+## Khi nào nên sử dụng
 
-- Data is highly interconnected
-- Relationship queries are common
-- Need to traverse connections
-- Social networks, recommendation systems
-- Fraud detection, network analysis
-- Knowledge graphs
+- Dữ liệu có nhiều kết nối lẫn nhau
+- Các truy vấn về mối quan hệ thường xuyên
+- Cần duyệt qua các kết nối
+- Mạng xã hội, hệ thống gợi ý
+- Phát hiện gian lận, phân tích mạng
+- Đồ thị tri thức
+## Ví dụ: Mạng Xã hội
 
-## Example: Social Network
+### Mô hình Dữ liệu
 
-### Data Model
+**Nút (Nodes):** User
+- Thuộc tính: id, name, email, age, createdAt
 
-**Nodes:** User
-- Properties: id, name, email, age, createdAt
+**Quan hệ (Relationships):** FRIEND
+- Thuộc tính: since, createdAt
+- Loại: Hai chiều
 
-**Relationships:** FRIEND
-- Properties: since, createdAt
-- Type: Bidirectional
-
-### Schema Visualization
+### Trực quan hóa Schema
 
 ```
 (User)-[:FRIEND]->(User)
 ```
 
-## Key Concepts
+## Các Khái niệm Chính
 
-### 1. Creating Nodes
+### 1. Tạo Nút (Creating Nodes)
 
 ```typescript
 async createUser(createUserDto: CreateUserDto): Promise<any> {
@@ -62,7 +61,7 @@ async createUser(createUserDto: CreateUserDto): Promise<any> {
 }
 ```
 
-### 2. Creating Relationships
+### 2. Tạo Quan hệ (Creating Relationships)
 
 ```typescript
 async createFriendship(dto: CreateFriendshipDto): Promise<any> {
@@ -98,9 +97,9 @@ async createFriendship(dto: CreateFriendshipDto): Promise<any> {
 }
 ```
 
-### 3. Cypher Queries
+### 3. Truy vấn Cypher
 
-**Get friends of a user:**
+**Lấy danh sách bạn bè của người dùng:**
 
 ```cypher
 MATCH (u:User {id: $userId})-[f:FRIEND]->(friend:User)
@@ -129,9 +128,9 @@ async getFriendsOfUser(userId: string): Promise<any[]> {
 }
 ```
 
-### 4. Graph Traversal - Friends of Friends
+### 4. Duyệt Đồ thị - Bạn của Bạn
 
-Find 2nd degree connections:
+Tìm các kết nối bậc 2:
 
 ```cypher
 MATCH (u:User {id: $userId})-[:FRIEND]->()-[:FRIEND]->(fof:User)
@@ -161,7 +160,7 @@ async getFriendsOfFriends(userId: string): Promise<any[]> {
 }
 ```
 
-### 5. Mutual Friends
+### 5. Bạn chung (Mutual Friends)
 
 ```cypher
 MATCH (u1:User {id: $userId1})-[:FRIEND]->(mutual:User)<-[:FRIEND]-(u2:User {id: $userId2})
@@ -187,9 +186,9 @@ async getMutualFriends(userId1: string, userId2: string): Promise<any[]> {
 }
 ```
 
-### 6. Shortest Path Algorithm
+### 6. Thuật toán Đường đi Ngắn nhất
 
-Find the shortest path between two users:
+Tìm đường đi ngắn nhất giữa hai người dùng:
 
 ```cypher
 MATCH path = shortestPath(
@@ -227,9 +226,9 @@ async getShortestPath(userId1: string, userId2: string): Promise<any> {
 }
 ```
 
-### 7. Friend Suggestions
+### 7. Gợi ý Kết bạn
 
-Suggest friends based on mutual connections:
+Gợi ý bạn bè dựa trên các kết nối chung:
 
 ```cypher
 MATCH (u:User {id: $userId})-[:FRIEND]->()-[:FRIEND]->(suggested:User)
@@ -266,7 +265,7 @@ async suggestFriends(userId: string, limit: number = 5): Promise<any[]> {
 }
 ```
 
-### 8. Aggregation - Friend Count
+### 8. Tổng hợp - Đếm số Bạn bè
 
 ```cypher
 MATCH (u:User)
@@ -296,116 +295,95 @@ async getUsersWithFriendCount(): Promise<any[]> {
 }
 ```
 
-## API Endpoints
+## Các API Endpoints
 
 ```
-POST   /neo4j/users                         - Create user node
-GET    /neo4j/users                         - Get all users
-GET    /neo4j/users/:id                     - Get user by ID
-PUT    /neo4j/users/:id                     - Update user
-DELETE /neo4j/users/:id                     - Delete user (with relationships)
-POST   /neo4j/users/friendships             - Create friendship
-DELETE /neo4j/users/friendships             - Remove friendship
-GET    /neo4j/users/:id/friends             - Get friends list
-GET    /neo4j/users/:id/friends-of-friends  - Get 2nd degree connections
-GET    /neo4j/users/:id/suggest-friends     - Suggest friends
-GET    /neo4j/users/:id1/mutual-friends/:id2 - Get mutual friends
-GET    /neo4j/users/:id1/shortest-path/:id2  - Find shortest path
-GET    /neo4j/users/with-friend-count       - Get users with friend counts
+POST   /neo4j/users                         - Tạo nút người dùng
+GET    /neo4j/users                         - Lấy tất cả người dùng
+GET    /neo4j/users/:id                     - Lấy người dùng theo ID
+PUT    /neo4j/users/:id                     - Cập nhật người dùng
+DELETE /neo4j/users/:id                     - Xóa người dùng (cùng quan hệ)
+POST   /neo4j/users/friendships             - Tạo quan hệ bạn bè
+DELETE /neo4j/users/friendships             - Xóa quan hệ bạn bè
+GET    /neo4j/users/:id/friends             - Lấy danh sách bạn bè
+GET    /neo4j/users/:id/friends-of-friends  - Lấy kết nối bậc 2
+GET    /neo4j/users/:id/suggest-friends     - Gợi ý bạn bè
+GET    /neo4j/users/:id1/mutual-friends/:id2 - Lấy bạn chung
+GET    /neo4j/users/:id1/shortest-path/:id2  - Tìm đường đi ngắn nhất
+GET    /neo4j/users/with-friend-count       - Lấy người dùng với số lượng bạn
 ```
 
-## Cypher Query Patterns
+## Các Mẫu Truy vấn Cypher
 
-### Pattern Matching
+### Khớp Mẫu (Pattern Matching)
 
 ```cypher
-// Simple match
+// Khớp đơn giản
 MATCH (u:User)
 RETURN u
 
-// Match with properties
+// Khớp với thuộc tính
 MATCH (u:User {name: 'Alice'})
 RETURN u
 
-// Match relationship
+// Khớp quan hệ
 MATCH (u1:User)-[:FRIEND]->(u2:User)
 RETURN u1, u2
 
-// Match with variable length path
+// Khớp với đường đi độ dài biến đổi
 MATCH (u1:User)-[:FRIEND*1..3]->(u2:User)
 RETURN u1, u2
 ```
 
-### Creating Data
+### Tạo Dữ liệu
 
 ```cypher
-// Create node
+// Tạo nút
 CREATE (u:User {name: 'Alice', age: 28})
 RETURN u
 
-// Create relationship
+// Tạo quan hệ
 MATCH (u1:User {id: $id1})
 MATCH (u2:User {id: $id2})
 CREATE (u1)-[:FRIEND]->(u2)
 
-// Create and return
+// Tạo và trả về
 CREATE (u:User {name: 'Bob'})
 RETURN u
 ```
 
-### Updating Data
+### Cập nhật Dữ liệu
 
 ```cypher
-// Update properties
+// Cập nhật thuộc tính
 MATCH (u:User {id: $id})
 SET u.name = $newName
 RETURN u
 
-// Add property
+// Thêm thuộc tính
 MATCH (u:User {id: $id})
 SET u.verified = true
 RETURN u
 ```
 
-### Deleting Data
+### Xóa Dữ liệu
 
 ```cypher
-// Delete node (must delete relationships first)
+// Xóa nút (phải xóa quan hệ trước)
 MATCH (u:User {id: $id})
 DETACH DELETE u
 
-// Delete relationship
+// Xóa quan hệ
 MATCH (u1:User {id: $id1})-[f:FRIEND]-(u2:User {id: $id2})
 DELETE f
 ```
 
 ## Best Practices
 
-1. **Model relationships explicitly** - Make connections first-class citizens
-2. **Use indexes** - Index frequently queried properties
-3. **Limit traversal depth** - Use bounds on variable-length paths
-4. **Use parameters** - Prevent Cypher injection
-5. **Close sessions** - Always close Neo4j sessions after use
-6. **Bidirectional relationships** - Create both directions for undirected graphs
-7. **Batch operations** - Use UNWIND for bulk creates
-
-## Performance Tips
-
-1. **Create indexes:**
-```cypher
-CREATE INDEX user_id FOR (u:User) ON (u.id)
-CREATE INDEX user_email FOR (u:User) ON (u.email)
-```
-
-2. **Use PROFILE to analyze queries:**
-```cypher
-PROFILE MATCH (u:User)-[:FRIEND*2]->()
-RETURN count(u)
-```
-
-3. **Limit results:**
-```cypher
-MATCH (u:User)-[:FRIEND]->(friend)
-RETURN friend
-LIMIT 100
-```
+1. **Mô hình hóa quan hệ rõ ràng** - Biến các kết nối thành công dân hạng nhất
+2. **Sử dụng chỉ mục** - Đánh chỉ mục các thuộc tính được truy vấn thường xuyên
+3. **Giới hạn độ sâu duyệt** - Sử dụng giới hạn trên đường đi độ dài biến đổi
+4. **Sử dụng tham số** - Ngăn chặn Cypher injection
+5. **Đóng sessions** - Luôn đóng Neo4j sessions sau khi sử dụng
+6. **Quan hệ hai chiều** - Tạo cả hai hướng cho đồ thị vô hướng
+7. **Thao tác hàng loạt** - Sử dụng UNWIND cho tạo hàng loạt

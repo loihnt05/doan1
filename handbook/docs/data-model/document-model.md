@@ -1,21 +1,21 @@
 ---
 sidebar_position: 3
 ---
-# Document Model (MongoDB + Mongoose)
+# Mô hình Tài liệu (MongoDB + Mongoose)
 
-The document model stores data in flexible, JSON-like documents. Each document can have its own structure, making it ideal for evolving schemas and hierarchical data.
+Mô hình tài liệu lưu trữ dữ liệu trong các documents linh hoạt giống JSON. Mỗi document có thể có cấu trúc riêng, làm cho nó lý tưởng cho các schema đang phát triển và dữ liệu phân cấp.
 
-## When to Use
+## Khi nào nên sử dụng
 
--  Flexible or evolving schemas
--  Hierarchical or nested data structures
--  High write throughput requirements
--  Horizontal scaling needs
--  Rapid development and iteration
+-  Schema linh hoạt hoặc đang phát triển
+-  Cấu trúc dữ liệu phân cấp hoặc lồng nhau
+-  Yêu cầu thông lượng ghi cao
+-  Nhu cầu mở rộng theo chiều ngang
+-  Phát triển và lặp lại nhanh chóng
 
-## Example: Article Management
+## Ví dụ: Quản lý Bài viết
 
-### Schema Definition
+### Định nghĩa Schema
 
 ```typescript
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
@@ -51,18 +51,18 @@ export class Article {
 export const ArticleSchema = SchemaFactory.createForClass(Article);
 ```
 
-## Key Concepts
+## Các Khái niệm Chính
 
-### 1. Validation Rules
+### 1. Quy tắc Xác thực
 
-Mongoose provides built-in validation:
+Mongoose cung cấp xác thực tích hợp sẵn:
 
 ```typescript
 @Prop({ 
-  required: true,           // Field is mandatory
-  trim: true,              // Remove whitespace
-  minlength: 5,            // Minimum length
-  maxlength: 200,          // Maximum length
+  required: true,           // Trường bắt buộc
+  trim: true,              // Xóa khoảng trắng
+  minlength: 5,            // Độ dài tối thiểu
+  maxlength: 200,          // Độ dài tối đa
 })
 title: string;
 
@@ -73,13 +73,13 @@ title: string;
 category: string;
 
 @Prop({ 
-  default: 0,              // Default value
-  min: 0,                  // Minimum value
+  default: 0,              // Giá trị mặc định
+  min: 0,                  // Giá trị tối thiểu
 })
 views: number;
 ```
 
-### 2. Default Values
+### 2. Giá trị Mặc định
 
 ```typescript
 @Prop({ default: '' })
@@ -130,10 +130,10 @@ ArticleSchema.set('toObject', { virtuals: true });
 
 ### 5. NoSQL Query Patterns
 
-**Simple queries:**
+**Truy vấn đơn giản:**
 
 ```typescript
-// Find by category
+// Tìm theo danh mục
 async findArticlesByCategory(category: string): Promise<Article[]> {
   return this.articleModel
     .find({ category })
@@ -141,7 +141,7 @@ async findArticlesByCategory(category: string): Promise<Article[]> {
     .exec();
 }
 
-// Find published articles
+// Tìm bài viết đã xuất bản
 async findPublishedArticles(): Promise<Article[]> {
   return this.articleModel
     .find({ published: true })
@@ -150,7 +150,7 @@ async findPublishedArticles(): Promise<Article[]> {
 }
 ```
 
-**Complex queries with multiple conditions:**
+**Truy vấn phức tạp với nhiều điều kiện:**
 
 ```typescript
 async findArticlesWithFilters(
@@ -180,7 +180,7 @@ async findArticlesWithFilters(
 }
 ```
 
-**Full-text search:**
+**Tìm kiếm toàn văn bản:**
 
 ```typescript
 async searchArticles(searchTerm: string): Promise<Article[]> {
@@ -190,9 +190,9 @@ async searchArticles(searchTerm: string): Promise<Article[]> {
 }
 ```
 
-### 6. Aggregation Pipeline
+### 6. Aggregation Pipeline (Đường ống Tổng hợp)
 
-Powerful data processing and transformation:
+Xử lý và chuyển đổi dữ liệu mạnh mẽ:
 
 ```typescript
 async aggregateArticlesByCategory(): Promise<any[]> {
@@ -213,7 +213,7 @@ async aggregateArticlesByCategory(): Promise<any[]> {
 }
 ```
 
-**Advanced aggregation - Statistics by month:**
+**Tổng hợp nâng cao - Thống kê theo tháng:**
 
 ```typescript
 async getArticleStatsByMonth(): Promise<any[]> {
@@ -242,11 +242,11 @@ async getArticleStatsByMonth(): Promise<any[]> {
 }
 ```
 
-### 7. Update Operators
+### 7. Toán tử Cập nhật
 
-MongoDB provides powerful update operators:
+MongoDB cung cấp các toán tử cập nhật mạnh mẽ:
 
-**$inc - Increment a value:**
+**$inc - Tăng giá trị:**
 
 ```typescript
 async incrementViews(id: string): Promise<Article | null> {
@@ -260,7 +260,7 @@ async incrementViews(id: string): Promise<Article | null> {
 }
 ```
 
-**$addToSet - Add to array (if not exists):**
+**$addToSet - Thêm vào mảng (nếu chưa tồn tại):**
 
 ```typescript
 async addTag(id: string, tag: string): Promise<Article | null> {
@@ -274,7 +274,7 @@ async addTag(id: string, tag: string): Promise<Article | null> {
 }
 ```
 
-**$pull - Remove from array:**
+**$pull - Xóa khỏi mảng:**
 
 ```typescript
 async removeTag(id: string, tag: string): Promise<Article | null> {

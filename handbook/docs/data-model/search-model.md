@@ -1,22 +1,22 @@
 ---
 sidebar_position: 5
 ---
-# Search Model (Elasticsearch)
+# Mô hình Tìm kiếm (Elasticsearch)
 
-Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It excels at full-text search, real-time analytics, and handling large volumes of data.
+Elasticsearch là một công cụ tìm kiếm và phân tích phân tán được xây dựng trên Apache Lucene. Nó xuất sắc trong việc tìm kiếm toàn văn bản, phân tích thời gian thực và xử lý khối lượng dữ liệu lớn.
 
-## When to Use
+## Khi nào nên sử dụng
 
--  Full-text search requirements
--  Real-time analytics and aggregations
--  Log and event data analysis
--  Complex filtering and faceting
--  Autocomplete and suggestions
--  Geospatial queries
+-  Yêu cầu tìm kiếm toàn văn bản
+-  Phân tích và tổng hợp thời gian thực
+-  Phân tích dữ liệu log và sự kiện
+-  Lọc và phân loại phức tạp
+-  Tự động hoàn thành và gợi ý
+-  Truy vấn không gian địa lý
 
-## Example: Article Search
+## Ví dụ: Tìm kiếm Bài viết
 
-### Index Mapping
+### Ánh xạ Index (Index Mapping)
 
 ```typescript
 await this.client.indices.create({
@@ -39,23 +39,23 @@ await this.client.indices.create({
 });
 ```
 
-## Key Concepts
+## Các Khái niệm Chính
 
-### 1. Field Types
+### 1. Các Loại Trường
 
 **Text vs Keyword:**
-- `text`: Analyzed, for full-text search
-- `keyword`: Not analyzed, for exact matches, aggregations, sorting
+- `text`: Được phân tích, cho tìm kiếm toàn văn bản
+- `keyword`: Không được phân tích, cho khớp chính xác, tổng hợp, sắp xếp
 
 ```typescript
-title: { type: 'text', analyzer: 'standard' },     // Full-text search
-author: { type: 'keyword' },                        // Exact match
-publishedDate: { type: 'date' },                    // Date operations
+title: { type: 'text', analyzer: 'standard' },     // Tìm kiếm toàn văn bản
+author: { type: 'keyword' },                        // Khớp chính xác
+publishedDate: { type: 'date' },                    // Thao tác ngày tháng
 ```
 
-### 2. Indexing Documents
+### 2. Đánh chỉ mục Documents
 
-**Single document:**
+**Document đơn:**
 
 ```typescript
 async indexArticle(createArticleDto: CreateArticleDto): Promise<any> {
@@ -75,7 +75,7 @@ async indexArticle(createArticleDto: CreateArticleDto): Promise<any> {
 }
 ```
 
-**Bulk indexing:**
+**Đánh chỉ mục hàng loạt:**
 
 ```typescript
 async bulkIndexArticles(articles: CreateArticleDto[]): Promise<any> {
@@ -98,9 +98,9 @@ async bulkIndexArticles(articles: CreateArticleDto[]): Promise<any> {
 }
 ```
 
-### 3. Match Query (Full-Text Search)
+### 3. Truy vấn Match (Tìm kiếm Toàn văn bản)
 
-Search with relevance scoring:
+Tìm kiếm với điểm số liên quan:
 
 ```typescript
 async searchByMatch(field: string, query: string): Promise<any> {
@@ -135,9 +135,9 @@ async searchByMatch(field: string, query: string): Promise<any> {
 }
 ```
 
-### 4. Multi-Match Query
+### 4. Truy vấn Multi-Match
 
-Search across multiple fields:
+Tìm kiếm trên nhiều trường:
 
 ```typescript
 async searchMultiMatch(query: string, fields: string[]): Promise<any> {
@@ -174,9 +174,9 @@ async searchMultiMatch(query: string, fields: string[]): Promise<any> {
 }
 ```
 
-### 5. Range Query
+### 5. Truy vấn Range (Phạm vi)
 
-Filter by date or numeric ranges:
+Lọc theo ngày tháng hoặc phạm vi số:
 
 ```typescript
 async searchByDateRange(startDate: Date, endDate: Date): Promise<any> {
@@ -217,9 +217,9 @@ async searchByDateRange(startDate: Date, endDate: Date): Promise<any> {
 }
 ```
 
-### 6. Bool Query
+### 6. Truy vấn Bool (Boolean)
 
-Combine multiple conditions:
+Kết hợp nhiều điều kiện:
 
 ```typescript
 async searchWithBoolQuery(params: {
@@ -265,11 +265,11 @@ async searchWithBoolQuery(params: {
 }
 ```
 
-**Bool query structure:**
-- `must`: Documents MUST match (affects score)
-- `should`: Documents SHOULD match (affects score)
-- `must_not`: Documents MUST NOT match
-- `filter`: Documents MUST match (doesn't affect score)
+**Cấu trúc truy vấn Bool:**
+- `must`: Documents PHẢI khớp (ảnh hưởng điểm số)
+- `should`: Documents NÊN khớp (ảnh hưởng điểm số)
+- `must_not`: Documents KHÔNG ĐƯỢC khớp
+- `filter`: Documents PHẢI khớp (không ảnh hưởng điểm số)
 
 **Example:**
 ```json
@@ -293,9 +293,9 @@ async searchWithBoolQuery(params: {
 }
 ```
 
-### 7. Term Query (Exact Match)
+### 7. Truy vấn Term (Khớp Chính xác)
 
-For keyword fields:
+Cho các trường keyword:
 
 ```typescript
 async searchByTerm(field: string, value: string): Promise<any> {
@@ -323,11 +323,11 @@ async searchByTerm(field: string, value: string): Promise<any> {
 }
 ```
 
-### 8. Aggregations
+### 8. Tổng hợp (Aggregations)
 
-Powerful analytics capabilities:
+Khả năng phân tích mạnh mẽ:
 
-**Terms aggregation (group by):**
+**Terms aggregation (nhóm theo):**
 
 ```typescript
 async aggregateByCategory(): Promise<any> {
@@ -348,7 +348,7 @@ async aggregateByCategory(): Promise<any> {
 }
 ```
 
-**Date histogram:**
+**Biểu đồ theo Ngày:**
 
 ```typescript
 async aggregateByMonth(): Promise<any> {
@@ -369,7 +369,7 @@ async aggregateByMonth(): Promise<any> {
 }
 ```
 
-### 9. Advanced Search with Pagination
+### 9. Tìm kiếm Nâng cao với Phân trang
 
 ```typescript
 async advancedSearch(params: {

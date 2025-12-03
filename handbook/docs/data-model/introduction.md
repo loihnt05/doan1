@@ -1,45 +1,45 @@
 ---
 sidebar_position: 1
 ---
-# Introduction to Data Models
+# Giới thiệu về các Mô hình Dữ liệu
 
-This section demonstrates four fundamental data models used in modern application development. Each model is designed to solve specific types of problems and excels in different scenarios.
+Phần này trình bày bốn mô hình dữ liệu cơ bản được sử dụng trong phát triển ứng dụng hiện đại. Mỗi mô hình được thiết kế để giải quyết các loại vấn đề cụ thể và xuất sắc trong các tình huống khác nhau.
 
-## Overview
+## Tổng quan
 
-Our backend implementation showcases:
+Backend của chúng ta bao gồm:
 
-1. **Relational Model** (PostgreSQL + Sequelize)
-2. **Document Model** (MongoDB + Mongoose)
-3. **Graph Model** (Neo4j)
-4. **Search Model** (Elasticsearch)
+1. **Mô hình Quan hệ** (PostgreSQL + Sequelize)
+2. **Mô hình Tài liệu** (MongoDB + Mongoose)
+3. **Mô hình Đồ thị** (Neo4j)
+4. **Mô hình Tìm kiếm** (Elasticsearch)
 
-## Why Multiple Data Models?
+## Tại sao cần nhiều Mô hình Dữ liệu?
 
-Different data models are optimized for different use cases:
+Các mô hình dữ liệu khác nhau được tối ưu hóa cho các trường hợp sử dụng khác nhau:
 
-- **Relational databases** excel at structured data with complex relationships and ACID transactions
-- **Document databases** are ideal for flexible schemas and hierarchical data
-- **Graph databases** are perfect for highly connected data and relationship queries
-- **Search engines** specialize in full-text search and analytics
+- **Cơ sở dữ liệu quan hệ** xuất sắc trong việc xử lý dữ liệu có cấu trúc với các mối quan hệ phức tạp và giao dịch ACID
+- **Cơ sở dữ liệu tài liệu** lý tưởng cho schema linh hoạt và dữ liệu phân cấp
+- **Cơ sở dữ liệu đồ thị** hoàn hảo cho dữ liệu có nhiều kết nối và các truy vấn về mối quan hệ
+- **Công cụ tìm kiếm** chuyên về tìm kiếm toàn văn bản và phân tích dữ liệu
 
-## Polyglot Persistence
+## Polyglot Persistence (Lưu trữ đa ngôn ngữ)
 
-Modern applications often use multiple databases (polyglot persistence) to leverage the strengths of each model. This approach allows you to:
+Các ứng dụng hiện đại thường sử dụng nhiều cơ sở dữ liệu (polyglot persistence) để tận dụng điểm mạnh của từng mô hình. Cách tiếp cận này cho phép bạn:
 
-- Choose the right tool for each specific use case
-- Optimize performance and scalability
-- Maintain data consistency where needed while allowing flexibility elsewhere
+- Chọn công cụ phù hợp cho từng trường hợp sử dụng cụ thể
+- Tối ưu hóa hiệu suất và khả năng mở rộng
+- Duy trì tính nhất quán của dữ liệu khi cần thiết đồng thời cho phép linh hoạt ở những nơi khác
 
-## What You'll Learn
+## Bạn sẽ học được gì
 
-In this section, you'll learn about:
+Trong phần này, bạn sẽ học về:
 
-- Data modeling principles for each database type
-- When to use each data model
-- Query patterns and optimization techniques
-- Schema design best practices
-- Indexing strategies
-- Real-world implementation examples
+- Nguyên tắc mô hình hóa dữ liệu cho từng loại cơ sở dữ liệu
+- Khi nào nên sử dụng mỗi mô hình dữ liệu
+- Các mẫu truy vấn và kỹ thuật tối ưu hóa
+- Phương pháp hay nhất trong thiết kế schema
+- Chiến lược đánh chỉ mục
+- Ví dụ triển khai thực tế
 
-Let's dive into each data model! 🚀
+Hãy cùng khám phá từng mô hình dữ liệu! 

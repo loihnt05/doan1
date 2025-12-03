@@ -1,48 +1,48 @@
 ---
 sidebar_position: 6
 ---
-# Data Model Comparison
+# So sánh các Mô hình Dữ liệu
 
-This guide compares the four data models to help you choose the right one for your use case.
+Hướng dẫn này so sánh bốn mô hình dữ liệu để giúp bạn chọn mô hình phù hợp cho trường hợp sử dụng của mình.
 
-## Quick Comparison
+## So sánh Nhanh
 
-| Feature | Relational | Document | Graph | Search |
+| Tính năng | Quan hệ | Tài liệu | Đồ thị | Tìm kiếm |
 |---------|-----------|----------|-------|--------|
-| **Best For** | Structured data | Flexible schemas | Connected data | Full-text search |
-| **Query Language** | SQL | NoSQL/Aggregation | Cypher | Query DSL |
-| **Scalability** | Vertical | Horizontal | Complex | Horizontal |
-| **Consistency** | Strong (ACID) | Eventual | Eventual | Eventual |
-| **Transactions** | Full ACID | Limited | Limited | No |
-| **Schema** | Fixed | Flexible | Flexible | Flexible |
-| **Joins** | Powerful | Limited | Excellent | No |
-| **Full-text Search** | Basic | Basic | No | Excellent |
+| **Phù hợp nhất cho** | Dữ liệu có cấu trúc | Schema linh hoạt | Dữ liệu có kết nối | Tìm kiếm toàn văn bản |
+| **Ngôn ngữ Truy vấn** | SQL | NoSQL/Aggregation | Cypher | Query DSL |
+| **Khả năng Mở rộng** | Dọc | Ngang | Phức tạp | Ngang |
+| **Tính Nhất quán** | Mạnh (ACID) | Eventual | Eventual | Eventual |
+| **Giao dịch** |  ACID đầy đủ |  Hạn chế |  Hạn chế |  Không |
+| **Schema** | Cố định | Linh hoạt | Linh hoạt | Linh hoạt |
+| **Joins** |  Mạnh mẽ |  Hạn chế |  Xuất sắc |  Không |
+| **Tìm kiếm Toàn văn** |  Cơ bản |  Cơ bản |  Không |  Xuất sắc |
 
-## Use Case Recommendations
+## Khuyến nghị Trường hợp Sử dụng
 
-### Choose Relational (PostgreSQL) When:
+### Chọn Mô hình Quan hệ (PostgreSQL) Khi:
 
- **Financial Systems**
-- Need ACID transactions
-- Money transfers, accounting
-- Example: Banking, e-commerce orders
+ **Hệ thống Tài chính**
+- Cần giao dịch ACID
+- Chuyển tiền, kế toán
+- Ví dụ: Ngân hàng, đơn hàng thương mại điện tử
 
- **Complex Relationships**
-- Many tables with foreign keys
-- Complex JOIN queries
-- Example: ERP systems, inventory management
+ **Quan hệ Phức tạp**
+- Nhiều bảng với khóa ngoại
+- Truy vấn JOIN phức tạp
+- Ví dụ: Hệ thống ERP, quản lý kho
 
- **Data Integrity is Critical**
-- Referential integrity constraints
-- Strict validation rules
-- Example: Healthcare records, legal documents
+ **Tính Toàn vẹn Dữ liệu Quan trọng**
+- Ràng buộc tính toàn vẹn tham chiếu
+- Quy tắc xác thực nghiêm ngặt
+- Ví dụ: Hồ sơ y tế, tài liệu pháp lý
 
- **Reporting & Analytics**
-- Complex SQL queries
-- Data warehousing
-- Example: Business intelligence, dashboards
+ **Báo cáo & Phân tích**
+- Truy vấn SQL phức tạp
+- Kho dữ liệu
+- Ví dụ: Phân tích kinh doanh, bảng điều khiển
 
-**Example Schema:**
+**Ví dụ Schema:**
 ```sql
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -56,7 +56,7 @@ CREATE INDEX idx_user_age ON users(age);
 
 ---
 
-### Choose Document (MongoDB) When:
+### Chọn Mô hình Tài liệu (MongoDB) Khi:
 
  **Rapid Development**
 - Schema evolves frequently
@@ -101,45 +101,45 @@ CREATE INDEX idx_user_age ON users(age);
 
 ---
 
-### Choose Graph (Neo4j) When:
+### Chọn Mô hình Đồ thị (Neo4j) Khi:
 
- **Social Networks**
-- Friend relationships
-- Followers/following
-- Example: Facebook, LinkedIn, Twitter
+ **Mạng Xã hội**
+- Quan hệ bạn bè
+- Người theo dõi/Đang theo dõi
+- Ví dụ: Facebook, LinkedIn, Twitter
 
- **Recommendation Engines**
-- User behavior patterns
-- Product relationships
-- Example: Netflix, Amazon recommendations
+ **Công cụ Gợi ý**
+- Mẫu hành vi người dùng
+- Quan hệ sản phẩm
+- Ví dụ: Gợi ý Netflix, Amazon
 
- **Network Analysis**
-- Dependencies
-- Impact analysis
-- Example: Software dependencies, supply chains
+ **Phân tích Mạng**
+- Phụ thuộc
+- Phân tích tác động
+- Ví dụ: Phụ thuộc phần mềm, chuỗi cung ứng
 
- **Fraud Detection**
-- Pattern matching
-- Anomaly detection
-- Example: Credit card fraud, insurance claims
+ **Phát hiện Gian lận**
+- Khớp mẫu
+- Phát hiện bất thường
+- Ví dụ: Gian lận thẻ tín dụng, yêu cầu bảo hiểm
 
- **Knowledge Graphs**
-- Semantic relationships
-- Ontologies
-- Example: Wikipedia, research databases
+ **Đồ thị Tri thức**
+- Quan hệ ngữ nghĩa
+- Bản thể học
+- Ví dụ: Wikipedia, cơ sở dữ liệu nghiên cứu
 
-**Example Model:**
+**Ví dụ Mô hình:**
 ```cypher
-// Create users
+// Tầo người dùng
 CREATE (alice:User {name: 'Alice', age: 28})
 CREATE (bob:User {name: 'Bob', age: 32})
 CREATE (charlie:User {name: 'Charlie', age: 25})
 
-// Create friendships
+// Tạo quan hệ bạn bè
 CREATE (alice)-[:FRIEND {since: '2020-01-15'}]->(bob)
 CREATE (bob)-[:FRIEND {since: '2021-03-20'}]->(charlie)
 
-// Find friends of friends
+// Tìm bạn của bạn
 MATCH (alice:User {name: 'Alice'})-[:FRIEND]->()-[:FRIEND]->(fof)
 WHERE NOT (alice)-[:FRIEND]->(fof)
 RETURN fof
@@ -147,34 +147,34 @@ RETURN fof
 
 ---
 
-### Choose Search (Elasticsearch) When:
+### Chọn Mô hình Tìm kiếm (Elasticsearch) Khi:
 
- **Full-Text Search**
-- Search engines
-- Document search
-- Example: E-commerce product search, Wikipedia
+ **Tìm kiếm Toàn văn bản**
+- Công cụ tìm kiếm
+- Tìm kiếm tài liệu
+- Ví dụ: Tìm kiếm sản phẩm thương mại điện tử, Wikipedia
 
- **Log Analytics**
-- Application logs
-- System monitoring
-- Example: ELK stack, observability
+ **Phân tích Log**
+- Log ứng dụng
+- Giám sát hệ thống
+- Ví dụ: ELK stack, observability
 
- **Real-Time Analytics**
-- Dashboards
-- Metrics aggregation
-- Example: Business analytics, monitoring
+ **Phân tích Thời gian Thực**
+- Bảng điều khiển
+- Tổng hợp chỉ số
+- Ví dụ: Phân tích kinh doanh, giám sát
 
- **Autocomplete & Suggestions**
-- Type-ahead search
-- Did-you-mean
-- Example: Google search, e-commerce
+ **Tự động Hoàn thành & Gợi ý**
+- Tìm kiếm theo kiểu gõ
+- Gợi ý từ khóa
+- Ví dụ: Tìm kiếm Google, thương mại điện tử
 
- **Geospatial Queries**
-- Location-based search
-- Proximity searches
-- Example: Uber, food delivery apps
+ **Truy vấn Không gian Địa lý**
+- Tìm kiếm theo vị trí
+- Tìm kiếm lân cận
+- Ví dụ: Uber, ứng dụng giao đồ ăn
 
-**Example Query:**
+**Ví dụ Truy vấn:**
 ```json
 {
   "query": {
@@ -198,20 +198,20 @@ RETURN fof
 
 ---
 
-## Performance Characteristics
+## Đặc điểm Hiệu suất
 
-### Read Performance
+### Hiệu suất Đọc
 
-| Database | Simple Read | Complex Query | Full-Text Search |
+| Cơ sở Dữ liệu | Đọc Đơn giản | Truy vấn Phức tạp | Tìm kiếm Toàn văn |
 |----------|-------------|---------------|------------------|
 | PostgreSQL | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
 | MongoDB | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| Neo4j | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ (relationships) | ⭐ |
+| Neo4j | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ (quan hệ) | ⭐ |
 | Elasticsearch | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 
-### Write Performance
+### Hiệu suất Ghi
 
-| Database | Single Write | Bulk Write | Update |
+| Cơ sở Dữ liệu | Ghi Đơn | Ghi Hàng loạt | Cập nhật |
 |----------|--------------|------------|--------|
 | PostgreSQL | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
 | MongoDB | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
@@ -219,81 +219,15 @@ RETURN fof
 | Elasticsearch | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
 
 ---
+## Tóm tắt
 
-## Polyglot Persistence Example
+Chọn cơ sở dữ liệu dựa trên:
 
-In a real-world application, you might use multiple databases:
+1. **Cấu trúc Dữ liệu** - Dữ liệu của bạn được tổ chức như thế nào?
+2. **Mẫu Truy vấn** - Bạn sẽ truy cập dữ liệu như thế nào?
+3. **Yêu cầu Tính nhất quán** - Độ chính xác của dữ liệu quan trọng như thế nào?
+4. **Yêu cầu Quy mô** - Có bao nhiêu dữ liệu và lưu lượng truy cập?
+5. **Tốc độ Phát triển** - Bạn cần lặp lại nhanh như thế nào?
+6. **Chuyên môn của Nhóm** - Nhóm của bạn biết gì?
 
-### E-Commerce Application
-
-```
-User Authentication & Orders
-└─> PostgreSQL (ACID transactions, data integrity)
-
-Product Catalog
-└─> MongoDB (flexible schema, nested categories)
-
-Product Recommendations
-└─> Neo4j (user behavior, product relationships)
-
-Product Search
-└─> Elasticsearch (full-text search, faceting)
-```
-
-### Social Media Platform
-
-```
-User Profiles & Posts
-└─> MongoDB (flexible content, high write volume)
-
-Friend Relationships
-└─> Neo4j (social graph, friend suggestions)
-
-Search & Discovery
-└─> Elasticsearch (hashtag search, trending topics)
-
-Analytics & Reporting
-└─> PostgreSQL (business intelligence, complex queries)
-```
-
----
-
-## Migration Considerations
-
-### From Relational to Document
-
-**Pros:**
-- More flexible schema
-- Easier horizontal scaling
-- Better for hierarchical data
-
-**Cons:**
-- Lose ACID guarantees
-- No foreign key constraints
-- JOIN operations more complex
-
-### From Relational to Graph
-
-**Pros:**
-- Much faster relationship queries
-- More intuitive for connected data
-- Better performance for traversals
-
-**Cons:**
-- Not ideal for simple CRUD
-- Smaller ecosystem
-- Less mature tooling
-
----
-## Summary
-
-Choose your database based on:
-
-1. **Data Structure** - How is your data organized?
-2. **Query Patterns** - How will you access the data?
-3. **Consistency Requirements** - How critical is data accuracy?
-4. **Scale Requirements** - How much data and traffic?
-5. **Development Speed** - How fast do you need to iterate?
-6. **Team Expertise** - What does your team know?
-
-**Remember:** There's no one-size-fits-all solution. The best choice depends on your specific requirements!
+**Ghi nhớ:** Không có giải pháp nào phù hợp cho tất cả. Sự lựa chọn tốt nhất phụ thuộc vào yêu cầu cụ thể của bạn! 🎯

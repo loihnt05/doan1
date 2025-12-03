@@ -1,21 +1,21 @@
 ---
 sidebar_position: 2
 ---
-# Relational Model (PostgreSQL + Sequelize)
+# Mô hình Quan hệ (PostgreSQL + Sequelize)
 
-The relational model organizes data into tables (relations) with rows and columns. It's the most mature and widely-used database model, perfect for structured data with clear relationships.
+Mô hình quan hệ tổ chức dữ liệu thành các bảng (relations) với các hàng và cột. Đây là mô hình cơ sở dữ liệu trưởng thành và được sử dụng rộng rãi nhất, hoàn hảo cho dữ liệu có cấu trúc với các mối quan hệ rõ ràng.
 
-## When to Use
+## Khi nào nên sử dụng
 
--  Data has a well-defined structure
--  Need ACID transactions (Atomicity, Consistency, Isolation, Durability)
--  Complex queries with joins across multiple tables
--  Data integrity is critical 
--  Strong consistency requirements
+-  Dữ liệu có cấu trúc được định nghĩa rõ ràng
+-  Cần giao dịch ACID (Atomicity, Consistency, Isolation, Durability)
+-  Truy vấn phức tạp với joins trên nhiều bảng
+-  Tính toàn vẹn dữ liệu là quan trọng
+-  Yêu cầu tính nhất quán mạnh
 
-## Example: User Management
+## Ví dụ: Quản lý Người dùng
 
-### Schema Definition
+### Định nghĩa Schema
 
 ```typescript
 import { Table, Column, Model, DataType, Index } from 'sequelize-typescript';
@@ -54,11 +54,11 @@ export class User extends Model {
 }
 ```
 
-## Key Concepts
+## Các Khái niệm Chính
 
-### 1. BTREE Index
+### 1. Chỉ mục BTREE
 
-Indexes speed up queries by creating a sorted tree structure:
+Chỉ mục tăng tốc độ truy vấn bằng cách tạo cấu trúc cây được sắp xếp:
 
 ```typescript
 @Index('idx_user_age')
@@ -69,14 +69,14 @@ Indexes speed up queries by creating a sorted tree structure:
 age: number;
 ```
 
-**Benefits:**
-- Fast range queries (`age >= 18`)
-- Efficient sorting
-- Quick lookups
+**Lợi ích:**
+- Truy vấn phạm vi nhanh (`age >= 18`)
+- Sắp xếp hiệu quả
+- Tra cứu nhanh chóng
 
-### 2. CRUD Operations
+### 2. Thao tác CRUD
 
-**Create:**
+**Tạo mới (Create):**
 ```typescript
 async createUser(createUserDto: CreateUserDto): Promise<User> {
   return this.userModel.create({
@@ -86,7 +86,7 @@ async createUser(createUserDto: CreateUserDto): Promise<User> {
 }
 ```
 
-**Read:**
+**Đọc (Read):**
 ```typescript
 async findAllUsers(): Promise<User[]> {
   return this.userModel.findAll();
@@ -97,7 +97,7 @@ async findUserById(id: number): Promise<User | null> {
 }
 ```
 
-**Update:**
+**Cập nhật (Update):**
 ```typescript
 async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
   const user = await this.userModel.findByPk(id);
@@ -105,7 +105,7 @@ async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
 }
 ```
 
-**Delete:**
+**Xóa (Delete):**
 ```typescript
 async deleteUser(id: number): Promise<void> {
   const user = await this.userModel.findByPk(id);
@@ -113,9 +113,9 @@ async deleteUser(id: number): Promise<void> {
 }
 ```
 
-### 3. Query Optimization
+### 3. Tối ưu hóa Truy vấn
 
-**Using BTREE index for efficient filtering:**
+**Sử dụng chỉ mục BTREE để lọc hiệu quả:**
 
 ```typescript
 async findAdultUsers(): Promise<User[]> {
@@ -130,9 +130,9 @@ async findAdultUsers(): Promise<User[]> {
 }
 ```
 
-### 4. Transactions
+### 4. Giao dịch (Transactions)
 
-Transactions ensure data consistency:
+Giao dịch đảm bảo tính nhất quán của dữ liệu:
 
 ```typescript
 async createUsersTransaction(users: CreateUserDto[]): Promise<User[]> {
@@ -146,10 +146,10 @@ async createUsersTransaction(users: CreateUserDto[]): Promise<User[]> {
       createdUsers.push(user);
     }
     
-    await transaction.commit(); // All succeed
+    await transaction.commit(); // Tất cả thành công
     return createdUsers;
   } catch (error) {
-    await transaction.rollback(); // Or all fail
+    await transaction.rollback(); // Hoặc tất cả thất bại
     throw error;
   }
 }
@@ -157,7 +157,7 @@ async createUsersTransaction(users: CreateUserDto[]): Promise<User[]> {
 
 ### 5. Query Builder
 
-Sequelize provides a powerful query builder:
+Sequelize cung cấp một query builder mạnh mẽ:
 
 ```typescript
 async findUsersWithComplexQuery(
@@ -222,22 +222,22 @@ async getUserStatistics(): Promise<any> {
 }
 ```
 
-## API Endpoints
+## Các API Endpoints
 
 ```
-POST   /postgres/users              - Create user
-GET    /postgres/users              - Get all users
-GET    /postgres/users/:id          - Get user by ID
-PUT    /postgres/users/:id          - Update user
-DELETE /postgres/users/:id          - Delete user
-GET    /postgres/users/adults       - Find users age >= 18
-POST   /postgres/users/batch        - Create multiple users (transaction)
-GET    /postgres/users/statistics   - Get user statistics
-GET    /postgres/users/search       - Search with filters
-GET    /postgres/users/raw-sql      - Raw SQL query example
+POST   /postgres/users              - Tạo người dùng
+GET    /postgres/users              - Lấy tất cả người dùng
+GET    /postgres/users/:id          - Lấy người dùng theo ID
+PUT    /postgres/users/:id          - Cập nhật người dùng
+DELETE /postgres/users/:id          - Xóa người dùng
+GET    /postgres/users/adults       - Tìm người dùng >= 18 tuổi
+POST   /postgres/users/batch        - Tạo nhiều người dùng (transaction)
+GET    /postgres/users/statistics   - Lấy thống kê người dùng
+GET    /postgres/users/search       - Tìm kiếm với bộ lọc
+GET    /postgres/users/raw-sql      - Ví dụ truy vấn SQL thuần
 ```
 
-## Best Practices
+## Phương pháp Hay nhất
 
 1. **Use indexes wisely** - Index frequently queried columns
 2. **Normalize data** - Reduce redundancy through proper table design
