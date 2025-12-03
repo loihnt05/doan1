@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 ---
-# Search Model (Elasticsearch)
+# Mô hình Tìm kiếm (Elasticsearch)
 
 Elasticsearch là một công cụ tìm kiếm và phân tích phân tán được xây dựng trên Apache Lucene. Nó xuất sắc trong việc tìm kiếm toàn văn bản, phân tích thời gian thực và xử lý khối lượng dữ liệu lớn.
 

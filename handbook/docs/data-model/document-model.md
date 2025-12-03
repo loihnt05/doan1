@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 ---
-# Document Model (MongoDB + Mongoose)
+# Mô hình Tài liệu (MongoDB + Mongoose)
 
 Mô hình tài liệu lưu trữ dữ liệu trong các documents linh hoạt giống JSON. Mỗi document có thể có cấu trúc riêng, làm cho nó lý tưởng cho các schema đang phát triển và dữ liệu phân cấp.
 
