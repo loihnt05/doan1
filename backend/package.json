@@ -23,12 +23,15 @@
   },
   "dependencies": {
     "@aws-sdk/client-elasticache": "^3.936.0",
+    "@elastic/elasticsearch": "^8.19.1",
     "@google-cloud/memorystore": "^0.3.1",
     "@keyv/redis": "^5.1.4",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
+    "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^11.1.9",
+    "@nestjs/sequelize": "^11.0.1",
     "@redis/client": "^5.10.0",
     "cache-manager": "^7.2.5",
     "cache-manager-memcached-store": "^6.0.1",
@@ -37,9 +40,15 @@
     "ioredis": "^5.8.2",
     "keyv": "^5.5.4",
     "memcached": "^2.2.2",
+    "mongoose": "^9.0.0",
+    "neo4j-driver": "^6.0.1",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
     "redis": "^5.10.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "sequelize": "^6.37.7",
+    "sequelize-typescript": "^2.1.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

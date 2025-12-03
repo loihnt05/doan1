@@ -1,6 +1,67 @@
 version: '3.8'
 
 services:
+  # PostgreSQL for relational data
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nestjs_demo
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # MongoDB for document data
+  mongodb:
+    image: mongo:7-jammy
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: nestjs_demo
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - app-network
+
+  # Neo4j for graph data
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: neo4j
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_max__size: 512M
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    networks:
+      - app-network
+
+  # Elasticsearch for search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+
   hazelcast:
     image: hazelcast/hazelcast:5.3.0
     container_name: hazelcast
@@ -34,8 +95,15 @@ services:
       - cache-network
 
 networks:
+  app-network:
+    driver: bridge
   cache-network:
     driver: bridge
 
 volumes:
+  postgres-data:
+  mongodb-data:
+  neo4j-data:
+  neo4j-logs:
+  elasticsearch-data:
   redis-data:

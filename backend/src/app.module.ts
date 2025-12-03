@@ -9,6 +9,10 @@ import { CacheInterceptor } from './cache/interceptors/cache.interceptor';
 import { CacheStrategiesModule } from './cache/strategies/cache-strategies.module';
 import { ConfigModule } from './config/config.module';
 import { UserModule } from './user/user.module';
+import { PostgresModule } from './database/postgres/postgres.module';
+import { MongodbModule } from './database/mongodb/mongodb.module';
+import { Neo4jModule } from './database/neo4j/neo4j.module';
+import { ElasticsearchModule } from './database/elasticsearch/elasticsearch.module';
 
 @Module({
   imports: [
@@ -24,6 +28,11 @@ import { UserModule } from './user/user.module';
     CacheModule.register({
       isGlobal: true,
     }),
+    // Database modules demonstrating different data models
+    PostgresModule,    // Relational Model
+    MongodbModule,     // Document Model
+    Neo4jModule,       // Graph Model
+    ElasticsearchModule, // Search Model
   ],
   controllers: [AppController],
   providers: [
