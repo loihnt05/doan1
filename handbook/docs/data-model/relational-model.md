@@ -1,14 +1,17 @@
+---
+sidebar_position: 2
+---
 # Relational Model (PostgreSQL + Sequelize)
 
 The relational model organizes data into tables (relations) with rows and columns. It's the most mature and widely-used database model, perfect for structured data with clear relationships.
 
 ## When to Use
 
-- ✅ Data has a well-defined structure
-- ✅ Need ACID transactions (Atomicity, Consistency, Isolation, Durability)
-- ✅ Complex queries with joins across multiple tables
-- ✅ Data integrity is critical
-- ✅ Strong consistency requirements
+-  Data has a well-defined structure
+-  Need ACID transactions (Atomicity, Consistency, Isolation, Durability)
+-  Complex queries with joins across multiple tables
+-  Data integrity is critical 
+-  Strong consistency requirements
 
 ## Example: User Management
 
@@ -243,17 +246,3 @@ GET    /postgres/users/raw-sql      - Raw SQL query example
 5. **Validate input** - Use constraints and validation at the model level
 6. **Handle NULL values** - Be explicit about nullable columns
 
-## Trade-offs
-
-**Advantages:**
-- ✅ Strong consistency
-- ✅ ACID transactions
-- ✅ Mature tooling and ecosystem
-- ✅ Complex queries with JOINs
-- ✅ Data integrity enforcement
-
-**Disadvantages:**
-- ❌ Schema changes can be difficult
-- ❌ Horizontal scaling is complex
-- ❌ May not handle unstructured data well
-- ❌ Performance overhead for complex joins

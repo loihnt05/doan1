@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # Document Model (MongoDB + Mongoose)
 
 The document model stores data in flexible, JSON-like documents. Each document can have its own structure, making it ideal for evolving schemas and hierarchical data.
@@ -328,20 +331,3 @@ ArticleSchema.index({ title: 'text', content: 'text' });
 // Descending - for reverse sorted queries
 ArticleSchema.index({ createdAt: -1 });
 ```
-
-## Trade-offs
-
-**Advantages:**
--  Flexible schema
--  Easy to scale horizontally
--  High write performance
--  Natural data representation (JSON)
--  Rich query language
--  Powerful aggregation framework
-
-**Disadvantages:**
--  No ACID transactions across documents (before v4.0)
--  Data duplication in embedded documents
--  Limited JOINs (use $lookup)
--  No foreign key constraints
--  Eventual consistency in distributed setups

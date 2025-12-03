@@ -1,15 +1,18 @@
+---
+sidebar_position: 5
+---
 # Search Model (Elasticsearch)
 
 Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It excels at full-text search, real-time analytics, and handling large volumes of data.
 
 ## When to Use
 
-- ✅ Full-text search requirements
-- ✅ Real-time analytics and aggregations
-- ✅ Log and event data analysis
-- ✅ Complex filtering and faceting
-- ✅ Autocomplete and suggestions
-- ✅ Geospatial queries
+-  Full-text search requirements
+-  Real-time analytics and aggregations
+-  Log and event data analysis
+-  Complex filtering and faceting
+-  Autocomplete and suggestions
+-  Geospatial queries
 
 ## Example: Article Search
 
@@ -567,21 +570,3 @@ GET /articles/_search
   "query": { "match": { "title": "search" } }
 }
 ```
-
-## Trade-offs
-
-**Advantages:**
-- ✅ Excellent full-text search
-- ✅ Real-time search and analytics
-- ✅ Powerful aggregations
-- ✅ Highly scalable
-- ✅ RESTful API
-- ✅ Rich ecosystem (Kibana, Logstash)
-
-**Disadvantages:**
-- ❌ Not suitable as primary database
-- ❌ Eventual consistency
-- ❌ Memory intensive
-- ❌ Complex cluster management
-- ❌ No ACID transactions
-- ❌ Steep learning curve

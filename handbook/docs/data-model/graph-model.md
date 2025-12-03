@@ -1,15 +1,18 @@
+---
+sidebar_position: 4
+---
 # Graph Model (Neo4j)
 
 The graph model represents data as nodes (entities) and relationships (connections). It excels at managing highly connected data and complex relationship queries.
 
 ## When to Use
 
-- ✅ Data is highly interconnected
-- ✅ Relationship queries are common
-- ✅ Need to traverse connections
-- ✅ Social networks, recommendation systems
-- ✅ Fraud detection, network analysis
-- ✅ Knowledge graphs
+- Data is highly interconnected
+- Relationship queries are common
+- Need to traverse connections
+- Social networks, recommendation systems
+- Fraud detection, network analysis
+- Knowledge graphs
 
 ## Example: Social Network
 
@@ -406,20 +409,3 @@ MATCH (u:User)-[:FRIEND]->(friend)
 RETURN friend
 LIMIT 100
 ```
-
-## Trade-offs
-
-**Advantages:**
-- ✅ Excellent for relationship queries
-- ✅ Intuitive data model for connected data
-- ✅ Fast traversals
-- ✅ Flexible schema
-- ✅ Pattern matching queries
-- ✅ Built-in graph algorithms
-
-**Disadvantages:**
-- ❌ Not ideal for simple CRUD operations
-- ❌ Limited aggregation compared to SQL
-- ❌ Scaling can be complex
-- ❌ Smaller ecosystem than relational databases
-- ❌ Memory intensive for large graphs

@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Introduction to Data Models
 
 This section demonstrates four fundamental data models used in modern application development. Each model is designed to solve specific types of problems and excels in different scenarios.

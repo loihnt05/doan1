@@ -1,3 +1,6 @@
+---
+sidebar_position: 6
+---
 # Data Model Comparison
 
 This guide compares the four data models to help you choose the right one for your use case.
@@ -282,53 +285,6 @@ Analytics & Reporting
 - Less mature tooling
 
 ---
-
-## Cost Considerations
-
-| Database | License | Hosting | Operations |
-|----------|---------|---------|------------|
-| PostgreSQL | Free (Open Source) | Low-Medium | Low |
-| MongoDB | Free/Commercial | Medium | Medium |
-| Neo4j | Free/Commercial | Medium-High | Medium-High |
-| Elasticsearch | Free/Commercial | Medium-High | Medium-High |
-
----
-
-## Learning Curve
-
-| Database | Getting Started | Advanced Features | Ecosystem |
-|----------|----------------|-------------------|-----------|
-| PostgreSQL | Easy | Medium | ⭐⭐⭐⭐⭐ |
-| MongoDB | Very Easy | Medium | ⭐⭐⭐⭐ |
-| Neo4j | Medium | Hard | ⭐⭐⭐ |
-| Elasticsearch | Medium | Hard | ⭐⭐⭐⭐ |
-
----
-
-## Decision Tree
-
-```
-Start Here
-│
-├─ Need ACID transactions?
-│  └─ YES → PostgreSQL
-│  └─ NO → Continue
-│
-├─ Highly connected data?
-│  └─ YES → Neo4j
-│  └─ NO → Continue
-│
-├─ Full-text search primary requirement?
-│  └─ YES → Elasticsearch
-│  └─ NO → Continue
-│
-└─ Need flexibility and scale?
-   └─ YES → MongoDB
-   └─ NO → PostgreSQL (default safe choice)
-```
-
----
-
 ## Summary
 
 Choose your database based on:
@@ -340,4 +296,4 @@ Choose your database based on:
 5. **Development Speed** - How fast do you need to iterate?
 6. **Team Expertise** - What does your team know?
 
-**Remember:** There's no one-size-fits-all solution. The best choice depends on your specific requirements! 🎯
+**Remember:** There's no one-size-fits-all solution. The best choice depends on your specific requirements!
