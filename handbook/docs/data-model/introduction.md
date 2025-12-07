@@ -42,4 +42,4 @@ Trong phần này, bạn sẽ học về:
 - Chiến lược đánh chỉ mục
 - Ví dụ triển khai thực tế
 
-Hãy cùng khám phá từng mô hình dữ liệu! 
+Hãy cùng khám phá từng mô hình dữ liệu!     
