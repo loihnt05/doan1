@@ -13,6 +13,7 @@ import { PostgresModule } from './database/postgres/postgres.module';
 import { MongodbModule } from './database/mongodb/mongodb.module';
 import { Neo4jModule } from './database/neo4j/neo4j.module';
 import { ElasticsearchModule } from './database/elasticsearch/elasticsearch.module';
+import { ConnectionPoolModule } from './connection-pool/connection-pool.module';
 
 @Module({
   imports: [
@@ -29,10 +30,12 @@ import { ElasticsearchModule } from './database/elasticsearch/elasticsearch.modu
       isGlobal: true,
     }),
     // Database modules demonstrating different data models
-    PostgresModule,    // Relational Model
-    MongodbModule,     // Document Model
-    Neo4jModule,       // Graph Model
-    ElasticsearchModule, // Search Model
+    // PostgresModule,    // Relational Model - Commented out (database not running)
+    // MongodbModule,     // Document Model - Commented out (database not running)
+    // Neo4jModule,       // Graph Model - Commented out (database not running)
+    // ElasticsearchModule, // Search Model - Commented out (database not running)
+    // Connection Pool Demo
+    ConnectionPoolModule,
   ],
   controllers: [AppController],
   providers: [
