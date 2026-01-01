@@ -15,7 +15,8 @@ RUN pnpm install
 COPY . .
 
 # Build all applications
-RUN pnpm run build user-service && \
+RUN pnpm run build api-gateway && \
+    pnpm run build user-service && \
     pnpm run build order-service && \
     pnpm run build payment-service
 

@@ -1,6 +1,18 @@
 version: "3.9"
 
 services:
+  api-gateway:
+    build: .
+    command: node dist/apps/api-gateway/main.js
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - user-service
+      - order-service
+      - payment-service
+
   user-service:
     build: .
     command: node dist/apps/user-service/main.js
