@@ -7,18 +7,18 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "dev": "nest start --watch",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/apps/backend/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./apps/backend/test/jest-e2e.json",
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
@@ -26,13 +26,16 @@
     "@elastic/elasticsearch": "^8.19.1",
     "@google-cloud/memorystore": "^0.3.1",
     "@keyv/redis": "^5.1.4",
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^11.1.9",
     "@nestjs/sequelize": "^11.0.1",
+    "@nestjs/throttler": "^6.4.0",
     "@redis/client": "^5.10.0",
+    "axios": "^1.13.2",
     "cache-manager": "^7.2.5",
     "cache-manager-memcached-store": "^6.0.1",
     "cacheable": "^2.2.0",
@@ -42,6 +45,7 @@
     "memcached": "^2.2.2",
     "mongoose": "^9.0.0",
     "neo4j-driver": "^6.0.1",
+    "opossum": "^9.0.0",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
     "redis": "^5.10.0",
@@ -81,7 +85,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -89,7 +93,10 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/apps/"
+    ]
   }
 }

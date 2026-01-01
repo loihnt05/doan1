@@ -748,23 +748,6 @@ async function example10_errorHandling(poolManager: ConnectionPoolManager) {
    await conn.executeQuery('...'); // Có thể lỗi
    await pool.release(conn);
    ```
-
-## Kết Luận
-
-Connection Pool là một kỹ thuật quan trọng giúp:
-
-- **Tăng hiệu suất** 10-100 lần
-- **Tiết kiệm tài nguyên** hệ thống và database
-- **Bảo vệ** database khỏi quá tải
-- **Quản lý** kết nối hiệu quả
-- **Tái sử dụng** kết nối thay vì tạo mới
-
-**Khuyến nghị:**
-- Luôn sử dụng Connection Pool trong production
-- Cấu hình phù hợp với hệ thống
-- Theo dõi metrics thường xuyên
-- Test kỹ trước khi deploy
-
 ## Tài Liệu Tham Khảo
 
 - [Source Code](../../backend/src/connection-pool/)

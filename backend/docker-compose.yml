@@ -1,109 +1,43 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  # PostgreSQL for relational data
-  postgres:
-    image: postgres:16-alpine
-    container_name: postgres
+  api-gateway:
+    build: .
+    command: node dist/apps/api-gateway/main.js
     ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: nestjs_demo
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - user-service
+      - order-service
+      - payment-service
+
+  user-service:
+    build: .
+    command: node dist/apps/user-service/main.js
+    ports:
+      - "3001:3001"
     networks:
       - app-network
 
-  # MongoDB for document data
-  mongodb:
-    image: mongo:7-jammy
-    container_name: mongodb
+  order-service:
+    build: .
+    command: node dist/apps/order-service/main.js
     ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: nestjs_demo
-    volumes:
-      - mongodb-data:/data/db
+      - "3002:3002"
     networks:
       - app-network
 
-  # Neo4j for graph data
-  neo4j:
-    image: neo4j:5.15-community
-    container_name: neo4j
+  payment-service:
+    build: .
+    command: node dist/apps/payment-service/main.js
     ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
-    environment:
-      NEO4J_AUTH: neo4j/password
-      NEO4J_dbms_memory_pagecache_size: 512M
-      NEO4J_dbms_memory_heap_max__size: 512M
-    volumes:
-      - neo4j-data:/data
-      - neo4j-logs:/logs
+      - "3003:3003"
     networks:
       - app-network
-
-  # Elasticsearch for search
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
-    container_name: elasticsearch
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    networks:
-      - app-network
-
-  hazelcast:
-    image: hazelcast/hazelcast:5.3.0
-    container_name: hazelcast
-    ports:
-      - "5701:5701"
-    environment:
-      - JAVA_OPTS=-Dhazelcast.config=/opt/hazelcast/config_ext/hazelcast.xml
-    volumes:
-      - ./hazelcast-config.xml:/opt/hazelcast/config_ext/hazelcast.xml
-    networks:
-      - cache-network
-
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - redis-data:/data
-    networks:
-      - cache-network
-
-  memcached:
-    image: memcached:1.6-alpine
-    container_name: memcached
-    ports:
-      - "11211:11211"
-    command: memcached -m 64
-    networks:
-      - cache-network
 
 networks:
   app-network:
     driver: bridge
-  cache-network:
-    driver: bridge
 
-volumes:
-  postgres-data:
-  mongodb-data:
-  neo4j-data:
-  neo4j-logs:
-  elasticsearch-data:
-  redis-data:
