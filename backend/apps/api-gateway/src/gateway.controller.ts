@@ -8,6 +8,7 @@ import CircuitBreaker from 'opossum';
 @Controller()
 export class GatewayController {
   private paymentBreaker: CircuitBreaker;
+  private requestCounter = 0; // In-memory state for demonstration
 
   constructor(
     private readonly gatewayService: GatewayService,
@@ -124,5 +125,49 @@ export class GatewayController {
   async nonBlocking() {
     await new Promise((resolve) => setTimeout(resolve, 3000));
     return { message: 'waited 3 seconds without blocking' };
+  }
+
+  // ============= PHASE 2: SCALING DEMONSTRATIONS =============
+
+  // CPU-bound operation that blocks the event loop
+  @Get('/cpu-bound')
+  cpuBound() {
+    const start = Date.now();
+    // Simulate heavy CPU computation
+    while (Date.now() - start < 3000) {
+      // Busy wait - blocks event loop
+    }
+    return {
+      message: 'CPU-bound operation completed',
+      duration: '3000ms',
+      warning: 'This blocks the event loop!',
+    };
+  }
+
+  // Stateful counter - demonstrates problem with multiple instances
+  @Get('/count')
+  count() {
+    this.requestCounter++;
+    return {
+      count: this.requestCounter,
+      processId: process.pid,
+      warning: 'This counter is per-instance, not shared!',
+    };
+  }
+
+  // Get metrics about current instance
+  @Get('/metrics')
+  metrics() {
+    const memUsage = process.memoryUsage();
+    return {
+      processId: process.pid,
+      uptime: process.uptime(),
+      memoryUsage: {
+        heapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`,
+        heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`,
+        rss: `${Math.round(memUsage.rss / 1024 / 1024)}MB`,
+      },
+      requestCount: this.requestCounter,
+    };
   }
 }
