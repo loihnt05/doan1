@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { USER_CACHE_KEYS } from '../../cache/decorators/cache.keys.js';
-import { Cacheable, CacheInvalidation } from '../../cache/decorators/index.js';
+import { USER_CACHE_KEYS } from '../../cache/decorators/cache.keys';
+import { Cacheable, CacheInvalidation } from '../../cache/decorators/index';
 import { User } from '../domain/user.entity';
 import type { UserRepository } from '../domain/user.repository';
 
