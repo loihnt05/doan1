@@ -2,13 +2,14 @@
 
 ## Project Overview
 
-This project demonstrates a complete microservices architecture implementation using NestJS, progressing through four phases:
+This project demonstrates a complete microservices architecture implementation using NestJS, progressing through five phases:
 
 - **Phase 0**: Foundation - Independent microservices
 - **Phase 1**: API Gateway - Routing, aggregation, and cross-cutting concerns  
 - **Phase 2**: Scaling - Vertical and horizontal scaling demonstrations
 - **Phase 3**: Load Balancer & Kubernetes - Advanced load balancing algorithms, K8s networking
 - **Phase 4**: Message Dispatcher - Event-driven architecture with Apache Kafka
+- **Phase 5**: Saga Pattern & Streaming - Distributed transactions with compensation and real-time analytics
 
 ## Architecture
 
@@ -350,16 +351,153 @@ Advanced load balancing algorithms and Kubernetes networking concepts.
 - **[infra/nginx/](infra/nginx/)** - Multiple nginx configs
 - **[infra/k8s/](infra/k8s/)** - Kubernetes manifests with detailed comments
 
+## Phase 5: Saga Pattern & Streaming Processing
+
+**Location**: `backend/PHASE5-STREAMING-SAGA.md`
+
+### Features Implemented
+
+✅ **Saga Choreography Pattern**
+- Order Service (saga initiator + compensation handler)
+- Payment Service (saga participant, 30% failure rate)
+- Inventory Service (saga participant, 20% failure rate)
+- Event-driven coordination (no central orchestrator)
+
+✅ **Compensation Actions**
+- Payment failure → Cancel order
+- Inventory failure → Refund payment + Cancel order
+- Forward actions (not rollbacks)
+
+✅ **Streaming Analytics**
+- Real-time revenue aggregation
+- Order success rate calculation
+- Time-windowing (orders per minute)
+- Periodic reporting every 10 seconds
+
+✅ **Event-Driven Patterns**
+- Pub/Sub: Analytics subscribes to all events
+- Event Splitter: Payment → Success/Failure events
+- Idempotency: Duplicate event handling
+- Correlation IDs: Track saga across services
+
+### Saga Flow
+
+**Success Path:**
+```
+Order Service → Payment Service → Inventory Service → Complete
+     │               │                   │
+  OrderCreated  PaymentCompleted  InventoryReserved
+```
+
+**Compensation Path (Payment Fails):**
+```
+Order Service → Payment Service ✗
+     │               │
+  OrderCreated  PaymentFailed
+     │
+  OrderCancelled (COMPENSATION)
+```
+
+**Compensation Path (Inventory Fails):**
+```
+Order Service → Payment Service → Inventory Service ✗
+     │               │                   │
+  OrderCreated  PaymentCompleted  InventoryFailed
+     │               │                   │
+OrderCancelled  PaymentRefunded (COMPENSATION)
+```
+
+### Running Phase 5
+
+```bash
+# 1. Start Kafka
+docker-compose -f docker-compose.kafka.yml up -d
+
+# 2. Start services in separate terminals
+cd backend
+
+# Terminal 1: Order Service
+PORT=3002 npm run start order-service
+
+# Terminal 2: Payment Service  
+PORT=3003 npm run start payment-service
+
+# Terminal 3: Inventory Service
+PORT=3004 npm run start inventory-service
+
+# Terminal 4: Analytics Service
+PORT=3005 npm run start analytics-service
+
+# 3. Run test script
+./test-saga.sh
+```
+
+### Testing Saga
+
+```bash
+# Create order (saga starts)
+curl -X POST http://localhost:3002/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "user-123",
+    "items": [{"productId": "prod-1", "quantity": 2, "price": 50}],
+    "total": 100
+  }'
+
+# Check order status
+curl http://localhost:3002/orders/{orderId}
+
+# View analytics
+curl http://localhost:3005/analytics
+```
+
+### Documentation
+
+- **[PHASE5-STREAMING-SAGA.md](PHASE5-STREAMING-SAGA.md)** - Complete implementation guide
+- **[Handbook: Saga Pattern](../handbook/docs/saga-pattern/)** - Educational content
+  - Introduction to Saga Pattern
+  - Choreography Pattern (implemented)
+  - Streaming vs Messaging
+  - Compensation strategies
+  - Lambda vs Kappa architecture
+
+### Key Concepts
+
+**Saga Pattern:**
+- Solves distributed transaction problem
+- Local transactions + event coordination
+- Compensation instead of rollback
+- Eventually consistent
+
+**Choreography vs Orchestration:**
+- Choreography: Event-driven, no central coordinator (our implementation)
+- Orchestration: Central controller calls services
+- Choreography better for simple workflows
+- Orchestration better for complex workflows
+
+**Streaming Processing:**
+- Stateful event processing
+- Real-time aggregation (sum, count, average)
+- Time windowing (minute, hour, day)
+- Different from messaging (task execution)
+
+**Lambda vs Kappa:**
+- Lambda: Batch + Speed layers (complex)
+- Kappa: Single streaming layer (simple, modern)
+- Our implementation uses Kappa architecture
+
 ## Technologies Used
 
 - **NestJS** v11.1.11 - Progressive Node.js framework
 - **Node.js** v23.7.0 - JavaScript runtime
 - **Docker** - Containerization
 - **Nginx** - Load balancer
+- **Apache Kafka** - Event streaming platform
 - **pnpm** - Package manager
 - **@nestjs/axios** - HTTP client
 - **@nestjs/throttler** - Rate limiting
 - **opossum** - Circuit breaker
+- **kafkajs** - Kafka client for Node.js
 
 ## License
 
@@ -367,7 +505,7 @@ MIT - See [LICENSE](../LICENSE)
 
 ---
 
-**🎯 Run `./test-scaling.sh` to see all demonstrations in action!**
+**🎯 Run `./test-saga.sh` to see saga pattern and streaming analytics in action!**
 
 **Built by**: [Your Name]  
 **Course**: [Course Name]  

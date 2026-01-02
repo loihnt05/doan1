@@ -10,13 +10,13 @@
   "monorepo": true,
   "root": "apps/backend",
   "projects": {
-    "backend": {
+    "analytics-service": {
       "type": "application",
-      "root": "apps/backend",
+      "root": "apps/analytics-service",
       "entryFile": "main",
-      "sourceRoot": "apps/backend/src",
+      "sourceRoot": "apps/analytics-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/backend/tsconfig.app.json"
+        "tsConfigPath": "apps/analytics-service/tsconfig.app.json"
       }
     },
     "api-gateway": {
@@ -28,13 +28,22 @@
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
       }
     },
-    "user-service": {
+    "backend": {
       "type": "application",
-      "root": "apps/user-service",
+      "root": "apps/backend",
       "entryFile": "main",
-      "sourceRoot": "apps/user-service/src",
+      "sourceRoot": "apps/backend/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/user-service/tsconfig.app.json"
+        "tsConfigPath": "apps/backend/tsconfig.app.json"
+      }
+    },
+    "inventory-service": {
+      "type": "application",
+      "root": "apps/inventory-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/inventory-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/inventory-service/tsconfig.app.json"
       }
     },
     "order-service": {
@@ -53,6 +62,15 @@
       "sourceRoot": "apps/payment-service/src",
       "compilerOptions": {
         "tsConfigPath": "apps/payment-service/tsconfig.app.json"
+      }
+    },
+    "user-service": {
+      "type": "application",
+      "root": "apps/user-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/user-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/user-service/tsconfig.app.json"
       }
     }
   }

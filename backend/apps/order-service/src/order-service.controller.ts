@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { OrderServiceService } from './order-service.service';
 
 @Controller()
@@ -26,5 +26,13 @@ export class OrderServiceController {
     @Body() orderDto: { userId: string; items: Array<{ productId: string; quantity: number; price: number }> },
   ) {
     return this.orderServiceService.createOrder(orderDto);
+  }
+
+  /**
+   * Get order status (for saga demo)
+   */
+  @Get('/orders/:orderId')
+  getOrder(@Param('orderId') orderId: string) {
+    return this.orderServiceService.getOrder(orderId);
   }
 }
