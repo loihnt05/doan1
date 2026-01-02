@@ -1,0 +1,66 @@
+# ===================================================================
+# NodePort Service - Exposes Service on Node IPs
+# ===================================================================
+# Use Case: Development, testing, or when LoadBalancer is not available
+# Accessible from outside cluster via NodeIP:NodePort
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-nodeport
+  namespace: default
+  labels:
+    app: api-gateway
+spec:
+  type: NodePort
+  
+  selector:
+    app: api-gateway
+  
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80          # Service port (inside cluster)
+      targetPort: 3000  # Container port
+      nodePort: 30080   # Exposed on each node (30000-32767 range)
+                        # If omitted, Kubernetes auto-assigns
+  
+  # External traffic policy
+  externalTrafficPolicy: Cluster  # Options: Cluster, Local
+  
+  # Session affinity for sticky sessions
+  sessionAffinity: None
+
+---
+# ===================================================================
+# How it works:
+# ===================================================================
+# 1. Service is accessible on EVERY node at <NodeIP>:30080
+# 2. Even if pod is not running on that node, traffic is routed
+# 3. kube-proxy forwards to appropriate pod
+#
+# Access methods:
+# - From outside cluster: http://<any-node-ip>:30080
+# - From inside cluster: http://api-gateway-nodeport (port 80)
+#
+# Example:
+# If you have 3 nodes:
+# - Node1 (192.168.1.10):30080 → Routes to pods
+# - Node2 (192.168.1.11):30080 → Routes to pods  
+# - Node3 (192.168.1.12):30080 → Routes to pods
+#
+# External Traffic Policy:
+# - Cluster (default): Can route to any node, preserves cluster-wide load balancing
+#   * Drawback: Client IP is hidden (SNAT)
+# - Local: Only routes to pods on the same node
+#   * Benefit: Preserves client IP
+#   * Drawback: Uneven load if pods are not evenly distributed
+#
+# Talking Points:
+# ✅ Simple external access without cloud load balancer
+# ✅ Good for development/testing
+# ✅ No additional infrastructure needed
+# ❌ Must know node IPs (nodes can be added/removed)
+# ❌ Requires firewall rules for node ports
+# ❌ Not recommended for production (use LoadBalancer or Ingress)
+# ❌ Limited port range (30000-32767)

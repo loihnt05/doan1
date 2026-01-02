@@ -2,17 +2,17 @@
 
 > A complete microservices demonstration with NestJS, Docker, and Nginx showcasing scaling patterns, API Gateway, and distributed system concepts.
 
-## 🎯 Project Status: Phase 2 Complete ✅
+## 🎯 Project Status: Phase 3 Complete ✅
 
 ### What's Been Built:
 - ✅ **Phase 0**: 3 independent microservices (user, order, payment)
 - ✅ **Phase 1**: API Gateway with routing, aggregation, auth, rate limiting, circuit breaker
 - ✅ **Phase 2**: Horizontal scaling with load balancing + performance demonstrations
+- ✅ **Phase 3**: Load balancing algorithms, Kubernetes networking, proxy types explained
 
-### 🚀 Key Achievement:
-**Demonstrated 457x performance improvement** when scaling from 1 to 3 instances during CPU-bound operations:
-- Single instance: **53,000ms** response time 😱
-- 3 instances: **116ms** response time ⚡
+### 🚀 Key Achievements:
+- **Phase 2**: 457x performance improvement with horizontal scaling
+- **Phase 3**: Complete understanding of LB algorithms, K8s Services, and service mesh concepts
 
 ## 🚀 Quick Start
 
@@ -82,12 +82,21 @@ doan1/
 - **Circuit Breaker**: Fault tolerance with opossum
 - **Retry Logic**: Exponential backoff for failed requests
 
-### Phase 2: Scaling Strategies ⭐ (Current)
+### Phase 2: Scaling Strategies
 - **Horizontal Scaling**: Multiple instances + Nginx load balancer
 - **Load Distribution**: Round-robin across 3 instances
 - **CPU-Bound Problems**: Demonstrated 457x performance improvement
 - **Stateful vs Stateless**: In-memory state issues with scaling
 - **Event Loop Monitoring**: Tracking Node.js performance
+- **Performance Testing**: Before/after scaling comparisons
+
+### Phase 3: Load Balancing & Kubernetes ⭐ (Current)
+- **LB Algorithms**: Round-robin, least connections, IP hash demonstrations
+- **Health Checks**: Passive (Nginx) and active (K8s probes)
+- **Proxy Types**: Clear distinctions between reverse proxy, forward proxy, LB, API gateway
+- **K8s Networking**: ClusterIP, NodePort, LoadBalancer, Ingress with real YAML
+- **Service Discovery**: Static vs dynamic patterns, K8s DNS
+- **Service Mesh**: Istio/Linkerd concepts, when to use
 - **Performance Testing**: Before/after scaling comparisons
 
 ## 🧪 Test Results

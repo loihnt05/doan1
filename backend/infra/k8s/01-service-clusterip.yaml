@@ -1,0 +1,56 @@
+# ===================================================================
+# ClusterIP Service (Default Type - Internal Only)
+# ===================================================================
+# Use Case: Internal service-to-service communication
+# Accessible only within the cluster
+# Most common type for microservices
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: default
+  labels:
+    app: user-service
+    tier: backend
+spec:
+  # ClusterIP is the default type
+  type: ClusterIP
+  
+  # Selector matches pods to include in this service
+  selector:
+    app: user-service
+  
+  # Service ports
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80          # Service port (what clients connect to)
+      targetPort: 3001  # Container port (where app listens)
+  
+  # Session affinity (sticky sessions)
+  sessionAffinity: None  # Options: None, ClientIP
+  
+  # Optional: Specific cluster IP (normally auto-assigned)
+  # clusterIP: 10.96.0.100
+
+---
+# ===================================================================
+# How it works:
+# ===================================================================
+# 1. Service gets a virtual IP (ClusterIP): e.g., 10.96.0.100
+# 2. kube-proxy creates iptables/IPVS rules on each node
+# 3. When pod sends request to 10.96.0.100:80
+# 4. kube-proxy redirects to one of the backend pod IPs
+# 5. Load balancing is done by kube-proxy (round-robin by default)
+#
+# DNS Resolution:
+# - user-service.default.svc.cluster.local → 10.96.0.100
+# - Other pods can use: http://user-service/users
+#
+# Talking Points:
+# ✅ Internal only - not exposed outside cluster
+# ✅ Stable IP even when pods restart
+# ✅ Built-in service discovery via DNS
+# ✅ Load balancing across pod replicas
+# ❌ Not accessible from outside cluster

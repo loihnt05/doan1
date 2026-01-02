@@ -1,0 +1,89 @@
+# ===================================================================
+# LoadBalancer Service - Cloud Provider Integration
+# ===================================================================
+# Use Case: Production external access with cloud-native load balancer
+# Automatically provisions external load balancer (AWS ELB, GCP LB, Azure LB)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-lb
+  namespace: default
+  labels:
+    app: api-gateway
+  annotations:
+    # Cloud-specific annotations
+    # AWS:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # Network LB
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    # GCP:
+    # cloud.google.com/load-balancer-type: "Internal"
+    # Azure:
+    # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  
+  selector:
+    app: api-gateway
+  
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80          # External load balancer port
+      targetPort: 3000  # Container port
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 3000
+  
+  # Source IP ranges allowed (CIDR notation)
+  loadBalancerSourceRanges:
+    - 0.0.0.0/0  # Allow all (use specific IPs in production)
+    # - 203.0.113.0/24  # Allow only specific network
+  
+  # External traffic policy
+  externalTrafficPolicy: Local  # Preserves client IP
+  
+  # Health check node port (when externalTrafficPolicy: Local)
+  healthCheckNodePort: 30100
+
+---
+# ===================================================================
+# How it works:
+# ===================================================================
+# 1. Kubernetes talks to cloud provider API
+# 2. Cloud provider creates external load balancer
+# 3. Load balancer routes traffic to NodePort (auto-created)
+# 4. NodePort routes to pods
+#
+# Flow:
+# Internet → Cloud LB → NodePort → kube-proxy → Pod
+#
+# Status:
+# After creation, check:
+#   kubectl get svc api-gateway-lb
+# You'll see:
+#   EXTERNAL-IP: a1b2c3.us-west-2.elb.amazonaws.com
+#
+# Access:
+#   http://a1b2c3.us-west-2.elb.amazonaws.com
+#
+# Talking Points:
+# ✅ Production-ready external access
+# ✅ Automatic provisioning and management
+# ✅ Health checks handled by cloud provider
+# ✅ SSL/TLS termination at load balancer
+# ✅ High availability across zones
+# ❌ Only works with cloud providers (AWS, GCP, Azure)
+# ❌ Costs money (LB resource charges)
+# ❌ One load balancer per service (can be expensive)
+# 💡 For multiple services, use Ingress instead
+#
+# Comparison to Docker Compose nginx:
+# Docker Compose nginx:  Software LB running in container
+# K8s LoadBalancer:      Hardware/Cloud LB managed by provider
+#
+# Both do the same job (distribute traffic), but:
+# - K8s LoadBalancer is managed service (auto-healing, scaling)
+# - Docker nginx requires manual management
+# - K8s integrates with cloud features (auto-scaling, zones, DNS)
