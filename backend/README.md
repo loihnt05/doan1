@@ -2,11 +2,13 @@
 
 ## Project Overview
 
-This project demonstrates a complete microservices architecture implementation using NestJS, progressing through three phases:
+This project demonstrates a complete microservices architecture implementation using NestJS, progressing through four phases:
 
 - **Phase 0**: Foundation - Independent microservices
 - **Phase 1**: API Gateway - Routing, aggregation, and cross-cutting concerns  
 - **Phase 2**: Scaling - Vertical and horizontal scaling demonstrations
+- **Phase 3**: Load Balancer & Kubernetes - Advanced load balancing algorithms, K8s networking
+- **Phase 4**: Message Dispatcher - Event-driven architecture with Apache Kafka
 
 ## Architecture
 
@@ -233,20 +235,120 @@ docker-compose up --scale api-gateway=5
 
 ## Next Steps
 
-### Phase 3: Distributed State
-- [ ] Redis for shared caching
-- [ ] Session management
-- [ ] Pub/sub messaging
-
-### Phase 4: Observability
+### Phase 5: Observability
 - [ ] Prometheus metrics
 - [ ] Grafana dashboards
-- [ ] Distributed tracing
+- [ ] Distributed tracing with OpenTelemetry
+- [ ] Log aggregation with ELK stack
 
-### Phase 5: Production
-- [ ] Kubernetes deployment
-- [ ] Auto-scaling policies
+### Phase 6: Production
+- [ ] Kubernetes deployment manifests
+- [ ] Helm charts
+- [ ] Auto-scaling policies (HPA, VPA)
 - [ ] Blue-green deployments
+- [ ] CI/CD pipelines
+
+## Phase 4: Message Dispatcher (Kafka) ✅
+
+Event-driven architecture implementation with Apache Kafka for asynchronous, decoupled communication between microservices.
+
+### Architecture
+
+```
+┌──────────────┐      ┌─────────────────────────────────┐
+│Order Service │─────▶│         Kafka Cluster           │
+│  (Producer)  │      │  ┌──────────┐  ┌──────────┐    │
+└──────────────┘      │  │Zookeeper │  │  Broker  │    │
+                      │  │  :2181   │  │:9092/29092    │
+                      │  └──────────┘  └──────────┘    │
+                      └───────────┬─────────────────────┘
+                                  │
+                      ┌───────────┼────────────┐
+                      │           │            │
+              ┌───────▼──┐   ┌───▼─────┐  ┌──▼────────┐
+              │Payment   │   │Notif.   │  │Analytics  │
+              │Service   │   │Service  │  │Service    │
+              │(Consumer)│   │(Consumer)   │(Consumer) │
+              └──────────┘   └─────────┘  └───────────┘
+```
+
+### Key Features
+
+**Event-Driven Communication:**
+- Asynchronous messaging (no blocking)
+- Loose coupling between services
+- Events stored durably in Kafka
+- Multiple consumers per event (pub/sub)
+
+**Consumer Groups:**
+- Load balancing across instances
+- Automatic rebalancing
+- Independent consumer groups for different services
+
+**Fault Tolerance:**
+- Dead Letter Queue (DLQ) for failed messages
+- Automatic retries with exponential backoff
+- Idempotency handling
+
+**Performance:**
+- Response time: 2000ms (HTTP) → 100ms (Kafka) = **20x faster**
+- Throughput: 50 req/s → 1000+ req/s
+
+### Running Phase 4
+
+```bash
+# Start Kafka infrastructure
+docker-compose -f docker-compose.kafka.yml up -d
+
+# Run comprehensive test suite
+./test-kafka.sh
+```
+
+**Kafka UI**: http://localhost:8080
+
+### Documentation
+
+- **[PHASE4-MESSAGE-DISPATCHER.md](PHASE4-MESSAGE-DISPATCHER.md)** - Complete Kafka guide with concepts, patterns, and CLI cheatsheet
+- **[Handbook: Event-Driven Architecture](../handbook/docs/phase4-message-dispatcher/event-driven-architecture.md)** - Educational content with diagrams
+
+### Test Script Features
+
+The `test-kafka.sh` script demonstrates:
+1. ✅ Kafka infrastructure startup (Zookeeper, Broker, UI)
+2. ✅ Topic creation with partitions
+3. ✅ Event production (OrderCreated)
+4. ✅ Event consumption (PaymentService)
+5. ✅ Consumer groups load balancing (2 instances)
+6. ✅ Offset management and replay
+7. ✅ Dead Letter Queue handling
+8. ✅ Real-time monitoring via Kafka UI
+
+## Phase 3: Load Balancer & Kubernetes ✅
+
+Advanced load balancing algorithms and Kubernetes networking concepts.
+
+### Load Balancing Algorithms
+
+**Multiple nginx configurations demonstrating:**
+- **Round Robin** (default): Even distribution
+- **Least Connections**: Dynamic load-aware routing
+- **IP Hash**: Sticky sessions per client IP
+- **Health Checks**: Passive failure detection
+
+### Kubernetes Concepts
+
+**Service types** with full YAML examples:
+- **ClusterIP**: Internal service discovery
+- **NodePort**: External access for development
+- **LoadBalancer**: Cloud provider integration
+- **Ingress**: Layer 7 routing with path/host rules
+
+### Documentation
+
+- **[PHASE3-LOAD-BALANCER.md](PHASE3-LOAD-BALANCER.md)** - Comprehensive load balancer guide
+- **[Handbook: Load Balancing](../handbook/docs/phase3-load-balancer.md)** - Educational content
+- **[infra/nginx/](infra/nginx/)** - Multiple nginx configs
+- **[infra/k8s/](infra/k8s/)** - Kubernetes manifests with detailed comments
 
 ## Technologies Used
 
