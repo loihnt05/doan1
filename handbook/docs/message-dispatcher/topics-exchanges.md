@@ -13,11 +13,14 @@ Chủ đề và Trao đổi là các cơ chế định tuyến xác định các
 
 Một chủ đề là một danh mục hoặc tên nguồn cấp dữ liệu mà thông điệp được xuất bản. Chủ đề được chia thành các phân vùng để mở rộng quy mô và song song.
 
-```
-Topic: order-events
-├── Partition 0: [msg1, msg4, msg7, ...]
-├── Partition 1: [msg2, msg5, msg8, ...]
-└── Partition 2: [msg3, msg6, msg9, ...]
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-events"]
+        P0["Partition 0: msg1, msg4, msg7, ..."]
+        P1["Partition 1: msg2, msg5, msg8, ..."]
+        P2["Partition 2: msg3, msg6, msg9, ..."]
+    end
+
 ```
 
 ### Tạo Chủ đề
@@ -163,16 +166,36 @@ export class OrderConsumer {
 
 RabbitMQ sử dụng trao đổi để định tuyến thông điệp đến hàng đợi dựa trên quy tắc.
 
-```
-Producer → Exchange → [Routing Logic] → Queues → Consumers
+```mermaid
+flowchart TD
+    P[Producer] --> EX[Exchange]
+    EX --> RL[Routing Logic]
+    RL --> Q1[Queue 1]
+    RL --> Q2[Queue 2]
+    RL --> Q3[Queue 3]
+    Q1 --> C1[Consumer 1]
+    Q2 --> C2[Consumer 2]
+    Q3 --> C3[Consumer 3]
+
 ```
 
 ### 1. Direct Exchange
 
 Định tuyến thông điệp đến hàng đợi dựa trên **khớp chính xác khóa định tuyến**.
 
-```
-Message with key "error" → Only goes to queue bound with "error"
+```mermaid
+flowchart TD
+    P[Producer] --> EX[Direct Exchange]
+
+    EX -->|Routing key = error| Q1[Queue: ErrorLogs]
+    EX -->|Routing key = info| Q2[Queue: InfoLogs]
+    EX -->|Routing key = debug| Q3[Queue: DebugLogs]
+
+    Q1 --> C1[Consumer 1]
+    Q2 --> C2[Consumer 2]
+    Q3 --> C3[Consumer 3]
+
+
 ```
 
 **Thiết lập:**
@@ -228,9 +251,16 @@ await service.publishLog('info', 'User logged in');               // → info-lo
 
 **Luồng:**
 
-```
-Producer ─'error'→ Direct Exchange ─'error'→ error-logs → Error Handler
-                                   ─'info'→ info-logs → Logger
+```mermaid
+flowchart TD
+    P[Producer] --> EX[Direct Exchange]
+
+    EX -->|error| Q1[error-logs]
+    EX -->|info| Q2[info-logs]
+
+    Q1 --> EH[Error Handler]
+    Q2 --> LG[Logger]
+
 ```
 
 ### 2. Fanout Exchange
@@ -282,10 +312,17 @@ await service.notifyUser('Your order has shipped');
 
 **Luồng:**
 
-```
-Producer → Fanout Exchange ─┬→ email-queue → Email Service
-                            ├→ sms-queue → SMS Service  
-                            └→ push-queue → Push Service
+```mermaid
+flowchart TD
+    P[Producer] --> EX[Fanout Exchange]
+
+    EX --> Q1[email-queue]
+    EX --> Q2[sms-queue]
+    EX --> Q3[push-queue]
+
+    Q1 --> ES[Email Service]
+    Q2 --> SS[SMS Service]
+    Q3 --> PS[Push Service]
 ```
 
 **Trường hợp sử dụng:**
@@ -361,15 +398,14 @@ await service.publishEvent('payment.us.processed', {...});
 
 **Ví dụ Định tuyến:**
 
-```
-Routing Key          | Pattern 'order.*'  | Pattern 'order.#'  | Pattern '*.*.created'
----------------------|--------------------|--------------------|----------------------
-order.created        |  Match           |  Match           |  No match
-order.us.created     |  No match        |  Match           |  Match
-order.updated        |  Match           |  Match           |  No match
-payment.created      |  No match        |  No match        |  No match
-order.us.eu.created  |  No match        |  Match           |  No match
-```
+| Routing Key         | Pattern `order.*` | Pattern `order.#` | Pattern `*.*.created` |
+| ------------------- | ----------------- | ----------------- | --------------------- |
+| order.created       |  Match           |  Match           |  No match            |
+| order.us.created    |  No match        |  Match           |  Match               |
+| order.updated       |  Match           |  Match           |  No match            |
+| payment.created     |  No match        |  No match        |  No match            |
+| order.us.eu.created |  No match        |  Match           |  No match            |
+
 
 **Trường hợp sử dụng:**
 - Định tuyến đa vùng

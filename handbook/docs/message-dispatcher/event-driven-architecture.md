@@ -86,16 +86,17 @@ notification-requested ← Events requesting notifications
 
 Partitions cho phép **song song** và **đảm bảo thứ tự**.
 
-```
-Topic: order-created (6 partitions)
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created (6 partitions)"]
+        P0["Partition 0: Msg 0,6,12"]
+        P1["Partition 1: Msg 1,7,13"]
+        P2["Partition 2: Msg 2,8,14"]
+        P3["Partition 3: Msg 3,9,15"]
+        P4["Partition 4: Msg 4,10,16"]
+        P5["Partition 5: Msg 5,11,17"]
+    end
 
-┌────────┬────────┬────────┬────────┬────────┬────────┐
-│ Part 0 │ Part 1 │ Part 2 │ Part 3 │ Part 4 │ Part 5 │
-├────────┼────────┼────────┼────────┼────────┼────────┤
-│ Msg 0  │ Msg 1  │ Msg 2  │ Msg 3  │ Msg 4  │ Msg 5  │
-│ Msg 6  │ Msg 7  │ Msg 8  │ Msg 9  │ Msg 10 │ Msg 11 │
-│ Msg 12 │ Msg 13 │ Msg 14 │ Msg 15 │ Msg 16 │ Msg 17 │
-└────────┴────────┴────────┴────────┴────────┴────────┘
 ```
 
 **Điểm chính:**
@@ -118,20 +119,31 @@ Consumer groups cho phép hai mẫu: **cân bằng tải** và **pub/sub**.
 
 #### Mẫu 1: Cân bằng tải (Cùng nhóm)
 
-```
-Consumer Group: payment-service
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created (6 partitions)"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+        P3[Partition 3]
+        P4[Partition 4]
+        P5[Partition 5]
+    end
 
-Topic: order-created (6 partitions)
-┌───┬───┬───┬───┬───┬───┐
-│ 0 │ 1 │ 2 │ 3 │ 4 │ 5 │
-└─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┘
-  │   │   │   │   │   │
-  └───┴───┘   └───┴───┘
-      │           │
-┌─────▼─────┐ ┌─▼───────┐
-│ Instance1 │ │Instance2│
-│(Parts 0-2)│ │(Parts3-5)│
-└───────────┘ └─────────┘
+    subgraph CG["Consumer Group: payment-service"]
+        C1[Instance 1 ]
+        C2[Instance 2 ]
+    end
+
+    %% Assign partitions
+    P0 --> C1
+    P1 --> C1
+    P2 --> C1
+
+    P3 --> C2
+    P4 --> C2
+    P5 --> C2
+
 ```
 
 **Hành vi:**
@@ -141,18 +153,32 @@ Topic: order-created (6 partitions)
 
 #### Mẫu 2: Pub/Sub (Nhóm khác nhau)
 
-```
-Topic: order-created
-        │
-    ┌───┼───┬───┐
-    │   │   │   │
-    ▼   ▼   ▼   ▼
-┌─────┬──────┬────────┬──────┐
-│ Grp │ Grp  │  Grp   │ Grp  │
-│pay  │notify│analytic│audit │
-│ment │      │        │      │
-│ ALL │ ALL  │  ALL   │ ALL  │
-└─────┴──────┴────────┴──────┘
+```mermaid
+flowchart TD
+    Topic["Topic: order-created"]
+
+    subgraph Payment["Payment Group"]
+        C_P[ALL messages]
+    end
+
+    subgraph Notification["Notification Group"]
+        C_N[ALL messages]
+    end
+
+    subgraph Analytics["Analytics Group"]
+        C_A[ALL messages]
+    end
+
+    subgraph Audit["Audit Group"]
+        C_Ad[ALL messages]
+    end
+
+    %% Connections
+    Topic --> C_P
+    Topic --> C_N
+    Topic --> C_A
+    Topic --> C_Ad
+
 ```
 
 **Hành vi:**
@@ -164,14 +190,22 @@ Topic: order-created
 
 Một **offset** là ID tuần tự của mỗi thông điệp trong một partition.
 
-```
-Partition 0:
-┌───┬───┬───┬───┬───┬───┬───┐
-│ 0 │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ ← Offsets
-└───┴───┴───┴───┴───┴───┴───┘
-         ▲       ▲
-         │       └─ Current offset (4)
-         └─ Committed offset (3)
+```mermaid
+flowchart TD
+    subgraph P0["Partition 0: Offsets 0-6"]
+        O0[0]
+        O1[1]
+        O2[2]
+        O3[3]
+        O4[4]
+        O5[5]
+        O6[6]
+    end
+
+    %% Consumer offsets
+    Committed["Committed offset"] --> O3
+    Current["Current offset"] --> O4
+
 ```
 
 **Quản lý Offset:**
@@ -182,23 +216,53 @@ Partition 0:
 ### Delivery Semantics
 
 #### At-Most-Once (commit trước khi xử lý)
-```
-Read → Commit → Process
-If crash during process → Message lost
+```mermaid
+flowchart TD
+    subgraph AMO["At-Most-Once"]
+        A1[Read message]
+        A2[Commit offset]
+        A3[Process message]
+        A4[Crash during processing]
+        A5[Message LOST]
+        
+        A1 --> A2
+        A2 --> A3
+        A3 --> A4
+        A4 --> A5
+    end
 ```
 **Trường hợp sử dụng**: Logs, metrics (không quan trọng)
 
 #### At-Least-Once (commit sau khi xử lý) ← **Mặc định**
-```
-Read → Process → Commit
-If crash before commit → Message redelivered
+```mermaid
+flowchart TD
+
+    subgraph ALO["At-Least-Once"]
+        B1[Read message]
+        B2[Process message]
+        B3[Commit offset]
+        B4[Crash before commit]
+        B5[Message redelivered]
+        
+        B1 --> B2
+        B2 --> B3
+        B3 --> B4
+        B4 --> B5
+    end
 ```
 **Trường hợp sử dụng**: Hầu hết trường hợp + idempotency
 
 #### Exactly-Once (transactional)
-```
-Read → Process + Commit in transaction
-Most complex, highest guarantee
+```mermaid
+flowchart TD
+    subgraph EO["Exactly-Once"]
+        C1[Read message]
+        C2[Process + Commit in transaction]
+        C3[Highest guarantee]
+        
+        C1 --> C2
+        C2 --> C3
+    end
 ```
 **Trường hợp sử dụng**: Giao dịch tài chính
 
@@ -406,16 +470,20 @@ setInterval(async () => {
 
 **Giải pháp**: Saga dựa trên choreography với sự kiện.
 
-```
-OrderCreated → PaymentService → PaymentProcessed
-                                      ↓
-                                 InventoryService → InventoryReserved
-                                                         ↓
-                                                    ShippingService → OrderShipped
+```mermaid
+flowchart TD
+    OC[OrderCreated] --> PS[PaymentService → PaymentProcessed]
+    PS --> IS[InventoryService → InventoryReserved]
+    IS --> SS[ShippingService → OrderShipped]
 
-Hoàn tác khi thất bại:
-  PaymentFailed → CancelOrder
-  InventoryFailed → RefundPayment
+    %% Compensating actions
+    PS_fail[PaymentFailed] --> CO[CancelOrder]
+    IS_fail[InventoryFailed] --> RP[RefundPayment]
+
+    %% Optional: failure arrows
+    PS --> PS_fail
+    IS --> IS_fail
+
 ```
 
 ## Kiểm thử

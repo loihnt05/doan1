@@ -9,15 +9,20 @@ Delivery semantics định nghĩa các đảm bảo xung quanh việc phân ph�
 
 ## Ba Đảm bảo
 
-```
-At-Most-Once:  Message may be lost, never duplicated
-               [0 or 1 delivery]
+```mermaid
+flowchart TD
+    AMO[At-Most-Once]
+    ALO[At-Least-Once]
+    EO[Exactly-Once]
 
-At-Least-Once: Message never lost, may be duplicated  
-               [1 or more deliveries]
+    AMO_desc["0 or 1 delivery\nMessage may be lost, never duplicated"]
+    ALO_desc["1 or more deliveries\nMessage never lost, may be duplicated"]
+    EO_desc["Exactly 1 delivery\nMessage delivered precisely once"]
 
-Exactly-Once:  Message delivered precisely once
-               [exactly 1 delivery]
+    AMO --> AMO_desc
+    ALO --> ALO_desc
+    EO --> EO_desc
+
 ```
 
 ## At-Most-Once Delivery
@@ -26,12 +31,14 @@ Exactly-Once:  Message delivered precisely once
 
 Tin nhắn được coi là đã phân phối **trước** khi xử lý. Nếu xử lý thất bại, tin nhắn bị mất.
 
-```
-1. Consumer nhận tin nhắn
-2. Consumer commit offset ngay lập tức 
-3. Consumer xử lý tin nhắn
-4.  Xử lý thất bại
-5. Tin nhắn bị MẤT (offset đã commit)
+```mermaid
+flowchart TD
+    A[Consumer nhận tin nhắn] --> B[Commit offset ngay lập tức]
+    B --> C[Consumer xử lý tin nhắn]
+    C --> D{Xử lý thành công?}
+    D -- Thất bại --> E[Tin nhắn bị MẤT]
+    D -- Thành công --> F[Message processed]
+
 ```
 
 ### Implementation
@@ -108,10 +115,10 @@ export class MetricsConsumer {
 Messages are committed **after** successful processing. If processing fails, the message is retried.
 
 ```
-1. Consumer receives message
-2. Consumer processes message 
-3. Consumer commits offset 
-4. (If crash before commit, message is redelivered)
+1. Consumer nhận tin nhắn
+2. Consumer xử lý tin nhắn 
+3. Consumer commit offset 
+4. (Nếu crash trước khi commit, tin nhắn được phân phối lại)
 ```
 
 ### Implementation

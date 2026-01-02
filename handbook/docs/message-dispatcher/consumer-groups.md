@@ -11,26 +11,39 @@ Consumer Groups cho phép **xử lý song song** tin nhắn trong khi duy trì k
 
 ### Single Consumer
 
-```
-Topic (3 partitions)
-├── Partition 0 ────┐
-├── Partition 1 ────┼──→ Consumer 1 (handles ALL partitions)
-└── Partition 2 ────┘
-                    
-Throughput: Limited by single consumer
+```mermaid
+flowchart TD
+    subgraph Topic["Topic 3 partitions"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+    end
+
+    C1[Consumer 1]
+
+    P0 --> C1
+    P1 --> C1
+    P2 --> C1
 ```
 
 ### Consumer Group (Multiple Consumers)
 
-```
-Topic (3 partitions)
-├── Partition 0 ──────→ Consumer 1
-├── Partition 1 ──────→ Consumer 2  
-└── Partition 2 ──────→ Consumer 3
+```mermaid
+flowchart TD
+    subgraph Topic["Topic 3 partitions"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+    end
 
-Consumer Group: "payment-service-group"
+    C1[Consumer 1]
+    C2[Consumer 2]
+    C3[Consumer 3]
 
-Throughput: 3x (each consumer processes different partition)
+    P0 --> C1
+    P1 --> C2
+    P2 --> C3
+
 ```
 
 ### Nguyên tắc Chính
@@ -90,54 +103,120 @@ consumer: {
 ```
 
 **Kết quả:**
-```
-Topic: order-created
+```mermaid
+flowchart TD
+    Topic[Topic: order-created]
 
-Payment Service Group:
-  Consumer 1 → Processes orders (charges customer)
-  
-Notification Service Group:
-  Consumer 1 → Sends emails
-  Consumer 2 → Sends push notifications
-  
-Analytics Service Group:
-  Consumer 1 → Tracks metrics
+    %% Payment Service Group
+    PG1[Payment Consumer 1]
 
-Each group receives ALL messages independently
+    %% Notification Service Group
+    NG1[Notification Consumer 1]
+    NG2[Notification Consumer 2]
+
+    %% Analytics Service Group
+    AG1[Analytics Consumer 1]
+
+    %% Connections
+    Topic --> PG1
+    Topic --> NG1
+    Topic --> NG2
+    Topic --> AG1
+
 ```
 
 ### Partition Assignment
 
 #### Scenario 1: Balanced (3 consumers, 6 partitions)
 
-```
-Consumer Group: payment-service-group
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created (6 partitions)"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+        P3[Partition 3]
+        P4[Partition 4]
+        P5[Partition 5]
+    end
 
-Consumer 1 → Partitions [0, 1]
-Consumer 2 → Partitions [2, 3]
-Consumer 3 → Partitions [4, 5]
+    subgraph CG["Consumer Group: payment-service-group"]
+        C1[Consumer 1]
+        C2[Consumer 2]
+        C3[Consumer 3]
+    end
 
-Perfect balance: Each handles 2 partitions
+    %% Assign partitions to consumers
+    C1 --> P0
+    C1 --> P1
+
+    C2 --> P2
+    C2 --> P3
+
+    C3 --> P4
+    C3 --> P5
+
 ```
 
 #### Scenario 2: Unbalanced (4 consumers, 6 partitions)
 
-```
-Consumer 1 → Partitions [0, 1]
-Consumer 2 → Partitions [2, 3]
-Consumer 3 → Partitions [4, 5]
-Consumer 4 → (idle - no partitions assigned)
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created (6 partitions)"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+        P3[Partition 3]
+        P4[Partition 4]
+        P5[Partition 5]
+    end
 
-Note: Max parallelism = number of partitions
+    subgraph CG["Consumer Group: payment-service-group"]
+        C1[Consumer 1]
+        C2[Consumer 2]
+        C3[Consumer 3]
+        C4[Consumer 4] 
+    end
+
+    %% Assign partitions to consumers
+    C1 --> P0
+    C1 --> P1
+
+    C2 --> P2
+    C2 --> P3
+
+    C3 --> P4
+    C3 --> P5
+
 ```
 
 #### Scenario 3: Overloaded (2 consumers, 6 partitions)
 
-```
-Consumer 1 → Partitions [0, 1, 2]
-Consumer 2 → Partitions [3, 4, 5]
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created (6 partitions)"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+        P3[Partition 3]
+        P4[Partition 4]
+        P5[Partition 5]
+    end
 
-Each consumer handles 3 partitions (more work)
+    subgraph CG["Consumer Group: payment-service-group"]
+        C1[Consumer 1]
+        C2[Consumer 2]
+    end
+
+    %% Assign partitions
+    C1 --> P0
+    C1 --> P1
+    C1 --> P2
+
+    C2 --> P3
+    C2 --> P4
+    C2 --> P5
+
 ```
 
 **Quy tắc:** Để đạt song song tối đa, tạo **ít nhất nhiều partitions** như số consumer tối đa dự kiến.
@@ -164,21 +243,50 @@ await admin.createTopics({
 
 ### Rebalance Process
 
-```
-Initial State:
-Consumer 1 → [P0, P1, P2]
-Consumer 2 → [P3, P4, P5]
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created (6 partitions)"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+        P3[Partition 3]
+        P4[Partition 4]
+        P5[Partition 5]
+    end
 
-Consumer 3 joins →
+    subgraph Initial["Initial State"]
+        C1[Consumer 1]
+        C2[Consumer 2]
+    end
 
-Rebalancing... (all consumers pause)
+    %% Initial assignment
+    C1 --> P0
+    C1 --> P1
+    C1 --> P2
 
-New State:
-Consumer 1 → [P0, P1]
-Consumer 2 → [P2, P3]
-Consumer 3 → [P4, P5]
+    C2 --> P3
+    C2 --> P4
+    C2 --> P5
 
-All consumers resume processing
+    %% New consumer joins
+    C3[Consumer 3 joins]
+
+    %% New assignment after rebalancing
+    subgraph New["New State after Rebalancing"]
+        C1_new[Consumer 1]
+        C2_new[Consumer 2]
+        C3_new[Consumer 3]
+    end
+
+    C1_new --> P0
+    C1_new --> P1
+
+    C2_new --> P2
+    C2_new --> P3
+
+    C3_new --> P4
+    C3_new --> P5
+
 ```
 
 ### Handling Rebalance
