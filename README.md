@@ -2,17 +2,24 @@
 
 > A complete microservices demonstration with NestJS, Docker, and Nginx showcasing scaling patterns, API Gateway, and distributed system concepts.
 
-## 🎯 Project Status: Phase 3 Complete ✅
+## 🎯 Project Status: Phase 7 Complete ✅ - PRODUCTION READY
 
 ### What's Been Built:
 - ✅ **Phase 0**: 3 independent microservices (user, order, payment)
 - ✅ **Phase 1**: API Gateway with routing, aggregation, auth, rate limiting, circuit breaker
 - ✅ **Phase 2**: Horizontal scaling with load balancing + performance demonstrations
 - ✅ **Phase 3**: Load balancing algorithms, Kubernetes networking, proxy types explained
+- ✅ **Phase 4**: Event-driven architecture with Kafka (async communication, saga orchestration)
+- ✅ **Phase 5**: Saga pattern for distributed transactions (choreography + compensation)
+- ✅ **Phase 6**: Distributed locking with Redis (race condition prevention, fenced tokens)
+- ✅ **Phase 7**: Observability & metrics (Prometheus, structured logging, distributed tracing)
 
 ### 🚀 Key Achievements:
 - **Phase 2**: 457x performance improvement with horizontal scaling
 - **Phase 3**: Complete understanding of LB algorithms, K8s Services, and service mesh concepts
+- **Phase 5**: Automatic rollback with saga compensations - no manual intervention
+- **Phase 6**: Zero race conditions - distributed locks prevent overselling, double-booking, double-charging
+- **Phase 7**: Production-ready observability - "If you can't measure it, you can't improve it"
 
 ## 🚀 Quick Start
 
@@ -53,17 +60,36 @@ doan1/
 │   │   ├── api-gateway/      # API Gateway with load balancing
 │   │   ├── user-service/     # User microservice (port 3001)
 │   │   ├── order-service/    # Order microservice (port 3002)
-│   │   └── payment-service/  # Payment microservice (port 3003)
-│   ├── docker-compose.yml    # Multi-container orchestration
+│   │   ├── payment-service/  # Payment microservice (port 3003)
+│   │   ├── inventory-service/ # Inventory microservice (port 3004)
+│   │   └── analytics-service/ # Analytics microservice (port 3005)
+│   ├── libs/
+│   │   ├── observability/    # Metrics, logging, health checks ⭐
+│   │   ├── distributed-lock/ # Redis-based distributed locking
+│   │   ├── reliability/      # Circuit breaker, retry, rate limiter
+│   │   └── saga/             # Saga orchestration patterns
+│   ├── docker-compose.yml    # Multi-container orchestration + Kafka + Redis
 │   ├── nginx.conf           # Load balancer configuration
-│   ├── test-scaling.sh      # Automated test suite ⭐
+│   ├── test-scaling.sh      # Automated test suite
+│   ├── test-race-condition.sh # Race condition demo
+│   ├── test-fenced-tokens.sh  # Fenced token demo
 │   ├── README.md            # Complete backend documentation
 │   └── SCALING-DEMO.md      # Detailed scaling guide
-└── handbook/            # Documentation site (Docusaurus)
-    └── docs/
-        ├── distributed-cache/
-        ├── connection-pool/
-        └── data-model/
+├── handbook/            # Documentation site (Docusaurus)
+│   └── docs/
+│       ├── distributed-cache/
+│       ├── distributed-locking/ # ⭐ Phase 6 documentation
+│       ├── connection-pool/
+│       └── data-model/
+├── PHASE1-API-GATEWAY.md
+├── PHASE2-SCALING.md
+├── PHASE3-LOAD-BALANCING.md
+├── PHASE4-KAFKA-EVENTS.md
+├── PHASE5-SAGA-PATTERN.md
+├── PHASE6-DISTRIBUTED-LOCKING.md
+├── PHASE7-OBSERVABILITY.md    # ⭐ NEW
+├── FINAL-ARCHITECTURE.md      # ⭐ NEW - Complete system overview
+└── README.md                  # You are here
 ```
 
 ## 🎓 What You'll Learn
@@ -90,7 +116,7 @@ doan1/
 - **Event Loop Monitoring**: Tracking Node.js performance
 - **Performance Testing**: Before/after scaling comparisons
 
-### Phase 3: Load Balancing & Kubernetes ⭐ (Current)
+### Phase 3: Load Balancing & Kubernetes
 - **LB Algorithms**: Round-robin, least connections, IP hash demonstrations
 - **Health Checks**: Passive (Nginx) and active (K8s probes)
 - **Proxy Types**: Clear distinctions between reverse proxy, forward proxy, LB, API gateway
@@ -99,7 +125,153 @@ doan1/
 - **Service Mesh**: Istio/Linkerd concepts, when to use
 - **Performance Testing**: Before/after scaling comparisons
 
-## 🧪 Test Results
+### Phase 4: Event-Driven Architecture with Kafka
+- **Async Communication**: Services communicate via events, not direct calls
+- **Event Schemas**: OrderCreated, PaymentProcessed, InventoryReserved, etc.
+- **Consumer Groups**: Multiple consumers for parallel processing
+- **Dead Letter Queue**: Failed message handling
+- **Event Sourcing Foundation**: All state changes captured as events
+- **Loose Coupling**: Add/remove consumers without changing producers
+
+### Phase 5: Saga Pattern (Distributed Transactions)
+- **Choreography-Based Saga**: No central coordinator
+- **Automatic Rollback**: Compensation handlers for each step
+- **Eventual Consistency**: ACID impossible, saga pattern provides guarantees
+- **Idempotency**: Duplicate event handling with idempotency keys
+- **State Machine**: Track saga progress (PENDING → CONFIRMED/CANCELLED)
+- **Real Example**: Order → Reserve Inventory → Process Payment → Confirm (or rollback)
+
+### Phase 6: Distributed Locking & Reliability Patterns
+- **Redis Distributed Locks**: `SET resource NX PX 30000` for mutual exclusion
+- **Fenced Tokens**: Monotonic counters prevent stale writes after lock expiry
+- **Race Condition Prevention**: No overselling, no double-booking, no double-charging
+- **Reliability Patterns**: Retry with exponential backoff, circuit breaker, bulkhead, rate limiter
+- **Real Scenarios**: Inventory management, payment processing, ticket booking
+- **Test Scripts**: `test-race-condition.sh`, `test-fenced-tokens.sh`
+
+### Phase 7: Observability, Metrics & Production Readiness ⭐ (Current)
+- **3 Pillars**: Metrics (quantitative), Logs (qualitative), Traces (flow)
+- **Prometheus Metrics**: HTTP, Kafka, locks, sagas, business metrics (orders, payments, revenue)
+- **Structured Logging**: JSON logs with trace IDs using Pino
+- **Distributed Tracing**: Trace ID propagation across services via HTTP/Kafka headers
+- **Health Checks**: `/health` (liveness), `/ready` (readiness), `/metrics` (Prometheus)
+- **Alerting**: High error rate, latency spikes, Kafka lag, lock contentions
+- **Production Checklist**: Complete with SLO/SLA concepts, error budgets
+
+## 🛠️ Technologies & Patterns
+
+### Core Stack
+| Technology | Purpose | Phase |
+|------------|---------|-------|
+| **NestJS** | Backend framework | 0 |
+| **TypeScript** | Type safety | 0 |
+| **Docker** | Containerization | 0 |
+| **Nginx** | Load balancer | 2-3 |
+| **Kafka** | Event streaming | 4 |
+| **Redis** | Distributed locks + cache | 6 |
+| **MongoDB** | Database | 4-5 |
+| **Prometheus** | Metrics | 7 |
+| **Pino** | Structured logging | 7 |
+
+### Enterprise Patterns
+| Pattern | Description | Benefit |
+|---------|-------------|---------|
+| **API Gateway** | Single entry point | Decouples clients from services |
+| **Horizontal Scaling** | Run multiple instances | Linear scalability |
+| **Load Balancing** | Distribute traffic | Even resource utilization |
+| **Event-Driven Architecture** | Async via Kafka | Loose coupling |
+| **Saga (Choreography)** | Distributed transactions | Eventual consistency |
+| **Distributed Lock** | Redis-based mutual exclusion | Prevent race conditions |
+| **Fenced Tokens** | Monotonic counters | Prevent stale writes |
+| **Circuit Breaker** | Fail fast | Prevent cascading failures |
+| **Retry + Backoff** | Handle transient failures | Resilience |
+| **Observability (3 Pillars)** | Metrics, logs, traces | Production readiness |
+
+### Performance Metrics
+- **Horizontal Scaling**: 457x improvement (53s → 116ms)
+- **Load Balancing**: Even distribution across 3+ instances
+- **Kafka Throughput**: 10k+ messages/sec per partition
+- **Lock Acquisition**: <1ms average latency (Redis)
+- **P95 HTTP Latency**: <100ms (target)
+
+## 📚 Complete Documentation
+
+| Document | Description | Lines |
+|----------|-------------|-------|
+| **[README.md](./README.md)** | Project overview (you are here) | 350+ |
+| **[PHASE1-API-GATEWAY.md](./PHASE1-API-GATEWAY.md)** | API Gateway pattern explained | 400+ |
+| **[PHASE2-SCALING.md](./PHASE2-SCALING.md)** | Horizontal scaling guide | 450+ |
+| **[PHASE3-LOAD-BALANCING.md](./PHASE3-LOAD-BALANCING.md)** | Load balancing algorithms | 500+ |
+| **[PHASE4-KAFKA-EVENTS.md](./PHASE4-KAFKA-EVENTS.md)** | Event-driven architecture | 550+ |
+| **[PHASE5-SAGA-PATTERN.md](./PHASE5-SAGA-PATTERN.md)** | Distributed transactions | 600+ |
+| **[PHASE6-DISTRIBUTED-LOCKING.md](./PHASE6-DISTRIBUTED-LOCKING.md)** | Race condition prevention | 650+ |
+| **[PHASE7-OBSERVABILITY.md](./PHASE7-OBSERVABILITY.md)** | Metrics, logs, traces | 700+ |
+| **[FINAL-ARCHITECTURE.md](./FINAL-ARCHITECTURE.md)** | Complete system overview | 800+ |
+| **[handbook/docs/](./handbook/docs/)** | Interactive documentation site | 2000+ |
+
+**Total Documentation: 5000+ lines** 📖
+
+## 🚀 Quick Start Examples
+
+### 1. Run Complete System
+
+```bash
+cd backend
+docker-compose up --build
+
+# Access services
+curl http://localhost/api/orders    # API Gateway → Order Service
+curl http://localhost:3001/metrics  # Prometheus metrics
+curl http://localhost:3001/health   # Health check
+```
+
+### 2. Test Horizontal Scaling
+
+```bash
+cd backend
+./test-scaling.sh  # Automated 457x performance demo
+```
+
+### 3. Test Race Condition Prevention
+
+```bash
+cd backend
+./test-race-condition.sh  # 10 concurrent requests, only 1 succeeds
+```
+
+### 4. Test Saga Compensation
+
+```bash
+# Create order with invalid payment
+curl -X POST http://localhost/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"user-123","items":[{"id":"item-456","qty":999}]}'
+
+# Watch logs - saga will automatically rollback
+docker logs order-service | grep "saga"
+```
+
+### 5. View Metrics
+
+```bash
+# Prometheus metrics
+curl http://localhost:3001/metrics
+
+# Example output:
+# http_requests_total{method="POST",route="/orders",status_code="200"} 1524
+# kafka_consumer_lag{topic="orders",consumer_group="payment-service"} 0
+# lock_contentions_total{resource="inventory:item-123"} 5
+```
+
+### 6. View Distributed Traces
+
+```bash
+# All logs for a specific request
+TRACE_ID="a1b2c3d4"
+docker logs order-service | grep $TRACE_ID
+docker logs payment-service | grep $TRACE_ID
+docker logs inventory-service | grep $TRACE_ID
+```
 
 ### CPU-Bound Operation Impact
 

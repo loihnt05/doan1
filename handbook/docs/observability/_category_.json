@@ -1,0 +1,8 @@
+{
+  "label": "Observability & Metrics",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn about making distributed systems production-ready with metrics, logs, and traces."
+  }
+}
