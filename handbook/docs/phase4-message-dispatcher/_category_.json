@@ -1,0 +1,8 @@
+{
+  "label": "Phase 4: Message Dispatcher",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Event-Driven Architecture with Apache Kafka - asynchronous messaging, consumer groups, partitions, and fault-tolerant communication patterns."
+  }
+}

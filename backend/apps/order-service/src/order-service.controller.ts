@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { OrderServiceService } from './order-service.service';
 
 @Controller()
@@ -16,5 +16,15 @@ export class OrderServiceController {
       { id: 101, userId: 1, total: 100 },
       { id: 102, userId: 2, total: 200 },
     ];
+  }
+
+  /**
+   * Create a new order and publish event to Kafka
+   */
+  @Post('/orders')
+  async createOrder(
+    @Body() orderDto: { userId: string; items: Array<{ productId: string; quantity: number; price: number }> },
+  ) {
+    return this.orderServiceService.createOrder(orderDto);
   }
 }

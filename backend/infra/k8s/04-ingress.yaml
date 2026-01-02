@@ -1,0 +1,140 @@
+# ===================================================================
+# Ingress - Layer 7 HTTP(S) Routing
+# ===================================================================
+# Use Case: Expose multiple services through single entry point
+# Like API Gateway + Nginx combined
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-ingress
+  namespace: default
+  annotations:
+    # Ingress controller specific annotations
+    # Nginx Ingress Controller:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    
+    # SSL/TLS
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # Load balancing algorithm
+    nginx.ingress.kubernetes.io/load-balance: "round_robin"  # or least_conn
+    
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    
+    # CORS
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  # Ingress class (controller to use)
+  ingressClassName: nginx  # or traefik, istio, etc.
+  
+  # TLS configuration
+  tls:
+    - hosts:
+        - api.example.com
+      secretName: api-tls-secret  # Certificate stored in Secret
+  
+  # Routing rules
+  rules:
+    # Rule 1: Main API domain
+    - host: api.example.com
+      http:
+        paths:
+          # Route /api/users/* to user-service
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 80
+          
+          # Route /api/orders/* to order-service
+          - path: /api/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          
+          # Route /api/payments/* to payment-service
+          - path: /api/payments
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 80
+          
+          # Default route to API gateway
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80
+    
+    # Rule 2: Different domain for admin interface
+    - host: admin.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-service
+                port:
+                  number: 80
+
+---
+# ===================================================================
+# How it works:
+# ===================================================================
+# 1. Ingress Controller (nginx, traefik, etc.) watches Ingress resources
+# 2. Generates configuration based on rules
+# 3. Provisions external load balancer (or uses existing)
+# 4. Routes traffic based on:
+#    - Host header (virtual hosting)
+#    - URL path
+#    - HTTP method (with annotations)
+#
+# Flow:
+# Client → DNS → Ingress LB → Ingress Controller → Service → Pod
+#
+# Path Types:
+# - Exact: Must match exactly (/api/users)
+# - Prefix: Matches prefix (/api/users/*)
+# - ImplementationSpecific: Controller-specific logic
+#
+# Talking Points:
+# ✅ Single load balancer for multiple services (cost effective)
+# ✅ Layer 7 routing (host, path, headers)
+# ✅ SSL/TLS termination
+# ✅ Virtual hosting (multiple domains on one IP)
+# ✅ URL rewriting and redirects
+# ✅ Rate limiting and authentication (with annotations)
+# ❌ Requires Ingress Controller to be installed
+# ❌ More complex than Service LoadBalancer
+#
+# Comparison:
+# ┌────────────────┬─────────────┬──────────────┐
+# │                │ Service LB  │ Ingress      │
+# ├────────────────┼─────────────┼──────────────┤
+# │ Layer          │ 4 (TCP/UDP) │ 7 (HTTP/S)   │
+# │ Cost           │ High (each) │ Shared       │
+# │ Routing        │ Port-based  │ Path/Host    │
+# │ SSL            │ Passthrough │ Termination  │
+# │ Flexibility    │ Low         │ High         │
+# └────────────────┴─────────────┴──────────────┘
+#
+# Ingress vs API Gateway:
+# - Ingress: Infrastructure routing (K8s native)
+# - API Gateway: Business logic (auth, rate limit, aggregation)
+# - Best Practice: Use both (Ingress → API Gateway → Services)

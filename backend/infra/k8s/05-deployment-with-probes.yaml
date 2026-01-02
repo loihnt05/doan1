@@ -1,0 +1,193 @@
+# ===================================================================
+# Deployment with Health Checks
+# ===================================================================
+# Shows how K8s manages pod lifecycle with probes
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: default
+  labels:
+    app: api-gateway
+    tier: frontend
+spec:
+  # Number of pod replicas
+  replicas: 3
+  
+  # Deployment strategy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Max pods above desired during update
+      maxUnavailable: 0  # Min pods that must be available
+  
+  # Pod selector
+  selector:
+    matchLabels:
+      app: api-gateway
+  
+  # Pod template
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        version: v1.0.0
+    spec:
+      # Container specification
+      containers:
+        - name: api-gateway
+          image: backend-api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          
+          # Container port
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          
+          # Environment variables
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+          
+          # Resource limits
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"     # 0.1 CPU core
+            limits:
+              memory: "512Mi"
+              cpu: "500m"     # 0.5 CPU core
+          
+          # ========================================================
+          # HEALTH PROBES - Critical for production
+          # ========================================================
+          
+          # 1. LIVENESS PROBE
+          # Purpose: Is the container alive and healthy?
+          # Action if fails: Kubernetes RESTARTS the container
+          # Use case: Detect deadlocks, infinite loops, crashes
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 30   # Wait 30s after container starts
+            periodSeconds: 10         # Check every 10 seconds
+            timeoutSeconds: 5         # Request timeout
+            successThreshold: 1       # 1 success = healthy
+            failureThreshold: 3       # 3 failures = restart container
+          
+          # 2. READINESS PROBE
+          # Purpose: Is the container ready to receive traffic?
+          # Action if fails: Remove pod from Service endpoints (no restart)
+          # Use case: Slow startup, dependency checks, warming up caches
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 10   # Start checking after 10s
+            periodSeconds: 5          # Check every 5 seconds
+            timeoutSeconds: 3
+            successThreshold: 1       # 1 success = ready for traffic
+            failureThreshold: 3       # 3 failures = remove from service
+          
+          # 3. STARTUP PROBE (Optional - for slow-starting apps)
+          # Purpose: Has the app finished starting?
+          # Action if fails: Kubernetes RESTARTS the container
+          # Use case: Apps that take minutes to start
+          # Note: Disables liveness/readiness checks until startup succeeds
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 30      # Allow up to 150s to start (30 * 5s)
+      
+      # Graceful shutdown
+      terminationGracePeriodSeconds: 30
+
+---
+# ===================================================================
+# PROBE TYPES EXPLAINED
+# ===================================================================
+#
+# HTTP GET Probe (most common):
+#   httpGet:
+#     path: /health
+#     port: 8080
+#     httpHeaders:
+#       - name: Custom-Header
+#         value: value
+#
+# TCP Socket Probe:
+#   tcpSocket:
+#     port: 8080
+#   # Just checks if port is open
+#
+# Exec Probe (runs command):
+#   exec:
+#     command:
+#       - cat
+#       - /tmp/healthy
+#   # Exit code 0 = healthy
+#
+# gRPC Probe (K8s 1.24+):
+#   grpc:
+#     port: 9090
+#
+# ===================================================================
+# PROBE COMPARISON
+# ===================================================================
+#
+# ┌─────────────┬──────────────┬───────────────┬─────────────┐
+# │ Probe       │ Purpose      │ Failure Action│ When to Use │
+# ├─────────────┼──────────────┼───────────────┼─────────────┤
+# │ Liveness    │ Is alive?    │ Restart       │ Deadlocks   │
+# │ Readiness   │ Ready?       │ Remove from LB│ Dependencies│
+# │ Startup     │ Started?     │ Restart       │ Slow start  │
+# └─────────────┴──────────────┴───────────────┴─────────────┘
+#
+# ===================================================================
+# BEST PRACTICES
+# ===================================================================
+#
+# 1. Always implement /health endpoint
+# 2. Make /health lightweight (don't query DB on every check)
+# 3. Use readiness for dependency checks (DB, Redis, etc.)
+# 4. Use liveness for app-specific deadlock detection
+# 5. Set initialDelaySeconds based on startup time
+# 6. Don't make probes too aggressive (avoid false positives)
+# 7. Monitor probe failures in production
+#
+# ===================================================================
+# IMPLEMENTATION IN OUR API GATEWAY
+# ===================================================================
+#
+# Already implemented:
+#   GET /api/health
+#   Returns: { status: 'ok', timestamp: '...' }
+#
+# Enhanced version should check:
+#   - Database connectivity
+#   - External service availability  
+#   - Memory usage
+#   - Disk space
+#
+# Example response:
+#   {
+#     "status": "healthy",
+#     "timestamp": "2026-01-01T12:00:00Z",
+#     "checks": {
+#       "database": "ok",
+#       "redis": "ok",
+#       "memory": "ok"
+#     }
+#   }
