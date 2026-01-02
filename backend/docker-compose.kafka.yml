@@ -83,9 +83,32 @@ services:
       - kafka-network
     restart: unless-stopped
 
+  # Redis - For distributed locking (Phase 6)
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - kafka-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 networks:
   kafka-network:
     driver: bridge
+
+volumes:
+  redis-data:
+    driver: local
 
 # ===================================================================
 # USAGE INSTRUCTIONS

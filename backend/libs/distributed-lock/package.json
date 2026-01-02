@@ -1,0 +1,8 @@
+{
+  "name": "@app/distributed-lock",
+  "version": "1.0.0",
+  "description": "Distributed locking library using Redis",
+  "main": "index.ts",
+  "author": "",
+  "license": "MIT"
+}

@@ -8,14 +8,20 @@ import {
   OrderCancelledEvent,
 } from '../../../libs/kafka';
 import { v4 as uuidv4 } from 'uuid';
+import { DistributedLockService } from '../../../libs/distributed-lock';
+import { retry, withTimeout } from '../../../libs/reliability-patterns';
 
 @Injectable()
 export class OrderServiceService implements OnModuleInit {
   private orders: Map<string, any> = new Map(); // In-memory storage for demo
+  
+  // Phase 6: Race condition demo variables
+  private balance = 1000; // Simulated balance
 
   constructor(
     private readonly kafkaProducer: KafkaProducerService,
     private readonly kafkaConsumer: KafkaConsumerService,
+    private readonly lockService: DistributedLockService,
   ) {}
 
   /**
@@ -236,3 +242,209 @@ export class OrderServiceService implements OnModuleInit {
 //
 // ===================================================================
 
+  // ==================== PHASE 6: RACE CONDITION DEMO ====================
+
+  /**
+   * DEMO: Race condition - NO LOCK (UNSAFE)
+   * 
+   * Problem: Multiple requests read-modify-write same variable concurrently
+   * Result: Lost updates, inconsistent state
+   * 
+   * Example Flow (2 concurrent requests):
+   * 1. Request A reads balance = 1000
+   * 2. Request B reads balance = 1000
+   * 3. Request A subtracts 100 → balance = 900
+   * 4. Request B subtracts 100 → balance = 900 (WRONG! Should be 800)
+   * 
+   * This is a "check-then-act" race condition
+   */
+  async processPaymentNoLock(): Promise<any> {
+    const paymentAmount = 100;
+    
+    // Read balance
+    const currentBalance = this.balance;
+    
+    // Simulate processing delay (makes race condition more visible)
+    await this.sleep(50);
+    
+    // Check if sufficient funds
+    if (currentBalance >= paymentAmount) {
+      // Deduct amount
+      this.balance = currentBalance - paymentAmount;
+      
+      console.log(`[NO LOCK] Payment processed: -$${paymentAmount}, new balance: $${this.balance}`);
+      
+      return {
+        success: true,
+        previousBalance: currentBalance,
+        newBalance: this.balance,
+        amount: paymentAmount,
+        warning: '⚠️  Race condition possible! Balance may be incorrect.',
+      };
+    }
+    
+    return {
+      success: false,
+      balance: this.balance,
+      message: 'Insufficient funds',
+    };
+  }
+
+  /**
+   * DEMO: Race condition SOLVED - WITH DISTRIBUTED LOCK (SAFE)
+   * 
+   * Solution: Distributed lock ensures only one process modifies at a time
+   * 
+   * Flow with lock:
+   * 1. Request A acquires lock
+   * 2. Request B waits for lock
+   * 3. Request A reads, modifies, writes → releases lock
+   * 4. Request B acquires lock
+   * 5. Request B reads updated balance, modifies, writes → releases lock
+   * 
+   * Result: Sequential execution, no lost updates
+   */
+  async processPaymentWithLock(): Promise<any> {
+    const lockKey = 'lock:balance';
+    const paymentAmount = 100;
+
+    // Acquire distributed lock with retry
+    const token = await this.lockService.acquireWithRetry(lockKey, {
+      retries: 5,
+      retryDelay: 100,
+      ttlMs: 5000,
+    });
+
+    if (!token) {
+      return {
+        success: false,
+        message: 'Could not acquire lock - system busy',
+      };
+    }
+
+    try {
+      // Critical section starts here
+      const currentBalance = this.balance;
+      
+      // Simulate processing delay
+      await this.sleep(50);
+      
+      if (currentBalance >= paymentAmount) {
+        this.balance = currentBalance - paymentAmount;
+        
+        console.log(`[WITH LOCK] Payment processed: -$${paymentAmount}, new balance: $${this.balance}`);
+        
+        return {
+          success: true,
+          previousBalance: currentBalance,
+          newBalance: this.balance,
+          amount: paymentAmount,
+          info: '✅ Protected by distributed lock',
+        };
+      }
+      
+      return {
+        success: false,
+        balance: this.balance,
+        message: 'Insufficient funds',
+      };
+      
+    } finally {
+      // Always release lock
+      await this.lockService.release(lockKey, token);
+    }
+  }
+
+  /**
+   * DEMO: Fenced tokens to prevent stale writes
+   * 
+   * Problem: Process acquires lock, pauses (GC, network delay), lock expires,
+   *          another process acquires lock, first process resumes and writes stale data
+   * 
+   * Solution: Fenced tokens
+   * - Token increments with each lock acquisition
+   * - Before write, check token is still valid
+   * - Reject write if token is stale
+   * 
+   * Example:
+   * 1. Worker A gets lock + token 1
+   * 2. Worker A pauses (GC pause)
+   * 3. Lock expires
+   * 4. Worker B gets lock + token 2
+   * 5. Worker B writes data (token 2)
+   * 6. Worker A resumes, tries to write
+   * 7. Token 1 < token 2 → write rejected ✅
+   */
+  async processOrderWithFencedToken(orderId: string): Promise<any> {
+    const lockKey = `lock:order:${orderId}`;
+    const resource = `order:${orderId}`;
+
+    // Get fenced token (monotonically increasing)
+    const fencedToken = await this.lockService.getFencedToken(resource);
+
+    // Acquire lock
+    const lockToken = await this.lockService.acquire(lockKey, 5000);
+    if (!lockToken) {
+      return {
+        success: false,
+        message: 'Could not acquire lock',
+      };
+    }
+
+    try {
+      // Simulate slow processing
+      console.log(`[FENCED TOKEN] Worker processing order ${orderId} with token ${fencedToken}`);
+      await this.sleep(2000);
+
+      // Before critical write, validate token is still current
+      const isValid = await this.lockService.validateFencedToken(resource, fencedToken);
+      
+      if (!isValid) {
+        console.warn(`[FENCED TOKEN] ✗ Stale operation rejected for order ${orderId} (token ${fencedToken})`);
+        return {
+          success: false,
+          message: 'Operation rejected - stale token',
+          token: fencedToken,
+        };
+      }
+
+      // Token is valid, safe to write
+      console.log(`[FENCED TOKEN] ✓ Token ${fencedToken} is valid, processing order ${orderId}`);
+      
+      return {
+        success: true,
+        message: 'Order processed successfully',
+        token: fencedToken,
+        orderId,
+      };
+
+    } finally {
+      await this.lockService.release(lockKey, lockToken);
+    }
+  }
+
+  /**
+   * Get current balance (for demo)
+   */
+  getBalance() {
+    return {
+      balance: this.balance,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Reset balance to 1000 (for demo)
+   */
+  resetBalance() {
+    this.balance = 1000;
+    return {
+      balance: this.balance,
+      message: 'Balance reset to $1000',
+    };
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
