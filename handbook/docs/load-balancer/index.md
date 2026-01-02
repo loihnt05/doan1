@@ -424,47 +424,6 @@ export class HealthController {
 
 
 ### So Sánh Trực Quan
-**Forward Proxy (Client-side)**
-
-```mermaid
-flowchart LR
-    C["Client"]
-    FP["Forward Proxy"]
-    NET["Internet"]
-
-    C --> FP
-    FP --> NET
-```
-**Reverse Proxy (Server-side)**
-```mermaid
-flowchart LR
-    C["Client"]
-    RP["Reverse Proxy"]
-    B1["Backend Server 1"]
-    B2["Backend Server 2"]
-
-    C --> RP
-    RP --> B1
-    RP --> B2
-
-```
-**Load Balancer**
-```mermaid
-flowchart LR
-    C["Client"]
-    LB["Load Balancer"]
-
-    S1["Server 1"]
-    S2["Server 2"]
-    S3["Server 3"]
-
-    C --> LB
-    LB --> S1
-    LB --> S2
-    LB --> S3
-
-```
-**API Gateway**
 ```mermaid
 flowchart TB
     %% Client
@@ -502,31 +461,39 @@ flowchart TB
 
 ### Server-Side (Truyền thống)
 
-```
-┌────────┐
-│ Client │
-└───┬────┘
-    │
-    ▼
-┌────────────┐
-│Load Balance│ ← Tập trung
-└──────┬─────┘
-       │
-   ┌───┼───┐
-   ▼   ▼   ▼
-  S1  S2  S3
+```mermaid
+flowchart TD
+    Client[Client]
+    LB[Load Balancer]
+
+    S1[Server 1]
+    S2[Server 2]
+    S3[Server 3]
+    S4[Server 4]
+
+    Client --> LB
+    LB --> S1
+    LB --> S2
+    LB --> S3
+    LB --> S4
+
 ```
 
 ### Client-Side (Service Mesh)
 
-```
-┌──────────────────┐
-│ Client + Sidecar │ ← Client biết tất cả servers
-└─────────┬────────┘   Quyết định locally
-          │
-      ┌───┼───┐
-      ▼   ▼   ▼
-     S1  S2  S3
+```mermaid
+flowchart TD
+    Client[Client Sidecar ClientSideLB]
+
+    S1[Server 1]
+    S2[Server 2]
+    S3[Server 3]
+
+    Client --> S1
+    Client --> S2
+    Client --> S3
+
+
 ```
 
 **Ví dụ Client-Side:**
@@ -583,10 +550,20 @@ spec:
 ```
 
 **Cách hoạt động:**
-```
-Client → kube-proxy → Pod 1
-                   ├→ Pod 2
-                   └→ Pod 3
+```mermaid
+flowchart TD
+    Client[Client]
+    KubeProxy[kube proxy]
+
+    Pod1[Pod 1]
+    Pod2[Pod 2]
+    Pod3[Pod 3]
+
+    Client --> KubeProxy
+    KubeProxy --> Pod1
+    KubeProxy --> Pod2
+    KubeProxy --> Pod3
+
 ```
 
 ### 2. ClusterIP (Internal Load Balancing)
