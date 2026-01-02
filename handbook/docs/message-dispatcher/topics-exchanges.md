@@ -1,14 +1,17 @@
+---
+sidebar_position: 5
+---
 # Topics & Exchanges
 
-## Overview
+## Tổng quan
 
-Topics and Exchanges are routing mechanisms that determine how messages flow from producers to consumers. Understanding these concepts is crucial for building flexible message-driven architectures.
+Chủ đề và Trao đổi là các cơ chế định tuyến xác định cách thông điệp chảy từ nhà sản xuất đến người tiêu dùng. Hiểu các khái niệm này rất quan trọng để xây dựng kiến trúc hướng thông điệp linh hoạt.
 
 ## Kafka Topics
 
-### What is a Topic?
+### Chủ đề là gì?
 
-A topic is a category or feed name to which messages are published. Topics are divided into partitions for scalability and parallelism.
+Một chủ đề là một danh mục hoặc tên nguồn cấp dữ liệu mà thông điệp được xuất bản. Chủ đề được chia thành các phân vùng để mở rộng quy mô và song song.
 
 ```
 Topic: order-events
@@ -17,7 +20,7 @@ Topic: order-events
 └── Partition 2: [msg3, msg6, msg9, ...]
 ```
 
-### Creating Topics
+### Tạo Chủ đề
 
 ```typescript
 // kafka-admin.service.ts
@@ -73,10 +76,10 @@ export class KafkaAdminService {
 }
 ```
 
-### Topic Naming Conventions
+### Quy ước Đặt Tên Chủ đề
 
 ```typescript
-//  GOOD: Descriptive, hierarchical
+//  TỐT: Mô tả, phân cấp
 'order.created'
 'order.updated'
 'order.cancelled'
@@ -85,14 +88,14 @@ export class KafkaAdminService {
 'user.registered'
 'inventory.stock-updated'
 
-//  BAD: Vague, inconsistent
+//  XẤU: Mơ hồ, không nhất quán
 'orders'
 'updates'
 'data'
 'events'
 ```
 
-### Producing to Topics
+### Xuất bản đến Chủ đề
 
 ```typescript
 @Injectable()
@@ -128,7 +131,7 @@ export class OrderProducer {
 }
 ```
 
-### Consuming from Topics
+### Tiêu thụ từ Chủ đề
 
 ```typescript
 @Controller()
@@ -156,9 +159,9 @@ export class OrderConsumer {
 
 ## RabbitMQ Exchanges
 
-### Exchange Types
+### Các Loại Trao đổi
 
-RabbitMQ uses exchanges to route messages to queues based on rules.
+RabbitMQ sử dụng trao đổi để định tuyến thông điệp đến hàng đợi dựa trên quy tắc.
 
 ```
 Producer → Exchange → [Routing Logic] → Queues → Consumers
@@ -166,13 +169,13 @@ Producer → Exchange → [Routing Logic] → Queues → Consumers
 
 ### 1. Direct Exchange
 
-Routes messages to queues based on **exact routing key match**.
+Định tuyến thông điệp đến hàng đợi dựa trên **khớp chính xác khóa định tuyến**.
 
 ```
 Message with key "error" → Only goes to queue bound with "error"
 ```
 
-**Setup:**
+**Thiết lập:**
 
 ```typescript
 import * as amqp from 'amqplib';
@@ -223,7 +226,7 @@ await service.publishLog('error', 'Database connection failed'); // → error-lo
 await service.publishLog('info', 'User logged in');               // → info-logs
 ```
 
-**Flow:**
+**Luồng:**
 
 ```
 Producer ─'error'→ Direct Exchange ─'error'→ error-logs → Error Handler
@@ -232,13 +235,13 @@ Producer ─'error'→ Direct Exchange ─'error'→ error-logs → Error Handle
 
 ### 2. Fanout Exchange
 
-Broadcasts messages to **all bound queues**, ignoring routing key.
+Phát sóng thông điệp đến **tất cả hàng đợi liên kết**, bỏ qua khóa định tuyến.
 
 ```
 One message → All queues get a copy
 ```
 
-**Setup:**
+**Thiết lập:**
 
 ```typescript
 @Injectable()
@@ -277,7 +280,7 @@ await service.notifyUser('Your order has shipped');
 // → push-queue: sends push notification
 ```
 
-**Flow:**
+**Luồng:**
 
 ```
 Producer → Fanout Exchange ─┬→ email-queue → Email Service
@@ -285,19 +288,19 @@ Producer → Fanout Exchange ─┬→ email-queue → Email Service
                             └→ push-queue → Push Service
 ```
 
-**Use cases:**
-- Broadcasting events
-- Notifications to multiple channels
-- Logging to multiple destinations
-- Real-time updates
+**Trường hợp sử dụng:**
+- Phát sóng sự kiện
+- Thông báo đến nhiều kênh
+- Ghi nhật ký đến nhiều đích
+- Cập nhật thời gian thực
 
 ### 3. Topic Exchange
 
-Routes based on **pattern matching** with wildcards.
+Định tuyến dựa trên **khớp mẫu** với ký tự đại diện.
 
-**Wildcards:**
-- `*` (star): Matches exactly **one word**
-- `#` (hash): Matches **zero or more words**
+**Ký tự đại diện:**
+- `*` (star): Khớp chính xác **một từ**
+- `#` (hash): Khớp **không hoặc nhiều từ**
 
 ```
 Routing key: 'order.us.created'
@@ -307,7 +310,7 @@ Pattern 'order.#'         → Match
 Pattern 'payment.*'       → No match 
 ```
 
-**Setup:**
+**Thiết lập:**
 
 ```typescript
 @Injectable()
@@ -356,7 +359,7 @@ await service.publishEvent('payment.us.processed', {...});
 // Matches: '*.us.*', '*.*.processed'
 ```
 
-**Routing Examples:**
+**Ví dụ Định tuyến:**
 
 ```
 Routing Key          | Pattern 'order.*'  | Pattern 'order.#'  | Pattern '*.*.created'
@@ -368,15 +371,15 @@ payment.created      |  No match        |  No match        |  No match
 order.us.eu.created  |  No match        |  Match           |  No match
 ```
 
-**Use cases:**
-- Multi-region routing
-- Category-based filtering
-- Hierarchical event routing
-- Flexible subscriptions
+**Trường hợp sử dụng:**
+- Định tuyến đa vùng
+- Lọc dựa trên danh mục
+- Định tuyến sự kiện phân cấp
+- Đăng ký linh hoạt
 
 ### 4. Headers Exchange
 
-Routes based on **message headers** instead of routing key.
+Định tuyến dựa trên **tiêu đề thông điệp** thay vì khóa định tuyến.
 
 ```typescript
 @Injectable()
@@ -427,90 +430,90 @@ await service.publishTask(
 // → image-processing queue
 ```
 
-**Match Modes:**
+**Chế độ Khớp:**
 
-| x-match | Behavior |
+| x-match | Hành vi |
 |---------|----------|
-| `all` | Message must have ALL specified headers with matching values |
-| `any` | Message must have AT LEAST ONE matching header |
+| `all` | Thông điệp phải có TẤT CẢ tiêu đề được chỉ định với giá trị khớp |
+| `any` | Thông điệp phải có ÍT NHẤT MỘT tiêu đề khớp |
 
-**Use cases:**
-- Complex routing logic
-- Attribute-based routing
-- Content-based filtering
+**Trường hợp sử dụng:**
+- Logic định tuyến phức tạp
+- Định tuyến dựa trên thuộc tính
+- Lọc dựa trên nội dung
 
-## Topic vs Exchange Comparison
+## So sánh Chủ đề vs Trao đổi
 
-| Feature | Kafka Topics | RabbitMQ Exchanges |
+| Tính năng | Kafka Topics | RabbitMQ Exchanges |
 |---------|-------------|-------------------|
-| **Routing** | Key-based partitioning | Exchange type determines routing |
-| **Partitions** | Yes (parallelism) | No (queues can have multiple consumers) |
-| **Ordering** | Per partition | Per queue |
-| **Message Replay** | Yes | No |
-| **Wildcards** | No | Yes (topic exchange) |
-| **Broadcasting** | Consumer groups | Fanout exchange |
-| **Complex Routing** | Limited | Very flexible |
+| **Định tuyến** | Phân vùng dựa trên khóa | Loại trao đổi xác định định tuyến |
+| **Phân vùng** | Có (song song) | Không (hàng đợi có thể có nhiều người tiêu dùng) |
+| **Thứ tự** | Theo phân vùng | Theo hàng đợi |
+| **Phát lại Thông điệp** | Có | Không |
+| **Ký tự đại diện** | Không | Có (trao đổi chủ đề) |
+| **Phát sóng** | Nhóm người tiêu dùng | Trao đổi fanout |
+| **Định tuyến Phức tạp** | Giới hạn | Rất linh hoạt |
 
-## Best Practices
+## Các Thực tiễn Tốt nhất
 
-### 1. Topic/Exchange Naming
+### 1. Đặt Tên Chủ đề/Trao đổi
 
 ```typescript
-//  GOOD: Clear hierarchy
+//  TỐT: Rõ ràng, phân cấp
 'ecommerce.order.created'
 'ecommerce.payment.succeeded'
 'analytics.user.login'
 
-//  BAD: Flat, unclear
+//  XẤU: Phẳng, không rõ ràng
 'order_created'
 'payment'
 'event123'
 ```
 
-### 2. Use Appropriate Exchange Type
+### 2. Sử dụng Loại Trao đổi Phù hợp
 
 ```typescript
-// Direct: Exact matching
+// Direct: Khớp chính xác
 logs: 'error', 'warning', 'info' → Use Direct Exchange
 
-// Fanout: Broadcast to all
+// Fanout: Phát sóng đến tất cả
 notifications → Use Fanout Exchange
 
-// Topic: Pattern matching
+// Topic: Khớp mẫu
 'order.*.created', 'payment.us.*' → Use Topic Exchange
 
-// Headers: Complex logic
+// Headers: Logic phức tạp
 Multiple attributes → Use Headers Exchange
 ```
 
-### 3. Separate Concerns
+### 3. Tách biệt Quan tâm
 
 ```typescript
-//  GOOD: Separate topics/exchanges
+//  TỐT: Tách biệt chủ đề
 'order-events'    // Order lifecycle
 'payment-events'  // Payment lifecycle
 'shipping-events' // Shipping lifecycle
 
-//  BAD: Single topic for everything
+//  XẤU: Một chủ đề cho mọi thứ
 'all-events'
 ```
 
-### 4. Version Your Messages
+### 4. Phiên bản Thông điệp
 
 ```typescript
-// Topic names with versions
+// Tên chủ đề với phiên bản
 'order.v1.created'
 'order.v2.created'
 
-// Or version in payload
+// Hoặc phiên bản trong payload
 {
   version: 2,
   data: {...}
 }
 ```
 
-## Next Steps
+## Các Bước Tiếp theo
 
-- Learn about [Consumer Groups](./consumer-groups.md)
-- Explore partitioning strategies for scalability
-- Study message ordering guarantees
+- Học về [Nhóm Người Tiêu Dùng](./consumer-groups.md)
+- Khám phá chiến lược phân vùng để mở rộng quy mô
+- Nghiên cứu các đảm bảo thứ tự thông điệp

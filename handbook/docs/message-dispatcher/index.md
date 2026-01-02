@@ -1,4 +1,7 @@
-# Message Dispatcher (Bộ Phân Phối Tin Nhắn)
+---
+sidebar_position: 1
+---
+# Message Dispatcher
 
 ## Tổng Quan
 
@@ -7,18 +10,28 @@ Message Dispatcher (còn gọi là Message Broker hoặc Message Queue) là midd
 ## Tại Sao Cần Message Dispatcher?
 
 ### Không Có Message Dispatcher (Đồng Bộ)
-```
-Order Service ──HTTP──> Payment Service
-                          ↓ (nếu down)
-                         Order thất bại!
+```mermaid
+flowchart TD
+    Order[Order Service]
+    Payment[Payment Service]
+    Down[Payment Down]
+
+    Order --> Payment
+    Payment --> Down
 ```
 
 ### Có Message Dispatcher (Bất Đồng Bộ)
-```
-Order Service ──> Message Queue ──> Payment Service
-     ↓                               (có thể down)
-    Trả về                       Queue lưu tin nhắn
-   ngay lập tức                    cho đến khi service phục hồi
+```mermaid
+flowchart TD
+    Order[Order Service]
+    Queue[Message Queue]
+    Payment[Payment Service]
+    Stored[Messages Stored]
+
+    Order --> Queue
+    Queue --> Stored
+    Stored --> Payment
+
 ```
 
 **Lợi Ích:**
@@ -40,13 +53,13 @@ Hướng dẫn này bao gồm các khái niệm và triển khai message dispatc
 ### Độ Tin Cậy & Phân Phối
 - **[Delivery Semantics](./delivery-semantics.md)** - Đảm bảo at-most-once, at-least-once, exactly-once
 
-## Core Concepts
+## Các Khái niệm Cốt lõi
 
 ### 1. Message Broker
 
-Central system that receives, stores, and delivers messages.
+Hệ thống trung tâm nhận, lưu trữ và phân phối tin nhắn.
 
-**Popular brokers:**
+**Các broker phổ biến:**
 - **Apache Kafka**: High-throughput, distributed streaming
 - **RabbitMQ**: Traditional message queuing
 - **AWS SQS/SNS**: Managed cloud services
@@ -54,7 +67,7 @@ Central system that receives, stores, and delivers messages.
 
 ### 2. Producer
 
-Service that sends messages to the broker.
+Dịch vụ gửi tin nhắn đến broker.
 
 ```typescript
 @Injectable()
@@ -82,7 +95,7 @@ export class OrderService {
 
 ### 3. Consumer
 
-Service that receives and processes messages.
+Dịch vụ nhận và xử lý tin nhắn.
 
 ```typescript
 @Controller()
@@ -114,29 +127,46 @@ export class PaymentConsumer {
 ### 4. Message Queue vs Topic
 
 #### Queue (Point-to-Point)
-```
-Producer → Queue → Consumer 1
-                   (only one gets it)
-                   
-Consumer 2 → (waits for next message)
+```mermaid
+flowchart TD
+    Producer[Producer]
+    Queue[Message Queue]
+
+    C1[Consumer 1]
+    C2[Consumer 2]
+
+    Producer --> Queue
+    Queue --> C1
+    Queue --> C2
+
 ```
 
-**Use case:** Work distribution (multiple workers processing jobs)
+**Trường hợp sử dụng:** Phân bổ công việc (nhiều worker xử lý công việc)
 
 #### Topic (Publish-Subscribe)
-```
-Producer → Topic → Consumer 1 (gets copy)
-               ├→ Consumer 2 (gets copy)
-               └→ Consumer 3 (gets copy)
+```mermaid
+flowchart TD
+    Producer[Producer]
+    Topic[Topic]
+
+    C1[Consumer 1]
+    C2[Consumer 2]
+    C3[Consumer 3]
+
+    Producer --> Topic
+    Topic --> C1
+    Topic --> C2
+    Topic --> C3
+
 ```
 
-**Use case:** Event broadcasting (multiple services react to same event)
+**Trường hợp sử dụng:** Phát sóng sự kiện (nhiều dịch vụ phản ứng với cùng sự kiện)
 
-## Exchange Types (RabbitMQ)
+## Các Loại Exchange (RabbitMQ)
 
 ### 1. Direct Exchange
 
-Route based on exact routing key match.
+Định tuyến dựa trên khớp chính xác khóa định tuyến.
 
 ```typescript
 // Producer
@@ -149,33 +179,65 @@ await channel.bindQueue(queue1, 'direct-exchange', 'order.created');
 await channel.bindQueue(queue2, 'direct-exchange', 'order.cancelled');
 ```
 
-```
-Producer ──'order.created'──> Exchange ──> Queue 1 → Consumer 1
-                                      (no match)
-                                       ✗ ──> Queue 2 → Consumer 2
+```mermaid
+flowchart TD
+    Producer[Producer]
+    Exchange[Exchange]
+
+    Q1[Queue 1]
+    C1[Consumer 1]
+
+    Q2[Queue 2]
+    C2[Consumer 2]
+
+    Producer --> Exchange
+    Exchange --> Q1
+    Q1 --> C1
+    Exchange --> Q2
+    Q2 --> C2
+
 ```
 
 ### 2. Fanout Exchange
 
-Broadcast to all bound queues (ignores routing key).
+Phát sóng đến tất cả hàng đợi liên kết (bỏ qua khóa định tuyến).
 
 ```typescript
 // Broadcast to all
 await channel.publish('fanout-exchange', '', message);
 ```
 
-```
-Producer ──> Fanout Exchange ──┬──> Queue 1 → Consumer 1
-                               ├──> Queue 2 → Consumer 2
-                               └──> Queue 3 → Consumer 3
-                               (all receive message)
+```mermaid
+flowchart TD
+    Producer[Producer]
+    Exchange[Fanout Exchange]
+
+    Q1[Queue 1]
+    C1[Consumer 1]
+
+    Q2[Queue 2]
+    C2[Consumer 2]
+
+    Q3[Queue 3]
+    C3[Consumer 3]
+
+    Producer --> Exchange
+    Exchange --> Q1
+    Q1 --> C1
+
+    Exchange --> Q2
+    Q2 --> C2
+
+    Exchange --> Q3
+    Q3 --> C3
+
 ```
 
-**Use case:** Notifications, logging, analytics
+**Trường hợp sử dụng:** Thông báo, ghi nhật ký, phân tích
 
 ### 3. Topic Exchange
 
-Route based on pattern matching.
+Định tuyến dựa trên khớp mẫu.
 
 ```typescript
 // Producer
@@ -187,18 +249,33 @@ await channel.bindQueue(queue2, 'topic-exchange', 'order.us.*');        // Match
 await channel.bindQueue(queue3, 'topic-exchange', 'payment.*');         // No match
 ```
 
-**Wildcards:**
-- `*`: Matches exactly one word
-- `#`: Matches zero or more words
+**Ký tự đại diện:**
+- `*`: Khớp chính xác một từ
+- `#`: Khớp không hoặc nhiều từ
 
-```
-'order.*.created'  matches  'order.us.created'
-'order.#'          matches  'order.us.created.bulk'
+```mermaid
+flowchart TD
+    Producer[Producer]
+    Exchange[Topic Exchange]
+
+    Q1[Queue 1 binding: order.*.created]
+    Q2[Queue 2 binding: order.#]
+
+    Consumer1[Consumer 1]
+    Consumer2[Consumer 2]
+
+    Producer --> Exchange
+    Exchange --> Q1
+    Q1 --> Consumer1
+
+    Exchange --> Q2
+    Q2 --> Consumer2
+
 ```
 
 ### 4. Headers Exchange
 
-Route based on message headers (not routing key).
+Định tuyến dựa trên tiêu đề tin nhắn (không phải khóa định tuyến).
 
 ```typescript
 // Producer
@@ -219,25 +296,52 @@ await channel.bindQueue(queue, 'headers-exchange', '', {
 
 ## Consumer Groups
 
-Multiple consumers in same group share message processing.
+Nhiều consumer trong cùng nhóm chia sẻ xử lý tin nhắn.
+
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created (6 partitions)"]
+        P0[Partition 0]
+        P1[Partition 1]
+        P2[Partition 2]
+        P3[Partition 3]
+        P4[Partition 4]
+        P5[Partition 5]
+    end
+
+    subgraph CGA["Consumer Group A"]
+        C1A[Consumer 1]
+        C2A[Consumer 2]
+        C3A[Consumer 3]
+    end
+
+    subgraph CGB["Consumer Group B"]
+        C1B[Consumer 1]
+        C2B[Consumer 2]
+    end
+
+    %% Consumer Group A assignment
+    C1A --> P0
+    C1A --> P1
+    C2A --> P2
+    C2A --> P3
+    C3A --> P4
+    C3A --> P5
+
+    %% Consumer Group B assignment
+    C1B --> P0
+    C1B --> P1
+    C1B --> P2
+    C2B --> P3
+    C2B --> P4
+    C2B --> P5
 
 ```
-Topic: order-created (6 partitions)
 
-Consumer Group A:
-  Consumer 1 → Partition 0, 1
-  Consumer 2 → Partition 2, 3
-  Consumer 3 → Partition 4, 5
-
-Consumer Group B:
-  Consumer 1 → Partition 0, 1, 2
-  Consumer 2 → Partition 3, 4, 5
-```
-
-**Key Points:**
-- Within group: Each message consumed by only ONE consumer
-- Across groups: Each group gets ALL messages
-- Enables parallel processing + multiple subscribers
+**Điểm chính:**
+- Trong nhóm: Mỗi tin nhắn được tiêu thụ bởi chỉ MỘT consumer
+- Qua các nhóm: Mỗi nhóm nhận TẤT CẢ tin nhắn
+- Cho phép xử lý song song + nhiều subscriber
 
 ```typescript
 // NestJS Kafka Consumer Group
@@ -263,7 +367,7 @@ Consumer Group B:
 
 ### At-Most-Once
 
-Message may be lost but never delivered twice.
+Tin nhắn có thể bị mất nhưng không bao giờ được phân phối hai lần.
 
 ```typescript
 // No acknowledgment checking
@@ -275,11 +379,11 @@ async handleOrder(data: any) {
 }
 ```
 
-**Use case:** Logs, metrics (losing some data is acceptable)
+**Trường hợp sử dụng:** Logs, metrics (mất một số dữ liệu là chấp nhận được)
 
 ### At-Least-Once
 
-Message never lost but may be delivered multiple times.
+Tin nhắn không bao giờ bị mất nhưng có thể được phân phối nhiều lần.
 
 ```typescript
 // Manual acknowledgment after processing
@@ -295,11 +399,11 @@ async handleOrder(data: any, context: KafkaContext) {
 }
 ```
 
-**Use case:** Most applications (handle duplicates with idempotency)
+**Trường hợp sử dụng:** Hầu hết ứng dụng (xử lý trùng lặp với idempotency)
 
 ### Exactly-Once
 
-Message delivered exactly one time (hardest to achieve).
+Tin nhắn được phân phối chính xác một lần (khó đạt nhất).
 
 ```typescript
 // Use transactional outbox pattern
@@ -327,11 +431,11 @@ async handleOrder(data: any) {
 }
 ```
 
-**Use case:** Financial transactions, critical operations
+**Trường hợp sử dụng:** Giao dịch tài chính, hoạt động quan trọng
 
 ## Dead Letter Queue (DLQ)
 
-When message processing repeatedly fails, send to DLQ for investigation.
+Khi xử lý tin nhắn thất bại lặp lại, gửi đến DLQ để điều tra.
 
 ```typescript
 @Injectable()
@@ -386,25 +490,36 @@ export class MessageProcessor {
 
 ### Architecture
 
-```
-┌─────────────────────────────────────────────────┐
-│               Kafka Cluster                     │
-│                                                 │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │ Broker 1 │  │ Broker 2 │  │ Broker 3 │    │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘    │
-│       │             │             │            │
-│  ┌────▼─────────────▼─────────────▼────┐     │
-│  │          Zookeeper                   │     │
-│  │    (Coordination & Metadata)         │     │
-│  └──────────────────────────────────────┘     │
-└─────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Cluster["Kafka Cluster"]
+        Broker1[Broker 1]
+        Broker2[Broker 2]
+        Broker3[Broker 3]
 
-Topic: order-created (3 partitions, replication=2)
+        ZK[Zookeeper\nCoordination & Metadata]
+    end
 
-Partition 0: [Broker 1 Leader] [Broker 2 Replica]
-Partition 1: [Broker 2 Leader] [Broker 3 Replica]
-Partition 2: [Broker 3 Leader] [Broker 1 Replica]
+    %% Connect brokers to Zookeeper
+    Broker1 --> ZK
+    Broker2 --> ZK
+    Broker3 --> ZK
+
+    %% Topic partitions with replication
+    subgraph Topic["Topic: order-created (3 partitions, replication=2)"]
+        P0[Partition 0\nLeader: Broker 1\nReplica: Broker 2]
+        P1[Partition 1\nLeader: Broker 2\nReplica: Broker 3]
+        P2[Partition 2\nLeader: Broker 3\nReplica: Broker 1]
+    end
+
+    %% Connect partitions to brokers (leaders only)
+    P0 --> Broker1
+    P0 --> Broker2
+    P1 --> Broker2
+    P1 --> Broker3
+    P2 --> Broker3
+    P2 --> Broker1
+
 ```
 
 ### Topics & Partitions
@@ -420,28 +535,51 @@ await admin.createTopics({
 });
 ```
 
-**Why partitions?**
-- **Parallelism**: Each partition processed independently
-- **Scalability**: Distribute load across brokers
-- **Ordering**: Messages in same partition are ordered
+**Tại sao partitions?**
+- **Song song**: Mỗi partition được xử lý độc lập
+- **Khả năng mở rộng**: Phân bổ tải trên các broker
+- **Thứ tự**: Tin nhắn trong cùng partition được sắp xếp
 
-```
-Topic: order-created
+```mermaid
+flowchart TD
+    subgraph Topic["Topic: order-created"]
+        P0[Partition 0\nmsg1 msg3 msg5]
+        P1[Partition 1\nmsg2 msg4 msg6]
+        P2[Partition 2\nmsg7 msg8 msg9]
+    end
 
-Partition 0: [msg1] [msg3] [msg5] → Consumer 1
-Partition 1: [msg2] [msg4] [msg6] → Consumer 2
-Partition 2: [msg7] [msg8] [msg9] → Consumer 3
+    C1[Consumer 1]
+    C2[Consumer 2]
+    C3[Consumer 3]
+
+    P0 --> C1
+    P1 --> C2
+    P2 --> C3
+
 ```
 
 ### Offset Management
 
-Kafka tracks consumer position with offsets.
+Kafka theo dõi vị trí consumer với offsets.
 
-```
-Partition 0: [0] [1] [2] [3] [4] [5] [6]
-                          ↑
-                    Consumer offset = 3
-                    (processed 0,1,2,3)
+```mermaid
+flowchart TD
+    subgraph P0["Partition 0"]
+        M0["0"]
+        M1["1"]
+        M2["2"]
+        M3["3"]
+        M4["4"]
+        M5["5"]
+        M6["6"]
+    end
+
+    Consumer[Consumer]
+    Offset["Consumer offset = 3\n(processed 0,1,2,3)"]
+
+    Consumer --> Offset
+    Offset --> M3
+
 ```
 
 ```typescript
@@ -494,7 +632,7 @@ await producer.send({
 });
 ```
 
-## Implementation Example
+## Ví dụ Triển khai
 
 ### Producer Setup
 
@@ -583,11 +721,11 @@ export class PaymentController {
 }
 ```
 
-## Best Practices
+## Các Thực tiễn Tốt nhất
 
 ### 1. Idempotency
 
-Ensure processing same message multiple times has same effect.
+Đảm bảo xử lý cùng tin nhắn nhiều lần có cùng hiệu quả.
 
 ```typescript
 @EventPattern('order-created')
@@ -607,7 +745,7 @@ async handleOrder(data: OrderCreatedEvent) {
 }
 ```
 
-### 2. Error Handling
+### 2. Xử lý Lỗi
 
 ```typescript
 @EventPattern('order-created')
@@ -626,7 +764,7 @@ async handleOrder(data: OrderCreatedEvent) {
 }
 ```
 
-### 3. Monitoring
+### 3. Giám sát
 
 ```typescript
 @Injectable()
@@ -644,16 +782,16 @@ export class KafkaMetrics {
 }
 ```
 
-## Project Implementation
+## Triển khai Dự án
 
-See:
+Xem:
 - [Kafka setup](../../../backend/PHASE4-MESSAGE-DISPATCHER.md)
 - [Docker Compose](../../../backend/docker-compose.kafka.yml)
 - [Consumer examples](../../../backend/apps/payment-service/src)
 - [Test scripts](../../../backend/test-kafka.sh)
 
-## Next Steps
+## Các Bước Tiếp theo
 
-- Learn about saga pattern for distributed transactions
-- Explore [Streaming](../streaming-processing/index.md)
-- Check event sourcing patterns
+- Học về saga pattern cho giao dịch phân tán
+- Khám phá [Streaming](../streaming-processing/index.md)
+- Kiểm tra các mẫu event sourcing

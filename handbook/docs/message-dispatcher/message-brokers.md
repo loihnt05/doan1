@@ -1,14 +1,17 @@
+---
+sidebar_position: 4
+---
 # Message Brokers
 
-## Overview
+## Tổng quan
 
-A message broker is middleware that translates messages between formal messaging protocols, enabling applications to communicate asynchronously by sending and receiving messages through queues or topics.
+Một message broker là middleware dịch tin nhắn giữa các giao thức nhắn tin chính thức, cho phép ứng dụng giao tiếp không đồng bộ bằng cách gửi và nhận tin nhắn thông qua hàng đợi hoặc topics.
 
-## Core Concepts
+## Các Khái niệm Cốt lõi
 
 ### Producer
 
-An application/service that **sends messages** to the broker.
+Một ứng dụng/dịch vụ **gửi tin nhắn** đến broker.
 
 ```typescript
 @Injectable()
@@ -32,7 +35,7 @@ export class OrderProducerService {
 
 ### Consumer
 
-An application/service that **receives and processes messages** from the broker.
+Một ứng dụng/dịch vụ **nhận và xử lý tin nhắn** từ broker.
 
 ```typescript
 @Controller()

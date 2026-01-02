@@ -1,10 +1,13 @@
+---
+sidebar_position: 2
+---
 # Consumer Groups
 
-## Overview
+## Tổng quan
 
-Consumer Groups enable **parallel processing** of messages while maintaining scalability and fault tolerance. Multiple consumers in the same group work together to process messages from a topic, with each message consumed by only ONE consumer in the group.
+Consumer Groups cho phép **xử lý song song** tin nhắn trong khi duy trì khả năng mở rộng và khả năng chịu lỗi. Nhiều consumer trong cùng nhóm làm việc cùng nhau để xử lý tin nhắn từ một topic, với mỗi tin nhắn được tiêu thụ bởi chỉ MỘT consumer trong nhóm.
 
-## How Consumer Groups Work
+## Cách Consumer Groups Hoạt động
 
 ### Single Consumer
 
@@ -30,12 +33,12 @@ Consumer Group: "payment-service-group"
 Throughput: 3x (each consumer processes different partition)
 ```
 
-### Key Principles
+### Nguyên tắc Chính
 
-1. **Within a group**: Each message is consumed by only ONE consumer
-2. **Across groups**: Each group receives ALL messages
-3. **Partition assignment**: Each partition assigned to exactly one consumer in group
-4. **Rebalancing**: When consumers join/leave, partitions are reassigned
+1. **Trong một nhóm**: Mỗi tin nhắn được tiêu thụ bởi chỉ MỘT consumer
+2. **Qua các nhóm**: Mỗi nhóm nhận TẤT CẢ tin nhắn
+3. **Gán partition**: Mỗi partition được gán cho chính xác một consumer trong nhóm
+4. **Cân bằng lại**: Khi consumer tham gia/rời đi, partitions được gán lại
 
 ## Kafka Consumer Groups
 
@@ -86,7 +89,7 @@ consumer: {
 }
 ```
 
-**Result:**
+**Kết quả:**
 ```
 Topic: order-created
 
@@ -137,7 +140,7 @@ Consumer 2 → Partitions [3, 4, 5]
 Each consumer handles 3 partitions (more work)
 ```
 
-**Rule:** For maximum parallelism, create **at least as many partitions** as max expected consumers.
+**Quy tắc:** Để đạt song song tối đa, tạo **ít nhất nhiều partitions** như số consumer tối đa dự kiến.
 
 ```typescript
 // Create topic with enough partitions

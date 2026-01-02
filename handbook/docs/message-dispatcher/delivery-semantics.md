@@ -1,10 +1,13 @@
+---
+sidebar_position: 3
+---
 # Delivery Semantics
 
-## Overview
+## Tổng quan
 
-Delivery semantics define the guarantees around message delivery between producers and consumers. Understanding these trade-offs is critical for building reliable distributed systems.
+Delivery semantics định nghĩa các đảm bảo xung quanh việc phân phối tin nhắn giữa producer và consumer. Hiểu các trade-off này rất quan trọng để xây dựng hệ thống phân tán đáng tin cậy.
 
-## The Three Guarantees
+## Ba Đảm bảo
 
 ```
 At-Most-Once:  Message may be lost, never duplicated
@@ -19,16 +22,16 @@ Exactly-Once:  Message delivered precisely once
 
 ## At-Most-Once Delivery
 
-### How It Works
+### Cách Hoạt động
 
-Messages are considered delivered **before** processing. If processing fails, the message is lost.
+Tin nhắn được coi là đã phân phối **trước** khi xử lý. Nếu xử lý thất bại, tin nhắn bị mất.
 
 ```
-1. Consumer receives message
-2. Consumer commits offset immediately 
-3. Consumer processes message
-4.  Processing fails
-5. Message is LOST (offset already committed)
+1. Consumer nhận tin nhắn
+2. Consumer commit offset ngay lập tức 
+3. Consumer xử lý tin nhắn
+4.  Xử lý thất bại
+5. Tin nhắn bị MẤT (offset đã commit)
 ```
 
 ### Implementation

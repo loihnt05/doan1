@@ -4,13 +4,13 @@ sidebar_position: 1
 
 # Event-Driven Architecture with Kafka
 
-## Overview
+## Tổng quan
 
-Event-Driven Architecture (EDA) is a software design pattern where services communicate through events rather than direct calls. Apache Kafka serves as the message broker, enabling asynchronous, loosely-coupled communication between microservices.
+Kiến trúc Hướng Sự kiện (EDA) là một mẫu thiết kế phần mềm nơi các dịch vụ giao tiếp thông qua sự kiện thay vì gọi trực tiếp. Apache Kafka phục vụ như một nhà môi giới thông điệp, cho phép giao tiếp không đồng bộ, kết hợp lỏng lẻo giữa các microservices.
 
 ## Request-Response vs Event-Driven
 
-### Request-Response (Synchronous)
+### Request-Response (Đồng bộ)
 
 ```mermaid
 sequenceDiagram
@@ -30,14 +30,14 @@ sequenceDiagram
     OrderService->>Client: Order Created
 ```
 
-**Problems:**
-- **Tight Coupling**: OrderService knows about PaymentService and NotificationService
-- **Blocking**: OrderService waits for all downstream services
-- **Failure Cascade**: If PaymentService is down, order creation fails
-- **Timeout Issues**: Long chain can timeout
-- **Hard to Scale**: Adding services requires code changes
+**Vấn đề:**
+- **Kết hợp chặt chẽ**: OrderService biết về PaymentService và NotificationService
+- **Chặn**: OrderService chờ tất cả dịch vụ hạ nguồn
+- **Thảm họa thất bại**: Nếu PaymentService ngừng hoạt động, tạo đơn hàng thất bại
+- **Vấn đề thời gian chờ**: Chuỗi dài có thể hết thời gian chờ
+- **Khó mở rộng**: Thêm dịch vụ yêu cầu thay đổi mã
 
-### Event-Driven (Asynchronous)
+### Event-Driven (Không đồng bộ)
 
 ```mermaid
 sequenceDiagram
@@ -58,18 +58,18 @@ sequenceDiagram
     Note over NotificationService: Send email in background
 ```
 
-**Benefits:**
-- **Loose Coupling**: Services only know about events
-- **Non-Blocking**: OrderService returns immediately
-- **Resilient**: Events stored until consumers ready
-- **Scalable**: Multiple consumers per service
-- **Extensible**: Add new consumers without changing producers
+**Lợi ích:**
+- **Kết hợp lỏng lẻo**: Dịch vụ chỉ biết về sự kiện
+- **Không chặn**: OrderService trả về ngay lập tức
+- **Bền bỉ**: Sự kiện được lưu trữ cho đến khi người tiêu dùng sẵn sàng
+- **Có thể mở rộng**: Nhiều người tiêu dùng cho mỗi dịch vụ
+- **Có thể mở rộng**: Thêm người tiêu dùng mới mà không thay đổi nhà sản xuất
 
-## Core Concepts
+## Các Khái niệm Cốt lõi
 
 ### Topics
 
-A **topic** is a named channel for events. Producers send messages to topics, consumers read from topics.
+Một **topic** là một kênh được đặt tên cho sự kiện. Nhà sản xuất gửi thông điệp đến topics, người tiêu dùng đọc từ topics.
 
 ```
 order-created          ← Events about new orders
@@ -77,14 +77,14 @@ payment-processed      ← Events about completed payments
 notification-requested ← Events requesting notifications
 ```
 
-**Configuration:**
-- **Partitions**: Number of parallel processing units (default: 3)
-- **Replication Factor**: Number of replicas for fault tolerance
-- **Retention**: How long to keep messages (default: 7 days)
+**Cấu hình:**
+- **Partitions**: Số lượng đơn vị xử lý song song (mặc định: 3)
+- **Replication Factor**: Số lượng bản sao cho khả năng chịu lỗi
+- **Retention**: Bao lâu để giữ thông điệp (mặc định: 7 ngày)
 
 ### Partitions
 
-Partitions enable **parallelism** and **ordering guarantees**.
+Partitions cho phép **song song** và **đảm bảo thứ tự**.
 
 ```
 Topic: order-created (6 partitions)
@@ -98,13 +98,13 @@ Topic: order-created (6 partitions)
 └────────┴────────┴────────┴────────┴────────┴────────┘
 ```
 
-**Key Points:**
-- Messages with **same key** → **same partition** (ordering)
-- Messages with **no key** → **round-robin** distribution
-- **More partitions** = **higher parallelism**
-- **One partition** = **one consumer** at a time (in same group)
+**Điểm chính:**
+- Thông điệp với **cùng khóa** → **cùng partition** (thứ tự)
+- Thông điệp với **không khóa** → **phân phối vòng tròn**
+- **Nhiều partitions** = **song song cao hơn**
+- **Một partition** = **một consumer** tại một thời điểm (trong cùng nhóm)
 
-**Partitioning Strategy:**
+**Chiến lược Partitioning:**
 ```typescript
 // Same orderId → same partition → ordering guaranteed
 await producer.send(Topics.ORDER_CREATED, event, 'order-123');
@@ -114,9 +114,9 @@ await producer.send(Topics.PAYMENT_PROCESSED, event, 'order-123');
 
 ### Consumer Groups
 
-Consumer groups enable two patterns: **load balancing** and **pub/sub**.
+Consumer groups cho phép hai mẫu: **cân bằng tải** và **pub/sub**.
 
-#### Pattern 1: Load Balancing (Same Group)
+#### Mẫu 1: Cân bằng tải (Cùng nhóm)
 
 ```
 Consumer Group: payment-service
@@ -134,12 +134,12 @@ Topic: order-created (6 partitions)
 └───────────┘ └─────────┘
 ```
 
-**Behavior:**
-- Partitions distributed among instances
-- Each message processed by **ONE** instance
-- Automatic rebalancing on join/leave
+**Hành vi:**
+- Partitions được phân phối giữa các instance
+- Mỗi thông điệp được xử lý bởi **MỘT** instance
+- Tự động cân bằng lại khi tham gia/rời đi
 
-#### Pattern 2: Pub/Sub (Different Groups)
+#### Mẫu 2: Pub/Sub (Nhóm khác nhau)
 
 ```
 Topic: order-created
@@ -155,14 +155,14 @@ Topic: order-created
 └─────┴──────┴────────┴──────┘
 ```
 
-**Behavior:**
-- Each group receives **ALL** messages
-- Groups process independently
-- Easy to add new consumers
+**Hành vi:**
+- Mỗi nhóm nhận **TẤT CẢ** thông điệp
+- Các nhóm xử lý độc lập
+- Dễ dàng thêm người tiêu dùng mới
 
 ### Offsets
 
-An **offset** is the sequential ID of each message in a partition.
+Một **offset** là ID tuần tự của mỗi thông điệp trong một partition.
 
 ```
 Partition 0:
@@ -174,37 +174,37 @@ Partition 0:
          └─ Committed offset (3)
 ```
 
-**Offset Management:**
-- **Auto-commit**: Offsets committed automatically
-- **Manual commit**: Full control over commits
-- **On rebalance**: Commits before reassignment
+**Quản lý Offset:**
+- **Auto-commit**: Offsets được commit tự động
+- **Manual commit**: Kiểm soát đầy đủ về commits
+- **On rebalance**: Commits trước khi gán lại
 
 ### Delivery Semantics
 
-#### At-Most-Once (commit before processing)
+#### At-Most-Once (commit trước khi xử lý)
 ```
 Read → Commit → Process
 If crash during process → Message lost
 ```
-**Use case**: Logs, metrics (non-critical)
+**Trường hợp sử dụng**: Logs, metrics (không quan trọng)
 
-#### At-Least-Once (commit after processing) ← **Default**
+#### At-Least-Once (commit sau khi xử lý) ← **Mặc định**
 ```
 Read → Process → Commit
 If crash before commit → Message redelivered
 ```
-**Use case**: Most use cases + idempotency
+**Trường hợp sử dụng**: Hầu hết trường hợp + idempotency
 
 #### Exactly-Once (transactional)
 ```
 Read → Process + Commit in transaction
 Most complex, highest guarantee
 ```
-**Use case**: Financial transactions
+**Trường hợp sử dụng**: Giao dịch tài chính
 
-## Implementation
+## Triển khai
 
-### Producer Example
+### Ví dụ Producer
 
 ```typescript
 import { KafkaProducerService } from '@libs/kafka';
@@ -241,7 +241,7 @@ export class OrderService {
 }
 ```
 
-### Consumer Example
+### Ví dụ Consumer
 
 ```typescript
 import { KafkaConsumerService } from '@libs/kafka';
@@ -284,22 +284,22 @@ export class PaymentService implements OnModuleInit {
 }
 ```
 
-## Best Practices
+## Các Thực tiễn Tốt nhất
 
-### 1. Event Naming
+### 1. Đặt Tên Sự kiện
 
- **Good** (past tense):
+ **Tốt** (thì quá khứ):
 - `OrderCreated`
 - `PaymentProcessed`
 - `UserRegistered`
 
- **Bad**:
+ **Xấu**:
 - `CreateOrder` (command)
-- `Order` (too generic)
+- `Order` (quá chung chung)
 
-### 2. Event Structure
+### 2. Cấu trúc Sự kiện
 
-Include essential context:
+Bao gồm ngữ cảnh thiết yếu:
 
 ```typescript
 {
@@ -314,7 +314,7 @@ Include essential context:
 
 ### 3. Idempotency
 
-Always implement idempotency checks:
+Luôn triển khai kiểm tra idempotency:
 
 ```typescript
 async handleEvent(event) {
@@ -331,12 +331,12 @@ async handleEvent(event) {
 }
 ```
 
-**Storage options:**
-- **Redis**: Fast, TTL support
-- **Database**: Durable, unique constraint
+**Tùy chọn lưu trữ:**
+- **Redis**: Nhanh, hỗ trợ TTL
+- **Database**: Bền vững, ràng buộc duy nhất
 - **Kafka Transactions**: Built-in exactly-once
 
-### 4. Error Handling
+### 4. Xử lý Lỗi
 
 ```typescript
 async handleEvent(event) {
@@ -352,36 +352,36 @@ async handleEvent(event) {
 }
 ```
 
-**Transient errors** (retry):
-- Network timeout
-- Database connection lost
-- External API unavailable
+**Lỗi tạm thời** (thử lại):
+- Thời gian chờ mạng
+- Mất kết nối database
+- API bên ngoài không khả dụng
 
-**Permanent errors** (DLQ):
-- Invalid data format
-- Business rule violation
-- Data not found
+**Lỗi vĩnh viễn** (DLQ):
+- Định dạng dữ liệu không hợp lệ
+- Vi phạm quy tắc kinh doanh
+- Dữ liệu không tìm thấy
 
-### 5. Monitoring
+### 5. Giám sát
 
-**Key metrics:**
-- **Consumer Lag**: Messages waiting to process
-- **DLQ Size**: Failed messages
-- **Processing Time**: Time per message
-- **Error Rate**: % of failures
+**Các chỉ số chính:**
+- **Consumer Lag**: Thông điệp chờ xử lý
+- **DLQ Size**: Thông điệp thất bại
+- **Processing Time**: Thời gian mỗi thông điệp
+- **Error Rate**: % thất bại
 
-**Tools:**
+**Công cụ:**
 - Kafka UI: http://localhost:8080
 - CLI: `kafka-consumer-groups --describe`
-- Prometheus + Grafana (production)
+- Prometheus + Grafana (sản xuất)
 
-## Advanced Patterns
+## Các Mẫu Nâng cao
 
 ### Transactional Outbox
 
-**Problem**: Database saved, but Kafka publish fails.
+**Vấn đề**: Database lưu, nhưng Kafka publish thất bại.
 
-**Solution**: Save event in database, publish asynchronously.
+**Giải pháp**: Lưu sự kiện trong database, publish không đồng bộ.
 
 ```typescript
 // 1. Save in transaction
@@ -402,9 +402,9 @@ setInterval(async () => {
 
 ### Saga Pattern
 
-**Problem**: Distributed transactions across services.
+**Vấn đề**: Giao dịch phân tán trên các dịch vụ.
 
-**Solution**: Choreography-based saga with events.
+**Giải pháp**: Saga dựa trên choreography với sự kiện.
 
 ```
 OrderCreated → PaymentService → PaymentProcessed
@@ -413,12 +413,12 @@ OrderCreated → PaymentService → PaymentProcessed
                                                          ↓
                                                     ShippingService → OrderShipped
 
-Rollback on failure:
+Hoàn tác khi thất bại:
   PaymentFailed → CancelOrder
   InventoryFailed → RefundPayment
 ```
 
-## Testing
+## Kiểm thử
 
 ### Unit Testing
 
@@ -463,26 +463,26 @@ describe('Payment Consumer', () => {
 });
 ```
 
-## Performance
+## Hiệu suất
 
-### Throughput Comparison
+### So sánh Throughput
 
-| Metric | Synchronous HTTP | Asynchronous Kafka |
+| Chỉ số | Synchronous HTTP | Asynchronous Kafka |
 |--------|-----------------|-------------------|
-| Response Time | 2000ms | 100ms (20x faster) |
+| Thời gian Phản hồi | 2000ms | 100ms (20x nhanh hơn) |
 | Orders/sec | 50 | 1000+ |
-| Failure Impact | Cascading | Isolated |
-| Scalability | Vertical | Horizontal |
+| Tác động Thất bại | Cascading | Isolated |
+| Khả năng Mở rộng | Vertical | Horizontal |
 
-### Optimization Tips
+### Mẹo Tối ưu hóa
 
-1. **Batch Messages**: Send multiple messages at once
-2. **Compression**: Enable gzip/snappy compression
-3. **Partitioning**: More partitions = higher parallelism
-4. **Consumer Instances**: Scale consumers to match partitions
-5. **Offset Commit**: Tune auto-commit interval
+1. **Batch Messages**: Gửi nhiều thông điệp cùng lúc
+2. **Compression**: Bật nén gzip/snappy
+3. **Partitioning**: Nhiều partitions = song song cao hơn
+4. **Consumer Instances**: Mở rộng consumers để khớp partitions
+5. **Offset Commit**: Điều chỉnh khoảng thời gian auto-commit
 
-## Resources
+## Tài nguyên
 
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
 - [KafkaJS Client](https://kafka.js.org/)
