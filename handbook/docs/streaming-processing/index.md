@@ -1,26 +1,26 @@
-# Streaming Processing
+# Xử lý Luồng
 
-## Overview
+## Tổng quan
 
-Streaming processing is the real-time processing of continuous data streams. Unlike batch processing (process data at rest), stream processing handles data in motion - as it arrives.
+Xử lý luồng là xử lý thời gian thực của các luồng dữ liệu liên tục. Không giống như xử lý hàng loạt (xử lý dữ liệu ở trạng thái nghỉ), xử lý luồng xử lý dữ liệu khi nó di chuyển - khi nó đến.
 
-## Stream Processing vs Batch Processing
+## Xử lý Luồng vs Xử lý Hàng loạt
 
 ```
-Batch Processing:
+Xử lý Hàng loạt:
 Data → Storage → Process → Results
-       (hours/days later)
+       (giờ/ngày sau đó)
 
-Stream Processing:
+Xử lý Luồng:
 Data → Process → Results
-       (milliseconds)
+       (mili giây)
 ```
 
-## Architectures
+## Kiến trúc
 
-### 1. Lambda Architecture
+### 1. Kiến trúc Lambda
 
-Combines batch and stream processing for completeness and low latency.
+Kết hợp xử lý hàng loạt và luồng để hoàn thiện và độ trễ thấp.
 
 ```
                           ┌─────────────┐
@@ -45,10 +45,10 @@ Combines batch and stream processing for completeness and low latency.
                           └─────────────┘
 ```
 
-**Layers:**
-1. **Batch Layer**: Processes all data for accuracy (Hadoop, Spark)
-2. **Speed Layer**: Processes recent data for low latency (Storm, Flink)
-3. **Serving Layer**: Merges results from both layers
+**Lớp:**
+1. **Batch Layer**: Xử lý tất cả dữ liệu để chính xác (Hadoop, Spark)
+2. **Speed Layer**: Xử lý dữ liệu gần đây để độ trễ thấp (Storm, Flink)
+3. **Serving Layer**: Hợp nhất kết quả từ cả hai lớp
 
 **Example:**
 ```typescript
@@ -79,17 +79,17 @@ async getMetrics() {
 }
 ```
 
-**Pros:**
--  Complete and accurate (batch layer)
--  Low latency (speed layer)
+**Ưu điểm:**
+-  Hoàn thiện và chính xác (batch layer)
+-  Độ trễ thấp (speed layer)
 
-**Cons:**
--  Complex - maintain two codebases
--  Higher cost - duplicate processing
+**Nhược điểm:**
+-  Phức tạp - duy trì hai codebase
+-  Chi phí cao hơn - xử lý trùng lặp
 
-### 2. Kappa Architecture
+### 2. Kiến trúc Kappa
 
-Simplified version - stream processing only.
+Phiên bản đơn giản hóa - chỉ xử lý luồng.
 
 ```
                     ┌─────────────┐
@@ -106,7 +106,7 @@ Simplified version - stream processing only.
                     └─────────────┘
 ```
 
-**Key Idea:** Keep all data in stream (Kafka), reprocess if needed.
+**Ý tưởng Chính:** Giữ tất cả dữ liệu trong luồng (Kafka), xử lý lại nếu cần.
 
 ```typescript
 // Single stream processing pipeline
@@ -133,18 +133,18 @@ async reprocess() {
 }
 ```
 
-**Pros:**
--  Simpler - one codebase
--  Lower cost
--  Event sourcing friendly
+**Ưu điểm:**
+-  Đơn giản hơn - một codebase
+-  Chi phí thấp hơn
+-  Thân thiện với event sourcing
 
-**Cons:**
--  May not handle all use cases
--  Reprocessing can be slow
+**Nhược điểm:**
+-  Có thể không xử lý tất cả trường hợp sử dụng
+-  Xử lý lại có thể chậm
 
-### 3. Microservices Architecture
+### 3. Kiến trúc Microservices
 
-Event-driven microservices with stream processing.
+Microservices hướng sự kiện với xử lý luồng.
 
 ```
 Order Service ──> [order-created] ──> Payment Service
@@ -152,7 +152,7 @@ Order Service ──> [order-created] ──> Payment Service
                                   └──> Notification Service
                                   └──> Analytics Service
 
-Each service processes events independently
+Mỗi dịch vụ xử lý sự kiện độc lập
 ```
 
 ```typescript
@@ -203,11 +203,11 @@ export class AnalyticsService {
 }
 ```
 
-## Streaming Patterns
+## Các Mẫu Xử lý Luồng
 
 ### 1. Idempotent Producer
 
-Ensure producing same message multiple times is safe.
+Đảm bảo gửi cùng tin nhắn nhiều lần là an toàn.
 
 ```typescript
 @Injectable()
@@ -246,7 +246,7 @@ export class IdempotentProducer {
 
 ### 2. Event Splitter
 
-Split one event into multiple events.
+Chia một sự kiện thành nhiều sự kiện.
 
 ```typescript
 @EventPattern('order-created')
@@ -272,7 +272,7 @@ async splitOrder(order: OrderCreatedEvent) {
 
 ### 3. Claim Check Pattern
 
-Store large payload separately, send reference only.
+Lưu payload lớn riêng biệt, chỉ gửi tham chiếu.
 
 ```typescript
 // Producer - Store payload in S3, send reference
@@ -306,11 +306,11 @@ async handleOrder(event: OrderEvent) {
 }
 ```
 
-**When to use:** Payloads > 1MB (Kafka message size limit)
+**Khi nào sử dụng:** Payloads > 1MB (giới hạn kích thước tin nhắn Kafka)
 
 ### 4. Event Aggregator
 
-Combine multiple events into one.
+Kết hợp nhiều sự kiện thành một.
 
 ```typescript
 @Injectable()
@@ -352,7 +352,7 @@ export class OrderAggregator {
 
 ### 5. Gateway Routing Pattern
 
-Route events to appropriate handlers.
+Định tuyến sự kiện đến các handler phù hợp.
 
 ```typescript
 @Controller()
@@ -380,7 +380,7 @@ export class EventRouter {
 
 ### 6. CQRS (Command Query Responsibility Segregation)
 
-Separate write model (commands) from read model (queries).
+Tách mô hình ghi (commands) khỏi mô hình đọc (queries).
 
 ```typescript
 // Command Side (Write Model)
@@ -432,7 +432,7 @@ export class OrderProjection {
 
 ### 7. Strangler Fig Pattern
 
-Gradually migrate from monolith to microservices.
+Từ từ di chuyển từ monolith sang microservices.
 
 ```typescript
 // Phase 1: Route new features to microservice
@@ -466,11 +466,11 @@ async syncFromLegacy(data: any) {
 
 ## Saga Pattern
 
-Manage distributed transactions across microservices.
+Quản lý giao dịch phân tán trên microservices.
 
 ### Orchestration-Based Saga
 
-Central orchestrator coordinates the saga.
+Orchestrator trung tâm điều phối saga.
 
 ```typescript
 @Injectable()
@@ -518,7 +518,7 @@ export class OrderSaga {
 
 ### Choreography-Based Saga
 
-Services react to events, no central coordinator.
+Dịch vụ phản ứng với sự kiện, không có coordinator trung tâm.
 
 ```typescript
 // Order Service
@@ -589,12 +589,12 @@ export class PaymentService {
 
 | Orchestration | Choreography |
 |--------------|--------------|
-| Central coordinator | Decentralized |
-| Easier to understand flow | More loosely coupled |
-| Single point of failure | Harder to trace flow |
-| Easier to debug | More resilient |
+| Coordinator trung tâm | Phân tán |
+| Dễ hiểu luồng hơn | Kết hợp lỏng lẻo hơn |
+| Điểm thất bại duy nhất | Khó theo dõi luồng hơn |
+| Dễ debug hơn | Bền bỉ hơn |
 
-## Best Practices
+## Các Thực tiễn Tốt nhất
 
 ### 1. Event Versioning
 
@@ -624,7 +624,7 @@ async handleOrder(event: OrderCreatedEventV1 | OrderCreatedEventV2) {
 }
 ```
 
-### 2. Monitoring
+### 2. Giám sát
 
 ```typescript
 @Injectable()
@@ -643,7 +643,7 @@ export class StreamMetrics {
 }
 ```
 
-### 3. Testing
+### 3. Kiểm thử
 
 ```typescript
 describe('Order Saga', () => {
