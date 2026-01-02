@@ -195,9 +195,9 @@ dbQueryDuration.observe(0.042); // 42ms
 |--------|-----------|---------|
 | **Quantile calculation** | Server-side (Prometheus) | Client-side (app) |
 | **Bucket configuration** | Required | Not required |
-| **Aggregation across instances** | ✅ Yes | ❌ No |
+| **Aggregation across instances** |  Yes |  No |
 | **Memory usage** | Lower | Higher |
-| **Recommended** | ✅ Use histograms | ⚠️ Use only if needed |
+| **Recommended** |  Use histograms |  Use only if needed |
 
 ---
 
@@ -486,12 +486,12 @@ rate(payments_processed_total{status="success"}[5m])
 
 ### 1. Use Labels Wisely
 
-✅ **Good:**
+ **Good:**
 ```typescript
 httpRequestsTotal.inc({ method: 'POST', route: '/orders', status_code: 200 });
 ```
 
-❌ **Bad (high cardinality):**
+ **Bad (high cardinality):**
 ```typescript
 httpRequestsTotal.inc({ method: 'POST', route: '/orders', user_id: 'user-12345' });
 ```

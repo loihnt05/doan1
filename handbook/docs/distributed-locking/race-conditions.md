@@ -41,7 +41,7 @@ T6   |                 | Write: 900       | 900
 
 **Expected:** $800  
 **Actual:** $900  
-**Lost:** $100 ❌
+**Lost:** $100 
 
 ## Why Does This Happen?
 
@@ -113,7 +113,7 @@ Instance 1:
 Instance 2:
   locked = false  ← Different memory!
   also acquires lock
-  also processes payment ❌
+  also processes payment 
 ```
 
 **Problem:** Each instance has its own `locked` variable!
@@ -126,7 +126,7 @@ Instance 2:
 2 customers buy last item simultaneously
 → Both see "1 in stock"
 → Both complete purchase
-→ Oversold! ❌
+→ Oversold! 
 ```
 
 ### 2. Bank Transfer
@@ -136,7 +136,7 @@ Account has $100
 Transfer A: -$100
 Transfer B: -$50
 → Both see $100
-→ Final balance: -$50 ❌
+→ Final balance: -$50 
 ```
 
 ### 3. Ticket Booking
@@ -146,7 +146,7 @@ Last seat available
 User A: Reserve seat 1A
 User B: Reserve seat 1A
 → Both get confirmation
-→ Double booking! ❌
+→ Double booking! 
 ```
 
 ## Solution Preview
@@ -170,4 +170,4 @@ try {
 }
 ```
 
-We'll explore this in detail in the next section: [Distributed Locks](./distributed-locks.md)
+We'll explore distributed locking solutions in detail in the next sections.

@@ -80,13 +80,13 @@ cd backend
 ```
 
 This tests:
-1. ✅ Basic routing through nginx
-2. ✅ Stateful counter problem demonstration
-3. ✅ CPU blocking with multiple instances (NOT blocked)
-4. ✅ CPU blocking with single instance (**53 seconds delay!**)
-5. ✅ Load distribution across instances
-6. ✅ Circuit breaker functionality
-7. ✅ Data aggregation from multiple services
+1.  Basic routing through nginx
+2.  Stateful counter problem demonstration
+3.  CPU blocking with multiple instances (NOT blocked)
+4.  CPU blocking with single instance (**53 seconds delay!**)
+5.  Load distribution across instances
+6.  Circuit breaker functionality
+7.  Data aggregation from multiple services
 
 **Key Test Result**: Single instance took **53,364ms** to respond during CPU-bound operation, while 3 instances responded in only **116ms**!
 
@@ -249,7 +249,7 @@ docker-compose up --scale api-gateway=5
 - [ ] Blue-green deployments
 - [ ] CI/CD pipelines
 
-## Phase 4: Message Dispatcher (Kafka) ✅
+## Phase 4: Message Dispatcher (Kafka) 
 
 Event-driven architecture implementation with Apache Kafka for asynchronous, decoupled communication between microservices.
 
@@ -315,16 +315,16 @@ docker-compose -f docker-compose.kafka.yml up -d
 ### Test Script Features
 
 The `test-kafka.sh` script demonstrates:
-1. ✅ Kafka infrastructure startup (Zookeeper, Broker, UI)
-2. ✅ Topic creation with partitions
-3. ✅ Event production (OrderCreated)
-4. ✅ Event consumption (PaymentService)
-5. ✅ Consumer groups load balancing (2 instances)
-6. ✅ Offset management and replay
-7. ✅ Dead Letter Queue handling
-8. ✅ Real-time monitoring via Kafka UI
+1.  Kafka infrastructure startup (Zookeeper, Broker, UI)
+2.  Topic creation with partitions
+3.  Event production (OrderCreated)
+4.  Event consumption (PaymentService)
+5.  Consumer groups load balancing (2 instances)
+6.  Offset management and replay
+7.  Dead Letter Queue handling
+8.  Real-time monitoring via Kafka UI
 
-## Phase 3: Load Balancer & Kubernetes ✅
+## Phase 3: Load Balancer & Kubernetes 
 
 Advanced load balancing algorithms and Kubernetes networking concepts.
 
@@ -357,24 +357,24 @@ Advanced load balancing algorithms and Kubernetes networking concepts.
 
 ### Features Implemented
 
-✅ **Saga Choreography Pattern**
+ **Saga Choreography Pattern**
 - Order Service (saga initiator + compensation handler)
 - Payment Service (saga participant, 30% failure rate)
 - Inventory Service (saga participant, 20% failure rate)
 - Event-driven coordination (no central orchestrator)
 
-✅ **Compensation Actions**
+ **Compensation Actions**
 - Payment failure → Cancel order
 - Inventory failure → Refund payment + Cancel order
 - Forward actions (not rollbacks)
 
-✅ **Streaming Analytics**
+ **Streaming Analytics**
 - Real-time revenue aggregation
 - Order success rate calculation
 - Time-windowing (orders per minute)
 - Periodic reporting every 10 seconds
 
-✅ **Event-Driven Patterns**
+ **Event-Driven Patterns**
 - Pub/Sub: Analytics subscribes to all events
 - Event Splitter: Payment → Success/Failure events
 - Idempotency: Duplicate event handling

@@ -379,7 +379,7 @@ Order Service          Payment Service
 
 ## Pros and Cons
 
-### Advantages ✅
+### Advantages 
 
 1. **Loose Coupling**
    - Services don't know about each other
@@ -401,7 +401,7 @@ Order Service          Payment Service
    - Multiple services can react to same event
    - Example: Analytics service subscribes to all events
 
-### Disadvantages ❌
+### Disadvantages 
 
 1. **Complex Flow Understanding**
    - Hard to see overall saga flow
@@ -430,12 +430,12 @@ Order Service          Payment Service
 Use clear, domain-driven event names:
 
 ```typescript
-// ✅ Good
+//  Good
 OrderCreated
 PaymentCompleted
 InventoryReserved
 
-// ❌ Bad
+//  Bad
 OrderEvent
 PaymentDone
 StockChecked
@@ -502,14 +502,14 @@ try {
 
 ## When to Use Choreography
 
-### Good Use Cases ✅
+### Good Use Cases 
 
 - **Simple workflows** (2-4 steps)
 - **Independent services** (truly autonomous)
 - **Event-driven architecture** (already using events)
 - **No complex business logic** in coordination
 
-### When to Use Orchestration Instead ❌
+### When to Use Orchestration Instead 
 
 - **Complex workflows** (5+ steps)
 - **Need saga state tracking**
@@ -530,4 +530,4 @@ Key points:
 - Compensation via events
 - Eventually consistent
 
-Next: [Orchestration Pattern](./orchestration.md) for comparison
+Next: Compare with orchestration pattern for centralized control

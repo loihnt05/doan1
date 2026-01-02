@@ -560,17 +560,17 @@ await consumer.run({
 
 ### 1. Event Design
 
-✅ **Good Event Names** (past tense):
+ **Good Event Names** (past tense):
 - `OrderCreated`
 - `PaymentProcessed`
 - `UserRegistered`
 
-❌ **Bad Event Names**:
+ **Bad Event Names**:
 - `CreateOrder` (command, not event)
 - `Order` (too generic)
 - `ProcessPayment` (command)
 
-✅ **Include Context**:
+ **Include Context**:
 ```typescript
 {
   eventId: 'unique-id',        // For idempotency
@@ -583,7 +583,7 @@ await consumer.run({
 
 ### 2. Partitioning Strategy
 
-✅ **Use Entity ID as Key**:
+ **Use Entity ID as Key**:
 ```typescript
 // All events for same order go to same partition
 await producer.send(topic, event, orderId);
@@ -832,17 +832,17 @@ kafka-consumer-groups --group my-group --topic my-topic:0 --reset-offsets --to-o
 
 ### What We Built
 
-✅ **Kafka Infrastructure**
+ **Kafka Infrastructure**
 - Zookeeper (coordination)
 - Kafka Broker (message storage)
 - Kafka UI (monitoring)
 
-✅ **Event-Driven Architecture**
+ **Event-Driven Architecture**
 - Producer (Order Service)
 - Consumer (Payment Service)
 - Event Types (strongly typed)
 
-✅ **Advanced Features**
+ **Advanced Features**
 - Consumer Groups (load balancing)
 - Partitions (parallelism + ordering)
 - Offsets (delivery guarantees)

@@ -279,7 +279,7 @@ export class OrderServiceService implements OnModuleInit {
         previousBalance: currentBalance,
         newBalance: this.balance,
         amount: paymentAmount,
-        warning: '⚠️  Race condition possible! Balance may be incorrect.',
+        warning: '  Race condition possible! Balance may be incorrect.',
       };
     }
     
@@ -339,7 +339,7 @@ export class OrderServiceService implements OnModuleInit {
           previousBalance: currentBalance,
           newBalance: this.balance,
           amount: paymentAmount,
-          info: '✅ Protected by distributed lock',
+          info: ' Protected by distributed lock',
         };
       }
       
@@ -373,7 +373,7 @@ export class OrderServiceService implements OnModuleInit {
    * 4. Worker B gets lock + token 2
    * 5. Worker B writes data (token 2)
    * 6. Worker A resumes, tries to write
-   * 7. Token 1 < token 2 → write rejected ✅
+   * 7. Token 1 < token 2 → write rejected 
    */
   async processOrderWithFencedToken(orderId: string): Promise<any> {
     const lockKey = `lock:order:${orderId}`;

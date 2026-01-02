@@ -38,7 +38,7 @@ echo ""
 
 # Test 1: NO LOCK (Race condition)
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${RED}❌ TEST 1: NO LOCK (Race Condition - UNSAFE)${NC}"
+echo -e "${RED} TEST 1: NO LOCK (Race Condition - UNSAFE)${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${YELLOW}Sending 10 concurrent payment requests ($100 each)...${NC}"
@@ -59,11 +59,11 @@ BALANCE_NO_LOCK=$(curl -s "$ORDER_SERVICE_URL/demo/balance" | jq -r '.balance')
 echo -e "${RED}Balance: $$BALANCE_NO_LOCK${NC}"
 
 if [ "$BALANCE_NO_LOCK" -ne 0 ]; then
-  echo -e "${RED}⚠️  RACE CONDITION DETECTED!${NC}"
+  echo -e "${RED}  RACE CONDITION DETECTED!${NC}"
   echo -e "${RED}Balance should be $0, but it's $$BALANCE_NO_LOCK${NC}"
   echo -e "${RED}Lost $(($BALANCE_NO_LOCK)) dollars due to concurrent writes!${NC}"
 else
-  echo -e "${YELLOW}⚠️  Race condition not visible in this run (try again)${NC}"
+  echo -e "${YELLOW}  Race condition not visible in this run (try again)${NC}"
 fi
 
 echo ""
@@ -78,7 +78,7 @@ echo ""
 
 # Test 2: WITH LOCK (Protected)
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}✅ TEST 2: WITH DISTRIBUTED LOCK (Safe)${NC}"
+echo -e "${GREEN} TEST 2: WITH DISTRIBUTED LOCK (Safe)${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${YELLOW}Sending 10 concurrent payment requests ($100 each)...${NC}"
@@ -99,10 +99,10 @@ BALANCE_WITH_LOCK=$(curl -s "$ORDER_SERVICE_URL/demo/balance" | jq -r '.balance'
 echo -e "${GREEN}Balance: $$BALANCE_WITH_LOCK${NC}"
 
 if [ "$BALANCE_WITH_LOCK" -eq 0 ]; then
-  echo -e "${GREEN}✅ CORRECT! Distributed lock prevented race condition!${NC}"
+  echo -e "${GREEN} CORRECT! Distributed lock prevented race condition!${NC}"
   echo -e "${GREEN}All 10 payments processed correctly.${NC}"
 else
-  echo -e "${YELLOW}⚠️  Balance: $$BALANCE_WITH_LOCK (might be due to timing)${NC}"
+  echo -e "${YELLOW}  Balance: $$BALANCE_WITH_LOCK (might be due to timing)${NC}"
 fi
 
 echo ""
@@ -115,12 +115,12 @@ echo ""
 echo -e "${RED}Without Lock:${NC}"
 echo -e "  Final Balance: $$BALANCE_NO_LOCK (Expected: $0)"
 echo -e "  Lost: $(($BALANCE_NO_LOCK)) dollars"
-echo -e "  Status: ${RED}❌ UNSAFE - Race condition${NC}"
+echo -e "  Status: ${RED} UNSAFE - Race condition${NC}"
 echo ""
 echo -e "${GREEN}With Distributed Lock:${NC}"
 echo -e "  Final Balance: $$BALANCE_WITH_LOCK (Expected: $0)"
 echo -e "  Lost: $(($BALANCE_WITH_LOCK)) dollars"
-echo -e "  Status: ${GREEN}✅ SAFE - Protected by Redis lock${NC}"
+echo -e "  Status: ${GREEN} SAFE - Protected by Redis lock${NC}"
 echo ""
 
 # Key Takeaways

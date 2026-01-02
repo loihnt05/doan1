@@ -288,12 +288,12 @@ export class PaymentService implements OnModuleInit {
 
 ### 1. Event Naming
 
-✅ **Good** (past tense):
+ **Good** (past tense):
 - `OrderCreated`
 - `PaymentProcessed`
 - `UserRegistered`
 
-❌ **Bad**:
+ **Bad**:
 - `CreateOrder` (command)
 - `Order` (too generic)
 
@@ -487,4 +487,3 @@ describe('Payment Consumer', () => {
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
 - [KafkaJS Client](https://kafka.js.org/)
 - [Event-Driven Architecture (Martin Fowler)](https://martinfowler.com/articles/201701-event-driven.html)
-- [Backend README: PHASE4-MESSAGE-DISPATCHER.md](../../backend/PHASE4-MESSAGE-DISPATCHER.md)

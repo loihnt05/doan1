@@ -49,8 +49,8 @@ spec:
 # - Other pods can use: http://user-service/users
 #
 # Talking Points:
-# ✅ Internal only - not exposed outside cluster
-# ✅ Stable IP even when pods restart
-# ✅ Built-in service discovery via DNS
-# ✅ Load balancing across pod replicas
-# ❌ Not accessible from outside cluster
+#  Internal only - not exposed outside cluster
+#  Stable IP even when pods restart
+#  Built-in service discovery via DNS
+#  Load balancing across pod replicas
+#  Not accessible from outside cluster

@@ -33,11 +33,11 @@
 4. Order Service consumes failure events for compensation
 
 **Characteristics:**
-- ✅ No central coordinator
-- ✅ Services react to events independently
-- ✅ Loose coupling
-- ❌ Hard to see overall flow
-- ❌ Cyclic event dependencies possible
+-  No central coordinator
+-  Services react to events independently
+-  Loose coupling
+-  Hard to see overall flow
+-  Cyclic event dependencies possible
 
 ---
 
@@ -77,12 +77,12 @@
 4. If any fail, orchestrator triggers compensation
 
 **Characteristics:**
-- ✅ Clear control flow
-- ✅ Centralized state
-- ✅ Easy to debug
-- ❌ Single point of failure
-- ❌ Orchestrator complexity
-- ❌ Tight coupling
+-  Clear control flow
+-  Centralized state
+-  Easy to debug
+-  Single point of failure
+-  Orchestrator complexity
+-  Tight coupling
 
 ---
 
@@ -233,19 +233,19 @@ Order Service          Kafka           Payment Service
 
 ### Use Choreography When:
 
-✅ **Simple workflows** (2-4 steps)
+ **Simple workflows** (2-4 steps)
 - Order → Payment → Inventory
 - User Registration → Send Email → Create Profile
 
-✅ **Services are independent**
+ **Services are independent**
 - Each service has clear boundaries
 - No complex shared state
 
-✅ **Event-driven architecture**
+ **Event-driven architecture**
 - Already using Kafka/messaging
 - Pub/sub model fits naturally
 
-✅ **Want loose coupling**
+ **Want loose coupling**
 - Services don't know about each other
 - Easy to add new subscribers
 
@@ -257,19 +257,19 @@ Order Service          Kafka           Payment Service
 
 ### Use Orchestration When:
 
-✅ **Complex workflows** (5+ steps)
+ **Complex workflows** (5+ steps)
 - Travel booking: Flight + Hotel + Car + Insurance + Payment
 
-✅ **Need saga state**
+ **Need saga state**
 - Must track progress
 - Show status to users
 - Resume from failure
 
-✅ **Complex business logic**
+ **Complex business logic**
 - If payment > $1000, require approval
 - Different paths based on user tier
 
-✅ **Clear ownership**
+ **Clear ownership**
 - One team owns workflow
 - Need centralized control
 
@@ -325,17 +325,17 @@ Orchestrator (for complex workflow)
 ## Phase 5 Implementation
 
 **We implemented Choreography because:**
-1. ✅ Simple workflow (Order → Payment → Inventory)
-2. ✅ Already using Kafka (event-driven)
-3. ✅ Want to demonstrate event patterns
-4. ✅ Services are independent
-5. ✅ No complex branching logic
+1.  Simple workflow (Order → Payment → Inventory)
+2.  Already using Kafka (event-driven)
+3.  Want to demonstrate event patterns
+4.  Services are independent
+5.  No complex branching logic
 
 **For comparison, Orchestration would be used if:**
-- ❌ Workflow had 5+ steps
-- ❌ Needed to show saga progress to users
-- ❌ Complex business rules in workflow
-- ❌ Required audit trail of saga execution
+-  Workflow had 5+ steps
+-  Needed to show saga progress to users
+-  Complex business rules in workflow
+-  Required audit trail of saga execution
 
 ---
 

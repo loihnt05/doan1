@@ -1,0 +1,8 @@
+{
+  "label": "5. Scaling",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Chiến lược scale vertical/horizontal, state management và quan sát chỉ số RPS/latency đúng với kịch bản test-scaling.sh."
+  }
+}

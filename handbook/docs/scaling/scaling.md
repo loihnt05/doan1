@@ -1,56 +1,63 @@
 ---
-sidebar_position: 1
+sidebar_position: 5
 ---
 
-# Phase 2: Scaling Demonstrations
+# Scaling Demonstrations
 
-## Overview
+## Tổng quan
 
-This phase demonstrates practical scaling strategies for microservices, including horizontal scaling, load balancing, and the critical differences between stateful and stateless design.
+Phase này chứng minh các chiến lược scaling thực tế cho microservices, bao gồm horizontal scaling, load balancing, và sự khác biệt quan trọng giữa thiết kế stateful và stateless.
 
-## Key Achievements
+## Thành tựu Chính
 
-### Performance Impact
+### Tác động Hiệu suất
 
-We demonstrated a **457x performance improvement** when scaling from 1 to 3 instances during CPU-bound operations:
+Chúng tôi chứng minh một **cải thiện hiệu suất 457x** khi scale từ 1 lên 3 instances trong các hoạt động CPU-bound:
 
-- **Single Instance**: 53,364ms response time (53 seconds!)
-- **3 Instances**: 116ms response time
-- **Improvement**: Requests complete 457x faster
+- **Single Instance**: 53,364ms thời gian phản hồi (53 giây!)
+- **3 Instances**: 116ms thời gian phản hồi
+- **Cải thiện**: Yêu cầu hoàn thành nhanh hơn 457x
 
-## Architecture
+## Kiến trúc
 
+```mermaid
+flowchart TB
+    C["Client"]
+
+    N["Nginx<br/>Load Balancer<br/>Port 80"]
+
+    GW1["API GW #1"]
+    GW2["API GW #2"]
+    GW3["API GW #3"]
+
+    U["User Service<br/>:3001"]
+    O["Order Service<br/>:3002"]
+    P["Payment Service<br/>:3003"]
+
+    C --> N
+
+    N --> GW1
+    N --> GW2
+    N --> GW3
+
+    GW1 --> U
+    GW1 --> O
+    GW1 --> P
+
+    GW2 --> U
+    GW2 --> O
+    GW2 --> P
+
+    GW3 --> U
+    GW3 --> O
+    GW3 --> P
 ```
-                    Client
-                      │
-                      ▼
-              ┌─────────────┐
-              │    Nginx    │  Port 80
-              │Load Balancer│
-              └──────┬──────┘
-                     │
-        ┌────────────┼────────────┐
-        │            │            │
-    ┌───▼──┐    ┌───▼──┐    ┌───▼──┐
-    │ API  │    │ API  │    │ API  │
-    │GW #1 │    │GW #2 │    │GW #3 │
-    └───┬──┘    └───┬──┘    └───┬──┘
-        │            │            │
-        └────────────┼────────────┘
-                     │
-        ┌────────────┼────────────┐
-        │            │            │
-    ┌───▼──┐    ┌───▼──┐    ┌───▼──┐
-    │User  │    │Order │    │Pay   │
-    │:3001 │    │:3002 │    │:3003 │
-    └──────┘    └──────┘    └──────┘
-```
 
-## Problems Demonstrated
+## Vấn đề Được Chứng minh
 
 ### 1. CPU-Bound Blocking
 
-**Problem**: Synchronous CPU operations block the Node.js event loop, preventing other requests from being processed.
+**Vấn đề**: Các hoạt động CPU đồng bộ chặn event loop của Node.js, ngăn cản các yêu cầu khác được xử lý.
 
 **Test Code**:
 ```typescript
@@ -66,7 +73,7 @@ cpuBound() {
 }
 ```
 
-**Test Results**:
+**Kết quả Test**:
 ```bash
 # Single instance - DISASTER
 $ curl http://localhost/api/cpu-bound &  # Starts, blocks event loop
@@ -77,7 +84,7 @@ $ curl http://localhost/api/cpu-bound &  # Blocks instance #1
 $ curl http://localhost/api/users         # Routed to instance #2, responds in 116ms
 ```
 
-**Visualization**:
+**Hình ảnh hóa**:
 
 Single Instance (Blocked):
 ```
@@ -95,9 +102,9 @@ Instance 2: Request       ███ (116ms)
                     Processed immediately!
 ```
 
-### 2. Stateful Design Problem
+### 2. Vấn đề Stateful Design
 
-**Problem**: In-memory state (counters, sessions) is per-instance, causing inconsistent behavior across replicas.
+**Vấn đề**: State trong bộ nhớ (counters, sessions) là per-instance, gây ra hành vi không nhất quán trên các replicas.
 
 **Test Code**:
 ```typescript
@@ -115,7 +122,7 @@ count() {
 }
 ```
 
-**Test Results**:
+**Kết quả Test**:
 ```bash
 $ for i in {1..9}; do curl http://localhost/api/count; done
 
@@ -130,18 +137,18 @@ $ for i in {1..9}; do curl http://localhost/api/count; done
 {"count":3, "processId":1}  # Instance 3
 ```
 
-**Analysis**: Each instance maintains its own counter. Nginx's round-robin load balancing sends requests to each instance in turn, revealing that state is not shared.
+**Phân tích**: Mỗi instance duy trì counter riêng. Load balancing round-robin của Nginx gửi yêu cầu đến từng instance theo lượt, tiết lộ rằng state không được chia sẻ.
 
-**Solution**: Use external state store:
-- Redis for distributed caching
-- Database for persistent state
-- JWT tokens for session data (stateless)
+**Giải pháp**: Sử dụng external state store:
+- Redis cho distributed caching
+- Database cho persistent state
+- JWT tokens cho session data (stateless)
 
-## Solutions Implemented
+## Giải pháp Được Triển khai
 
 ### Horizontal Scaling
 
-**Configuration** (docker-compose.yml):
+**Cấu hình** (docker-compose.yml):
 ```yaml
 services:
   nginx:
@@ -176,15 +183,15 @@ server {
 }
 ```
 
-**Benefits**:
-- ✅ Better throughput (3x improvement)
-- ✅ Fault tolerance (2/3 instances can fail)
-- ✅ Independent failure domains
-- ✅ CPU-bound work doesn't block all requests
+**Lợi ích**:
+-  Throughput tốt hơn (3x cải thiện)
+-  Dung sai lỗi (2/3 instances có thể fail)
+-  Independent failure domains
+-  Công việc CPU-bound không chặn tất cả yêu cầu
 
 ### Event Loop Monitoring
 
-**Implementation** (main.ts):
+**Triển khai** (main.ts):
 ```typescript
 function startEventLoopMonitoring() {
   setInterval(() => {
@@ -192,29 +199,29 @@ function startEventLoopMonitoring() {
     setImmediate(() => {
       const delay = Date.now() - start;
       if (delay > 10) {
-        console.warn(`⚠️ Event loop delay: ${delay}ms`);
+        console.warn(` Event loop delay: ${delay}ms`);
       }
     });
   }, 1000);
 }
 ```
 
-**What It Detects**:
-- Event loop lag indicates CPU saturation
-- Helps identify blocking operations
-- Guides scaling decisions
+**Phát hiện gì**:
+- Event loop lag chỉ ra CPU saturation
+- Giúp xác định blocking operations
+- Hướng dẫn scaling decisions
 
 **Sample Output**:
 ```
-⚠️ Event loop delay: 3002ms  <- During CPU-bound operation
-⚠️ Event loop delay: 15ms
+ Event loop delay: 3002ms  <- During CPU-bound operation
+ Event loop delay: 15ms
 Event loop healthy
 Event loop healthy
 ```
 
 ### Vertical Scaling (Cluster Mode)
 
-**Implementation** (cluster.ts - optional):
+**Triển khai** (cluster.ts - optional):
 ```typescript
 import cluster from 'cluster';
 import * as os from 'os';
@@ -237,34 +244,34 @@ if (cluster.isPrimary) {
 }
 ```
 
-**Benefits**:
-- Utilize all CPU cores on single machine
-- Automatic worker restart on crash
-- Better for CPU-bound workloads
+**Lợi ích**:
+- Sử dụng tất cả CPU cores trên single machine
+- Tự động restart worker khi crash
+- Tốt hơn cho CPU-bound workloads
 
-**When to Use**:
-- Single machine with multiple cores
-- CPU-bound operations common
-- Before horizontal scaling (cheaper)
+**Khi nào Sử dụng**:
+- Single machine với multiple cores
+- CPU-bound operations phổ biến
+- Trước horizontal scaling (rẻ hơn)
 
-## Testing & Validation
+## Kiểm thử & Validation
 
 ### Automated Test Suite
 
-Run the complete test:
+Chạy test hoàn chỉnh:
 ```bash
 cd backend
 ./test-scaling.sh
 ```
 
-**What It Tests**:
-1. ✅ Basic routing through nginx
-2. ✅ Stateful counter (12 requests, shows round-robin)
-3. ✅ CPU blocking with 3 instances (fast)
-4. ✅ CPU blocking with 1 instance (slow)
-5. ✅ Load distribution verification
-6. ✅ Circuit breaker functionality
-7. ✅ Data aggregation
+**Kiểm thử gì**:
+1.  Basic routing through nginx
+2.  Stateful counter (12 requests, shows round-robin)
+3.  CPU blocking với 3 instances (nhanh)
+4.  CPU blocking với 1 instance (chậm)
+5.  Load distribution verification
+6.  Circuit breaker functionality
+7.  Data aggregation
 
 ### Manual Testing
 
@@ -296,11 +303,11 @@ for i in {1..5}; do
 done
 ```
 
-## Performance Results
+## Kết quả Hiệu suất
 
 ### Throughput Comparison
 
-| Configuration | Requests/Second | Latency (p99) |
+| Cấu hình | Requests/Second | Latency (p99) |
 |--------------|-----------------|---------------|
 | 1 Instance | ~150 | 500ms |
 | 3 Instances | ~450 | 120ms |
@@ -313,14 +320,14 @@ done
 | Normal | 50ms | 50ms | - |
 | During CPU | **53,000ms** | **116ms** | **457x** |
 
-## Key Lessons
+## Những Bài Học Chính
 
-### 1. Stateless Design is Critical
+### 1. Stateless Design rất Quan trọng
 
 **Bad** (won't scale):
 ```typescript
 class GatewayController {
-  private sessionData = new Map();  // ❌ In-memory state
+  private sessionData = new Map();  //  In-memory state
   
   @Post('login')
   login() {
@@ -332,7 +339,7 @@ class GatewayController {
 **Good** (scales horizontally):
 ```typescript
 class GatewayController {
-  constructor(private redis: RedisService) {}  // ✅ External state
+  constructor(private redis: RedisService) {}  //  External state
   
   @Post('login')
   async login() {
@@ -341,7 +348,7 @@ class GatewayController {
 }
 ```
 
-### 2. CPU-Bound Work Needs Isolation
+### 2. CPU-Bound Work Cần Isolation
 
 **Options**:
 - Horizontal scaling (multiple instances)
@@ -349,10 +356,10 @@ class GatewayController {
 - Separate worker service
 - Message queue for async processing
 
-### 3. Monitoring is Essential
+### 3. Monitoring rất Cần thiết
 
 **Key Metrics**:
-- Event loop delay (should be <10ms)
+- Event loop delay (should be &lt;10ms)
 - Request rate per instance
 - Error rate
 - Response time percentiles (p50, p95, p99)
@@ -362,56 +369,26 @@ class GatewayController {
 - Prometheus + Grafana (future)
 - APM tools (New Relic, Datadog)
 
-### 4. Load Balancing Strategies
+### 4. Chiến lược Load Balancing
 
 **Round Robin** (used here):
-- Simple and fair
-- Good for stateless apps
-- May not account for instance health
+- Đơn giản và công bằng
+- Tốt cho stateless apps
+- Có thể không tính đến instance health
 
 **Least Connections**:
-- Routes to instance with fewest active connections
-- Better for long-lived connections
+- Routes đến instance với ít active connections nhất
+- Tốt hơn cho long-lived connections
 
 **IP Hash**:
 - Same client → same instance
 - Enables sticky sessions
-- Required for stateful apps (but avoid if possible)
+- Cần thiết cho stateful apps (nhưng tránh nếu có thể)
 
-## Next Steps
 
-### Phase 3: Distributed State
-- [ ] Redis integration for caching
-- [ ] Distributed sessions
-- [ ] Pub/sub for inter-service communication
-
-### Phase 4: Advanced Scaling
-- [ ] Kubernetes deployment
-- [ ] Auto-scaling based on metrics
-- [ ] Service mesh (Istio)
-
-### Phase 5: Observability
-- [ ] Prometheus metrics
-- [ ] Grafana dashboards
-- [ ] Distributed tracing (Jaeger)
-- [ ] Centralized logging (ELK)
-
-## Resources
+## Tài nguyên
 
 - [Node.js Event Loop](https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/)
 - [Nginx Load Balancing](https://nginx.org/en/docs/http/load_balancing.html)
 - [Microservices Patterns](https://microservices.io/patterns/index.html)
 - [12-Factor App](https://12factor.net/)
-
-## Summary
-
-Phase 2 successfully demonstrated:
-
-1. ✅ **Horizontal Scaling**: 3 instances + load balancer working perfectly
-2. ✅ **Performance Impact**: 457x improvement during CPU-bound operations
-3. ✅ **Stateful Problems**: Clearly showed why external state stores are needed
-4. ✅ **Load Distribution**: Nginx round-robin confirmed via counter test
-5. ✅ **Monitoring**: Event loop delay tracking implemented
-6. ✅ **Automation**: Complete test suite for reproducible demonstrations
-
-**Key Takeaway**: Proper scaling architecture is not just about performance—it's about maintaining responsiveness under load and building fault-tolerant systems.

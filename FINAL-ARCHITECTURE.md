@@ -30,12 +30,12 @@ This document presents the complete architecture after implementing all 7 phases
 4. System confirms order or rolls back
 
 **Key Characteristics:**
-- ✅ **Distributed** – 5+ microservices
-- ✅ **Fault-Tolerant** – Saga pattern with compensations
-- ✅ **Scalable** – Horizontal scaling with load balancing
-- ✅ **Resilient** – Circuit breakers, retries, timeouts
-- ✅ **Consistent** – Distributed locking with fenced tokens
-- ✅ **Observable** – Metrics, logs, traces
+-  **Distributed** – 5+ microservices
+-  **Fault-Tolerant** – Saga pattern with compensations
+-  **Scalable** – Horizontal scaling with load balancing
+-  **Resilient** – Circuit breakers, retries, timeouts
+-  **Consistent** – Distributed locking with fenced tokens
+-  **Observable** – Metrics, logs, traces
 
 ---
 
@@ -69,8 +69,8 @@ This document presents the complete architecture after implementing all 7 phases
 **Pattern:** **API Gateway Pattern**
 
 **Problem Solved:**
-- ❌ Before: Clients talk to many services (coupling)
-- ✅ After: Clients talk to one gateway (decoupling)
+-  Before: Clients talk to many services (coupling)
+-  After: Clients talk to one gateway (decoupling)
 
 **One-Liner:** *"Single front door for distributed services"*
 
@@ -87,8 +87,8 @@ This document presents the complete architecture after implementing all 7 phases
 **Pattern:** **Horizontal Scaling**
 
 **Problem Solved:**
-- ❌ Before: Single instance → limited throughput
-- ✅ After: N instances → N× throughput
+-  Before: Single instance → limited throughput
+-  After: N instances → N× throughput
 
 **One-Liner:** *"Scale out, not up – add more servers, not bigger servers"*
 
@@ -106,8 +106,8 @@ This document presents the complete architecture after implementing all 7 phases
 **Pattern:** **Load Balancer Pattern**
 
 **Problem Solved:**
-- ❌ Before: One instance handles all traffic (bottleneck)
-- ✅ After: Traffic distributed evenly across instances
+-  Before: One instance handles all traffic (bottleneck)
+-  After: Traffic distributed evenly across instances
 
 **One-Liner:** *"Traffic cop directing requests to available servers"*
 
@@ -125,8 +125,8 @@ This document presents the complete architecture after implementing all 7 phases
 **Pattern:** **Event-Driven Architecture (EDA)**
 
 **Problem Solved:**
-- ❌ Before: Synchronous service-to-service calls (tight coupling)
-- ✅ After: Asynchronous events (loose coupling)
+-  Before: Synchronous service-to-service calls (tight coupling)
+-  After: Asynchronous events (loose coupling)
 
 **Key Benefits:**
 - Services don't need to know about each other
@@ -149,14 +149,14 @@ This document presents the complete architecture after implementing all 7 phases
 **Pattern:** **Saga Pattern (Choreography)**
 
 **Problem Solved:**
-- ❌ Before: No distributed transactions → data inconsistency
-- ✅ After: Saga with compensations → eventual consistency
+-  Before: No distributed transactions → data inconsistency
+-  After: Saga with compensations → eventual consistency
 
 **Example Flow:**
 ```
-1. Order created ✅
-2. Inventory reserved ✅
-3. Payment failed ❌
+1. Order created 
+2. Inventory reserved 
+3. Payment failed 
 4. COMPENSATE: Release inventory ↩️
 5. COMPENSATE: Cancel order ↩️
 ```
@@ -177,8 +177,8 @@ This document presents the complete architecture after implementing all 7 phases
 **Pattern:** **Distributed Lock Pattern + Fenced Tokens**
 
 **Problem Solved:**
-- ❌ Before: Race conditions → lost updates, double-spending
-- ✅ After: Distributed locks → safe concurrent access
+-  Before: Race conditions → lost updates, double-spending
+-  After: Distributed locks → safe concurrent access
 
 **Key Scenarios:**
 1. **Inventory Management**: Prevent overselling
@@ -201,8 +201,8 @@ This document presents the complete architecture after implementing all 7 phases
 **Pattern:** **3 Pillars of Observability**
 
 **Problem Solved:**
-- ❌ Before: "It's slow" → no idea why
-- ✅ After: "P95 latency is 2.5s on payment service due to DB connection pool exhaustion"
+-  Before: "It's slow" → no idea why
+-  After: "P95 latency is 2.5s on payment service due to DB connection pool exhaustion"
 
 **Key Metrics:**
 - **Golden Signals**: Latency, Traffic, Errors, Saturation
@@ -369,7 +369,7 @@ This document presents the complete architecture after implementing all 7 phases
 7️⃣ KAFKA → ORDER SERVICE
    Consumes: PaymentProcessed
    - Updates order status: CONFIRMED
-   - Saga completed successfully ✅
+   - Saga completed successfully 
 
 8️⃣ KAFKA → ANALYTICS SERVICE
    Consumes: OrderCreated, PaymentProcessed
@@ -400,11 +400,11 @@ This document presents the complete architecture after implementing all 7 phases
    Status: PENDING
 
 3️⃣ INVENTORY SERVICE
-   - Reserves inventory ✅
+   - Reserves inventory 
    - Produces: InventoryReserved
 
 4️⃣ PAYMENT SERVICE
-   - Payment fails ❌ (insufficient funds)
+   - Payment fails  (insufficient funds)
    - Produces: PaymentFailed
 
 5️⃣ SAGA COMPENSATION STARTS ↩️
@@ -419,7 +419,7 @@ This document presents the complete architecture after implementing all 7 phases
    - Updates order status: CANCELLED
    - Produces: OrderCancelled
 
-8️⃣ SAGA COMPLETED WITH COMPENSATION ✅
+8️⃣ SAGA COMPLETED WITH COMPENSATION 
    Final State: Order cancelled, inventory released, no charge
 
 📊 PROMETHEUS RECORDS:
@@ -440,7 +440,7 @@ REQUEST A                          REQUEST B
     ▼                                  ▼
 Lock "inventory:item-123"          Lock "inventory:item-123"
     │                                  │
-    ├─ ACQUIRE (SUCCESS) ✅            ├─ ACQUIRE (WAIT) ⏳
+    ├─ ACQUIRE (SUCCESS)             ├─ ACQUIRE (WAIT) ⏳
     │                                  │
     ├─ Check stock: 1 item             │
     │                                  │
@@ -452,11 +452,11 @@ Lock "inventory:item-123"          Lock "inventory:item-123"
     │                                  │
     ├─ RELEASE LOCK                    │
     │                                  │
-    │                                  ├─ ACQUIRE (SUCCESS) ✅
+    │                                  ├─ ACQUIRE (SUCCESS) 
     │                                  │
     │                                  ├─ Check stock: 0 items
     │                                  │
-    │                                  ├─ FAIL: Out of stock ❌
+    │                                  ├─ FAIL: Out of stock 
     │                                  │
     │                                  ├─ RELEASE LOCK
 
@@ -605,11 +605,11 @@ Lock "inventory:item-123"          Lock "inventory:item-123"
 ## 🎯 Key Takeaways
 
 ### What We Achieved
-✅ Built a **production-ready distributed system** from scratch  
-✅ Implemented **12+ enterprise patterns**  
-✅ Created **comprehensive documentation** (2000+ lines)  
-✅ Wrote **test scripts** to demonstrate all patterns  
-✅ Added **observability** for monitoring and debugging
+ Built a **production-ready distributed system** from scratch  
+ Implemented **12+ enterprise patterns**  
+ Created **comprehensive documentation** (2000+ lines)  
+ Wrote **test scripts** to demonstrate all patterns  
+ Added **observability** for monitoring and debugging
 
 ### Core Learnings
 1. **Distributed systems are hard** – race conditions, consistency, observability

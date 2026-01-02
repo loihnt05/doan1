@@ -8,7 +8,7 @@ Phase 6 addresses **the most critical challenges in distributed systems**: race 
 
 **The Problem:**
 ```
-2 API instances → both process same order → double payment ❌
+2 API instances → both process same order → double payment 
 ```
 
 **What You'll Learn:**
@@ -57,7 +57,7 @@ T6                       Write: 900         900  ← WRONG!
 
 **Expected: $800**  
 **Actual: $900**  
-**Lost: $100** ❌
+**Lost: $100** 
 
 This is a **check-then-act race condition**.
 
@@ -87,13 +87,13 @@ async processPayment() {
 
 **Why this fails:**
 
-❌ **Multiple instances**: Lock only works within single process  
-❌ **Process restart**: Lock state lost  
-❌ **Not distributed**: Each instance has its own `locked` variable
+ **Multiple instances**: Lock only works within single process  
+ **Process restart**: Lock state lost  
+ **Not distributed**: Each instance has its own `locked` variable
 
 ```
 Instance 1: locked = true  → processes
-Instance 2: locked = false → also processes ❌
+Instance 2: locked = false → also processes 
 ```
 
 ---
@@ -243,13 +243,13 @@ async acquireRedlock(key: string, ttl: number) {
 
 ### When to Use Redlock
 
-✅ **Use Redlock when:**
+ **Use Redlock when:**
 - High availability is critical
 - Can tolerate operational complexity
 - Short critical sections (< 1 second)
 - Financial transactions, inventory updates
 
-❌ **Don't use Redlock when:**
+ **Don't use Redlock when:**
 - Single Redis is sufficient (most cases)
 - Long-running operations (use lease extension)
 - Strong consistency required (use Etcd/Zookeeper instead)
@@ -283,7 +283,7 @@ T3                                Lock expires
 T4                                Acquire lock
 T5                                Process + write
 T6    Resume from GC pause
-T7    Write ← STALE DATA! ❌
+T7    Write ← STALE DATA! 
 ```
 
 **Worker A writes stale data** even though it no longer holds the lock!
@@ -307,7 +307,7 @@ T3    GC pause
 T4                          Get token=2           2
 T5                          Acquire lock
 T6                          Process + write(2)    2       Write OK
-T7    Resume, try write(1)                        2       Rejected ✅
+T7    Resume, try write(1)                        2       Rejected 
 ```
 
 **Storage validates token:**
@@ -359,10 +359,10 @@ async processOrderWithFencedToken(orderId: string) {
 
 ### Key Points
 
-✅ **Token always increases** (Redis INCR is atomic)  
-✅ **Storage rejects old tokens** (prevents stale writes)  
-✅ **Works even if lock expires** (token validation catches it)  
-✅ **Essential for financial systems**
+ **Token always increases** (Redis INCR is atomic)  
+ **Storage rejects old tokens** (prevents stale writes)  
+ **Works even if lock expires** (token validation catches it)  
+ **Essential for financial systems**
 
 ---
 
@@ -422,13 +422,13 @@ try {
 
 ### When to Use
 
-✅ **Use consensus-based locks when:**
+ **Use consensus-based locks when:**
 - **Strong consistency** required (banking, inventory)
 - **Leader election** needed
 - **Configuration management** (service discovery)
 - Can afford operational complexity
 
-❌ **Use Redis locks when:**
+ **Use Redis locks when:**
 - Best-effort locking sufficient
 - Performance > consistency
 - Simple operations
@@ -506,7 +506,7 @@ Without jitter:
                  ↓
           all retry at T+1s
                  ↓
-          server overloaded ❌
+          server overloaded 
 ```
 
 With jitter:
@@ -515,7 +515,7 @@ With jitter:
                  ↓
           retry spread over T+500ms to T+1500ms
                  ↓
-          load distributed ✅
+          load distributed 
 ```
 
 ### 4. Bulkhead Pattern
@@ -615,7 +615,7 @@ Without Lock:
 
 With Lock:
   Final Balance: $0 (Expected: $0)
-  Status: ✅ SAFE
+  Status:  SAFE
 ```
 
 ### Test 2: Fenced Tokens
@@ -691,14 +691,14 @@ Without Lock:
   Instance 2: balance = 1000 ─┤ ← All read same value
   Instance 3: balance = 1000 ─┘
                                ↓
-                        Race condition! ❌
+                        Race condition! 
 
 With Lock:
   Instance 1: Acquire lock → process → release
   Instance 2: Wait for lock → process → release
   Instance 3: Wait for lock → process → release
                                ↓
-                        Sequential execution ✅
+                        Sequential execution 
 ```
 
 ---
@@ -820,15 +820,15 @@ fencedTokenRejections.inc();
 
 ## 📚 Summary
 
-**Phase 6 Complete!** ✅
+**Phase 6 Complete!** 
 
 You now understand:
-- ✅ Race conditions in distributed systems
-- ✅ Redis distributed locks (SET NX PX)
-- ✅ Redlock algorithm for HA
-- ✅ Fenced tokens to prevent stale writes
-- ✅ Reliability patterns (retry, timeout, bulkhead)
-- ✅ When to use which locking strategy
+-  Race conditions in distributed systems
+-  Redis distributed locks (SET NX PX)
+-  Redlock algorithm for HA
+-  Fenced tokens to prevent stale writes
+-  Reliability patterns (retry, timeout, bulkhead)
+-  When to use which locking strategy
 
 **Next Steps:**
 - Monitor lock metrics in production

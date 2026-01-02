@@ -16,7 +16,7 @@ T4   |                          |                 | Expired!
 T5   |                          | Acquire lock    | B owns
 T6   |                          | Process + write | B owns
 T7   | Resume from GC pause     |                 | B owns
-T8   | Write data ← STALE! ❌   |                 | B owns
+T8   | Write data ← STALE!    |                 | B owns
 ```
 
 **Worker A writes stale data** even though it no longer holds the lock!
@@ -25,9 +25,9 @@ T8   | Write data ← STALE! ❌   |                 | B owns
 
 Distributed locks solve **mutual exclusion** but not **timing bugs**:
 
-1. ✅ Only one process holds lock at a time
-2. ❌ Process can continue after lock expires
-3. ❌ Delayed process writes stale data
+1.  Only one process holds lock at a time
+2.  Process can continue after lock expires
+3.  Delayed process writes stale data
 
 ## Solution: Fenced Tokens
 
@@ -58,9 +58,9 @@ T3   | Process...      |                 | 1     |
 T4   | GC pause        |                 | 1     |
 T5   | (paused)        | Get token=2     | 2     |
 T6   | (paused)        | Acquire lock    | 2     |
-T7   | (paused)        | Write(token=2)  | 2     | ✅ Accept
+T7   | (paused)        | Write(token=2)  | 2     |  Accept
 T8   | Resume          |                 | 2     |
-T9   | Write(token=1)  |                 | 2     | ❌ Reject
+T9   | Write(token=1)  |                 | 2     |  Reject
 ```
 
 **Storage rejects token=1** because current token is 2!
@@ -152,29 +152,29 @@ async function saveToDatabase(data, token) {
 
 ### When You MUST Use Fenced Tokens
 
-✅ **Financial transactions**
+ **Financial transactions**
 - Money transfers
 - Payment processing
 - Account balance updates
 
-✅ **Inventory management**
+ **Inventory management**
 - Stock quantity updates
 - Reservation systems
 - Ticket booking
 
-✅ **Critical state updates**
+ **Critical state updates**
 - User permissions
 - Configuration changes
 - Database migrations
 
 ### When Fenced Tokens Are Optional
 
-❌ **Best-effort operations**
+ **Best-effort operations**
 - Metrics collection
 - Cache updates
 - Log aggregation
 
-❌ **Idempotent operations**
+ **Idempotent operations**
 - Sending emails (with deduplication)
 - Publishing events (with message IDs)
 
@@ -182,20 +182,20 @@ async function saveToDatabase(data, token) {
 
 | Approach | Mutual Exclusion | Prevents Stale Writes | Complexity |
 |----------|------------------|----------------------|------------|
-| **No Lock** | ❌ | ❌ | Low |
-| **Distributed Lock** | ✅ | ❌ | Medium |
-| **Lock + Fenced Token** | ✅ | ✅ | High |
+| **No Lock** |  |  | Low |
+| **Distributed Lock** |  |  | Medium |
+| **Lock + Fenced Token** |  |  | High |
 
 ## Implementation Tips
 
 ### 1. Generate Token Before Lock
 
 ```typescript
-// ✅ Correct order
+//  Correct order
 const token = await getToken();
 const lock = await acquireLock();
 
-// ❌ Wrong order - lock might expire before token generated
+//  Wrong order - lock might expire before token generated
 const lock = await acquireLock();
 const token = await getToken();
 ```
@@ -266,4 +266,4 @@ async function transferMoney(from: string, to: string, amount: number) {
 5. **Storage validates** token before write
 6. **Essential** for financial systems
 
-Next: [Redlock Algorithm](./redlock-algorithm.md)
+Next: Explore Redlock algorithm for multi-node Redis setups

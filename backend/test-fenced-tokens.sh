@@ -47,7 +47,7 @@ echo ""
 sleep 3
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}✅ TEST: Demonstrating Fenced Tokens${NC}"
+echo -e "${GREEN} TEST: Demonstrating Fenced Tokens${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
@@ -127,7 +127,7 @@ echo "4. Only worker with highest token succeeds"
 echo "5. Workers with stale tokens are rejected"
 echo ""
 
-echo -e "${GREEN}Result:${NC} Stale writes prevented! ✅"
+echo -e "${GREEN}Result:${NC} Stale writes prevented! "
 echo ""
 
 # Key Takeaways

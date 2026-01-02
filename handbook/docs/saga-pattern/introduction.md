@@ -96,14 +96,14 @@ graph LR
 ```
 
 **Pros:**
-- ✅ Loose coupling
-- ✅ No single point of failure
-- ✅ Easy to extend
+-  Loose coupling
+-  No single point of failure
+-  Easy to extend
 
 **Cons:**
-- ❌ Hard to track overall flow
-- ❌ Cyclic dependencies possible
-- ❌ Difficult to debug
+-  Hard to track overall flow
+-  Cyclic dependencies possible
+-  Difficult to debug
 
 ### 2. Orchestration (Centralized)
 
@@ -119,25 +119,25 @@ graph TD
 ```
 
 **Pros:**
-- ✅ Clear control flow
-- ✅ Easy to understand
-- ✅ Centralized state
+-  Clear control flow
+-  Easy to understand
+-  Centralized state
 
 **Cons:**
-- ❌ Central point of failure
-- ❌ Orchestrator complexity
-- ❌ Tight coupling
+-  Central point of failure
+-  Orchestrator complexity
+-  Tight coupling
 
 ## When to Use Sagas
 
-### Good Use Cases ✅
+### Good Use Cases 
 
 - **E-commerce orders**: Order → Payment → Inventory → Shipping
 - **Travel booking**: Flight + Hotel + Car rental
 - **Financial transactions**: Transfer between accounts
 - **Multi-step workflows**: Any process across services
 
-### Not Recommended ❌
+### Not Recommended 
 
 - **Within a single service**: Use database transactions
 - **Real-time requirements**: Sagas are eventually consistent
@@ -190,16 +190,16 @@ ROLLBACK; -- Undo everything
 ### Cannot Compensate
 
 Some actions cannot be undone:
-- ❌ Email sent
-- ❌ Physical item shipped
-- ❌ External API called (cannot guarantee undo)
-- ❌ Time-sensitive actions (concert tickets sold)
+-  Email sent
+-  Physical item shipped
+-  External API called (cannot guarantee undo)
+-  Time-sensitive actions (concert tickets sold)
 
 **Solution**: Design saga to minimize irreversible steps, or accept eventual consistency.
 
 ## Next Steps
 
 - [Choreography Pattern](./choreography.md) - Event-driven saga
-- [Orchestration Pattern](./orchestration.md) - Centralized saga
-- [Compensation Strategies](./compensation.md) - Designing compensations
+- Learn about orchestration pattern for centralized saga control
+- Study compensation strategies for designing rollback logic
 - [Streaming vs Messaging](./streaming-vs-messaging.md) - Event processing

@@ -4,14 +4,14 @@
 
 After completing this phase, you will understand:
 
-- ✅ What a Load Balancer does (and what it does NOT do)
-- ✅ Static vs Dynamic load balancing algorithms
-- ✅ Health checks (active vs passive)
-- ✅ Differences between: Load Balancer, Reverse Proxy, Forward Proxy, API Gateway
-- ✅ Client-side vs Server-side load balancing
-- ✅ Kubernetes networking concepts (ClusterIP, NodePort, LoadBalancer, Ingress)
-- ✅ Service discovery patterns
-- ✅ Service mesh concepts
+-  What a Load Balancer does (and what it does NOT do)
+-  Static vs Dynamic load balancing algorithms
+-  Health checks (active vs passive)
+-  Differences between: Load Balancer, Reverse Proxy, Forward Proxy, API Gateway
+-  Client-side vs Server-side load balancing
+-  Kubernetes networking concepts (ClusterIP, NodePort, LoadBalancer, Ingress)
+-  Service discovery patterns
+-  Service mesh concepts
 
 ---
 
@@ -70,14 +70,14 @@ upstream api_gateway {
 ```
 
 **Pros**:
-- ✅ Simple and fair
-- ✅ Works well for identical instances
-- ✅ Evenly distributes load
+-  Simple and fair
+-  Works well for identical instances
+-  Evenly distributes load
 
 **Cons**:
-- ❌ Doesn't consider instance load
-- ❌ Doesn't consider request complexity
-- ❌ May overload slower instances
+-  Doesn't consider instance load
+-  Doesn't consider request complexity
+-  May overload slower instances
 
 **Best for**: Homogeneous workloads with similar request patterns
 
@@ -97,13 +97,13 @@ upstream api_gateway {
 ```
 
 **Pros**:
-- ✅ Better for long-lived connections
-- ✅ Adapts to load dynamically
-- ✅ Prevents overloading busy instances
+-  Better for long-lived connections
+-  Adapts to load dynamically
+-  Prevents overloading busy instances
 
 **Cons**:
-- ❌ Slightly more overhead
-- ❌ Requires connection tracking
+-  Slightly more overhead
+-  Requires connection tracking
 
 **Best for**:
 - WebSocket connections
@@ -128,14 +128,14 @@ upstream api_gateway {
 ```
 
 **Pros**:
-- ✅ Session persistence without shared storage
-- ✅ Consistent routing per client
+-  Session persistence without shared storage
+-  Consistent routing per client
 
 **Cons**:
-- ❌ Uneven load distribution
-- ❌ Doesn't work well with NAT/proxies
-- ❌ Session lost if instance fails
-- ❌ Not recommended for stateless architectures
+-  Uneven load distribution
+-  Doesn't work well with NAT/proxies
+-  Session lost if instance fails
+-  Not recommended for stateless architectures
 
 **Best for**:
 - Legacy apps with server-side sessions (temporary solution)
@@ -179,14 +179,14 @@ upstream api_gateway {
 
 **Without health checks**:
 ```
-Client → LB → Dead Instance ❌
+Client → LB → Dead Instance 
                 ↓
             Timeout!
 ```
 
 **With health checks**:
 ```
-Client → LB → Healthy Instance ✅
+Client → LB → Healthy Instance 
               (dead instance bypassed)
 ```
 
@@ -206,13 +206,13 @@ upstream api_gateway {
 ```
 
 **Pros**:
-- ✅ No extra requests
-- ✅ Works with any backend
-- ✅ Built into open source Nginx
+-  No extra requests
+-  Works with any backend
+-  Built into open source Nginx
 
 **Cons**:
-- ❌ Reactive (waits for user traffic to fail)
-- ❌ Some user requests will fail before marking down
+-  Reactive (waits for user traffic to fail)
+-  Some user requests will fail before marking down
 
 ---
 
@@ -229,13 +229,13 @@ location / {
 ```
 
 **Pros**:
-- ✅ Proactive detection
-- ✅ Prevents user traffic from hitting dead instances
-- ✅ Configurable check frequency
+-  Proactive detection
+-  Prevents user traffic from hitting dead instances
+-  Configurable check frequency
 
 **Cons**:
-- ❌ Requires Nginx Plus (paid) or cloud load balancer
-- ❌ Additional load on backends
+-  Requires Nginx Plus (paid) or cloud load balancer
+-  Additional load on backends
 
 ---
 
@@ -366,7 +366,7 @@ Client → Forward Proxy → Internet
 
 **Examples**: Squid, Corporate proxy, VPN
 
-**❌ Not used in this project**
+** Not used in this project**
 
 ---
 
@@ -485,15 +485,15 @@ Services
 ```
 
 **Pros**:
-- ✅ Simple clients (don't need LB logic)
-- ✅ Centralized control
-- ✅ Easy to monitor
-- ✅ Works with any client
+-  Simple clients (don't need LB logic)
+-  Centralized control
+-  Easy to monitor
+-  Works with any client
 
 **Cons**:
-- ❌ Extra hop (latency)
-- ❌ Single point of failure
-- ❌ LB can become bottleneck
+-  Extra hop (latency)
+-  Single point of failure
+-  LB can become bottleneck
 
 **Used by**: Most web applications, our project
 
@@ -518,14 +518,14 @@ Services
 4. Connects directly
 
 **Pros**:
-- ✅ No extra hop (lower latency)
-- ✅ No LB bottleneck
-- ✅ Better for service mesh
+-  No extra hop (lower latency)
+-  No LB bottleneck
+-  Better for service mesh
 
 **Cons**:
-- ❌ Complex clients (LB logic in each)
-- ❌ Harder to monitor
-- ❌ Inconsistent LB across clients
+-  Complex clients (LB logic in each)
+-  Harder to monitor
+-  Inconsistent LB across clients
 
 **Used by**:
 - Netflix Ribbon
@@ -551,16 +551,16 @@ Services
 ### 6.1 Without Service Discovery (Static)
 
 ```typescript
-// Hardcoded service URLs ❌
+// Hardcoded service URLs 
 const USER_SERVICE = 'http://user-service:3001';
 const ORDER_SERVICE = 'http://order-service:3002';
 ```
 
 **Problems**:
-- ❌ Fragile (what if port changes?)
-- ❌ Manual updates needed
-- ❌ No automatic failover
-- ❌ Doesn't scale
+-  Fragile (what if port changes?)
+-  Manual updates needed
+-  No automatic failover
+-  Doesn't scale
 
 ---
 
@@ -585,10 +585,10 @@ const ORDER_SERVICE = 'http://order-service:3002';
 4. Registry monitors health, removes dead instances
 
 **Benefits**:
-- ✅ Dynamic instance discovery
-- ✅ Automatic failover
-- ✅ Scales automatically
-- ✅ Health monitoring built-in
+-  Dynamic instance discovery
+-  Automatic failover
+-  Scales automatically
+-  Health monitoring built-in
 
 **Examples**:
 - **Consul**: HashiCorp's service mesh
@@ -624,10 +624,10 @@ spec:
    ```
 
 **Benefits**:
-- ✅ Zero configuration
-- ✅ Automatic load balancing
-- ✅ Health checks integrated
-- ✅ No external registry needed
+-  Zero configuration
+-  Automatic load balancing
+-  Health checks integrated
+-  No external registry needed
 
 ---
 
@@ -710,10 +710,10 @@ admin.example.com       → admin-service
 
 | Type | External Access | Use Case | Cost |
 |------|----------------|----------|------|
-| **ClusterIP** | ❌ No | Internal only | Free |
-| **NodePort** | ✅ Yes | Development | Free |
-| **LoadBalancer** | ✅ Yes | Production | $$ per LB |
-| **Ingress** | ✅ Yes | Multiple services | $ (shared LB) |
+| **ClusterIP** |  No | Internal only | Free |
+| **NodePort** |  Yes | Development | Free |
+| **LoadBalancer** |  Yes | Production | $$ per LB |
+| **Ingress** |  Yes | Multiple services | $ (shared LB) |
 
 **Best Practice**:
 - Internal services: ClusterIP
@@ -769,13 +769,13 @@ Service A → Sidecar Proxy → Sidecar Proxy → Service B
 ### 8.2 What It Handles
 
 **Service mesh takes care of**:
-- ✅ mTLS (mutual TLS) - automatic encryption
-- ✅ Traffic routing (canary, blue-green)
-- ✅ Load balancing (client-side)
-- ✅ Retries and timeouts
-- ✅ Circuit breaking
-- ✅ Observability (tracing, metrics)
-- ✅ Authentication & authorization
+-  mTLS (mutual TLS) - automatic encryption
+-  Traffic routing (canary, blue-green)
+-  Load balancing (client-side)
+-  Retries and timeouts
+-  Circuit breaking
+-  Observability (tracing, metrics)
+-  Authentication & authorization
 
 **Without writing ANY code in your service!**
 
@@ -828,14 +828,14 @@ Service A → Sidecar Proxy → Sidecar Proxy → Service B
 
 ### 8.5 When to Use Service Mesh
 
-**✅ Use when**:
+** Use when**:
 - Many microservices (> 10)
 - Need mTLS everywhere
 - Complex routing requirements
 - High security requirements
 - Want observability without code changes
 
-**❌ Don't use when**:
+** Don't use when**:
 - Simple architecture (< 5 services)
 - Adding complexity isn't worth it
 - Team lacks expertise
@@ -917,40 +917,40 @@ done
 
 ### What We've Covered
 
-✅ **Load Balancing Algorithms**
+ **Load Balancing Algorithms**
 - Round Robin (static)
 - Least Connections (dynamic)
 - IP Hash (sticky sessions)
 - Weighted distribution
 
-✅ **Health Checks**
+ **Health Checks**
 - Passive (Nginx open source)
 - Active (conceptual)
 - Kubernetes probes (liveness, readiness, startup)
 
-✅ **Proxy Types**
+ **Proxy Types**
 - Reverse Proxy (our Nginx)
 - Forward Proxy (not used)
 - Load Balancer vs Reverse Proxy
 - API Gateway (business-aware)
 
-✅ **Load Balancing Patterns**
+ **Load Balancing Patterns**
 - Server-side (traditional, our setup)
 - Client-side (service mesh)
 
-✅ **Service Discovery**
+ **Service Discovery**
 - Static (hardcoded)
 - Dynamic (registry-based)
 - Kubernetes DNS (automatic)
 
-✅ **Kubernetes Networking**
+ **Kubernetes Networking**
 - ClusterIP (internal)
 - NodePort (development)
 - LoadBalancer (production)
 - Ingress (Layer 7 routing)
 - kube-proxy (how it works)
 
-✅ **Service Mesh**
+ **Service Mesh**
 - Sidecar pattern
 - mTLS, retries, circuit breaking
 - Istio, Linkerd

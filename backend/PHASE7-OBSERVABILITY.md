@@ -288,9 +288,9 @@ lock_contentions_total{resource="inventory:item-123",service="order-service"} 28
 ```
 
 Can you:
-- Filter by userId programmatically? ❌
-- Aggregate errors by error type? ❌
-- Count failures per hour? ❌
+- Filter by userId programmatically? 
+- Aggregate errors by error type? 
+- Count failures per hour? 
 
 **Good (structured):**
 ```json
@@ -844,7 +844,7 @@ groups:
 
 ---
 
-## ✅ Production Checklist
+##  Production Checklist
 
 ### Metrics
 - [ ] All services expose `/metrics` endpoint

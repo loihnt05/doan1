@@ -130,16 +130,16 @@ OrderCreated → Payment Service
 ```
 
 **Pros:**
-- ✅ Loose coupling
-- ✅ No single point of failure
-- ✅ Easy to add new participants
-- ✅ Services are truly independent
+-  Loose coupling
+-  No single point of failure
+-  Easy to add new participants
+-  Services are truly independent
 
 **Cons:**
-- ❌ Hard to understand overall flow
-- ❌ Cyclic dependencies possible
-- ❌ Difficult to debug
-- ❌ No central state tracking
+-  Hard to understand overall flow
+-  Cyclic dependencies possible
+-  Difficult to debug
+-  No central state tracking
 
 **When to use:**
 - Simple workflows (2-4 steps)
@@ -164,16 +164,16 @@ Saga Orchestrator:
 ```
 
 **Pros:**
-- ✅ Clear control flow
-- ✅ Easy to understand
-- ✅ Easy to add business logic
-- ✅ Centralized state management
+-  Clear control flow
+-  Easy to understand
+-  Easy to add business logic
+-  Centralized state management
 
 **Cons:**
-- ❌ Central point of failure
-- ❌ Orchestrator becomes complex
-- ❌ Tight coupling to orchestrator
-- ❌ Services less independent
+-  Central point of failure
+-  Orchestrator becomes complex
+-  Tight coupling to orchestrator
+-  Services less independent
 
 **When to use:**
 - Complex workflows (5+ steps)
@@ -895,19 +895,19 @@ updateReadModel(event: OrderCreatedEvent) {
 
 ### What We Built
 
-✅ **Saga Choreography Pattern**
+ **Saga Choreography Pattern**
 - Order Service (initiator + compensation)
 - Payment Service (participant)
 - Inventory Service (participant)
 - Compensation actions on failure
 
-✅ **Streaming Processing**
+ **Streaming Processing**
 - Analytics Service (real-time aggregation)
 - Revenue tracking
 - Success rate calculation
 - Time windowing
 
-✅ **Event-Driven Patterns**
+ **Event-Driven Patterns**
 - Idempotency
 - Event versioning
 - Correlation IDs

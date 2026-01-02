@@ -61,12 +61,12 @@ Logs tell you **why** something happened by providing detailed context:
 
 **Structured vs Unstructured:**
 
-❌ **Unstructured (Bad):**
+ **Unstructured (Bad):**
 ```
 2024-01-15 10:30:45 ERROR Payment failed for user user-123 order order-456 amount 99.99
 ```
 
-✅ **Structured (Good):**
+ **Structured (Good):**
 ```json
 {"level":"ERROR","userId":"user-123","orderId":"order-456","amount":99.99}
 ```
@@ -139,7 +139,7 @@ logger.info({ traceId }, 'Processing payment');
    ```
    [Order] 50ms → [Payment] 2,400ms (DB query) → [Confirm] 50ms
    ```
-   **Insight:** Database query taking 2.4s (should be <100ms)
+   **Insight:** Database query taking 2.4s (should be &lt;100ms)
 
 4. **Root Cause:** Database connection pool exhausted
    **Fix:** Increase connection pool size
@@ -323,7 +323,7 @@ kafka_consumer_lag{topic="orders"}
 
 ---
 
-## ✅ Production Checklist
+##  Production Checklist
 
 ### Metrics
 - [ ] All services expose `/metrics` endpoint

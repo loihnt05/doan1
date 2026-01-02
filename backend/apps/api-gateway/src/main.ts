@@ -12,7 +12,7 @@ function startEventLoopMonitoring() {
     setImmediate(() => {
       const delay = Date.now() - start;
       if (delay > 10) {
-        console.log(`⚠️  [PID ${process.pid}] Event loop delay: ${delay}ms`);
+        console.log(`  [PID ${process.pid}] Event loop delay: ${delay}ms`);
       }
     });
   }, 1000);

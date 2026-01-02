@@ -2,46 +2,25 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Lời mở đầu
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Chào mừng bạn đến với **Handbook do đội backend xây dựng**. Đây là bản tóm lược tiếng Việt của toàn bộ triển khai trong thư mục `backend/`, giúp chúng ta bám sát hiện trạng code thay vì lý thuyết chung chung.
 
-## Getting Started
+## Cách sử dụng nhanh
+- Đọc [Sổ Tay Điều Hành Microservices 2026](./handbook-intro.md) để nắm cấu trúc 0 → 10 (Runtime, Auth, Cache, Data, ...).
+- Mỗi mục đều chỉ thẳng tới thư mục thực thi trong `backend/apps/*` hoặc `backend/libs/*`; mở file tương ứng để xem mã nguồn.
+- Khi chỉnh sửa kiến trúc, cập nhật song song cả handbook lẫn code để giữ tính đồng bộ.
 
-Get started by **creating a new site**.
+## Công cụ cần có
+- Node.js v23.7 trở lên (trùng với môi trường backend).
+- pnpm để quản lý package cho cả `backend/` và `handbook/`.
+- Docker / Docker Compose nếu muốn tái hiện demo.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+## Luồng làm việc gợi ý
+1. Chạy `pnpm install` trong cả hai thư mục `backend/` và `handbook/`.
+2. Khởi động tài liệu bằng `pnpm start` (Docusaurus) để xem bản cập nhật realtime.
+3. Sau mỗi thay đổi kiến trúc, bổ sung mục tương ứng trong handbook trước khi merge code.
 
-### What you'll need
-
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
-
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
-
-```bash
-npm init docusaurus@latest my-website classic
-```
-
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
-
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+## Liên hệ
+- Vấn đề liên quan kiến trúc: trao đổi qua channel nội bộ.
+- Cập nhật tài liệu: mở PR trong thư mục `handbook/` và dẫn chứng bằng đường dẫn file thực thi ở backend.

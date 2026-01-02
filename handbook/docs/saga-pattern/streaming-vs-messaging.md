@@ -263,15 +263,15 @@ Events ────────────▶│   Hadoop/Spark   │───�
 - Merge results in serving layer
 
 **Pros:**
-- ✅ Accurate results (batch)
-- ✅ Low latency (speed)
-- ✅ Best of both worlds
+-  Accurate results (batch)
+-  Low latency (speed)
+-  Best of both worlds
 
 **Cons:**
-- ❌ Complex (maintain two systems)
-- ❌ Hard to sync batch and speed layers
-- ❌ Different codebases
-- ❌ Duplicate logic
+-  Complex (maintain two systems)
+-  Hard to sync batch and speed layers
+-  Different codebases
+-  Duplicate logic
 
 ### Kappa Architecture (Modern)
 
@@ -289,14 +289,14 @@ Events ──▶ Stream Processor (Kafka Streams) ──▶ Serving Layer
 - Same code for batch and streaming
 
 **Pros:**
-- ✅ Simple (one system)
-- ✅ Easy to maintain
-- ✅ Kafka replay for reprocessing
-- ✅ Modern approach
+-  Simple (one system)
+-  Easy to maintain
+-  Kafka replay for reprocessing
+-  Modern approach
 
 **Cons:**
-- ❌ Need to reprocess for schema changes
-- ❌ Single processing model (no batch optimization)
+-  Need to reprocess for schema changes
+-  Single processing model (no batch optimization)
 
 **Most systems today use Kappa**
 
@@ -387,21 +387,21 @@ async handleEvent(event) {
 
 ### Use Messaging When:
 
-- ✅ Task execution (send email, call API)
-- ✅ One-time operations
-- ✅ No state needed
-- ✅ Simple event handling
-- ✅ Independent events
+-  Task execution (send email, call API)
+-  One-time operations
+-  No state needed
+-  Simple event handling
+-  Independent events
 
 ### Use Streaming When:
 
-- ✅ Analytics and metrics
-- ✅ Aggregations (sum, count, average)
-- ✅ Time-based processing
-- ✅ Need to combine multiple events
-- ✅ Dashboard and reporting
-- ✅ Fraud detection
-- ✅ Monitoring systems
+-  Analytics and metrics
+-  Aggregations (sum, count, average)
+-  Time-based processing
+-  Need to combine multiple events
+-  Dashboard and reporting
+-  Fraud detection
+-  Monitoring systems
 
 ## Implementation in Phase 5
 
@@ -468,4 +468,4 @@ setInterval(() => {
 - Analytics service uses streaming (revenue aggregation)
 - Both patterns working together
 
-Next: [Lambda vs Kappa Architecture](./lambda-kappa-architecture.md)
+Next: Explore Lambda and Kappa architectures for stream processing

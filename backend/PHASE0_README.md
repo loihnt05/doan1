@@ -1,6 +1,6 @@
 # Phase 0 - NestJS Monorepo Foundation
 
-## ✅ Phase 0 Completed
+##  Phase 0 Completed
 
 This phase implements a basic NestJS monorepo with 3 independent microservices running in Docker.
 
@@ -104,25 +104,25 @@ curl localhost:3003/pay
 
 ### Phase 0 Checklist
 
-✅ NestJS monorepo setup
-✅ 3 independent microservices created
-✅ Each service has health check endpoint
-✅ Each service has one business endpoint returning fake data
-✅ Services run on separate ports (3001, 3002, 3003)
-✅ Dockerfile using Node.js v23.7.0
-✅ Docker Compose configuration
-✅ Services communicate via internal Docker network
-✅ All services tested and working
+ NestJS monorepo setup
+ 3 independent microservices created
+ Each service has health check endpoint
+ Each service has one business endpoint returning fake data
+ Services run on separate ports (3001, 3002, 3003)
+ Dockerfile using Node.js v23.7.0
+ Docker Compose configuration
+ Services communicate via internal Docker network
+ All services tested and working
 
 ### What's NOT in Phase 0
 
-❌ API Gateway
-❌ Authentication/Authorization
-❌ Apache Kafka message broker
-❌ Redis caching
-❌ Service-to-service HTTP communication
-❌ Database connections
-❌ Environment configuration
+ API Gateway
+ Authentication/Authorization
+ Apache Kafka message broker
+ Redis caching
+ Service-to-service HTTP communication
+ Database connections
+ Environment configuration
 
 These will be added in subsequent phases.
 
