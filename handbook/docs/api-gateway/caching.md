@@ -3,11 +3,11 @@ sidebar_position: 6
 ---
 # Caching Layer
 
-## Overview
+## Tổng quan
 
-Caching stores frequently accessed data in fast storage to reduce latency, database load, and improve overall system performance.
+Caching lưu trữ dữ liệu được truy cập thường xuyên trong bộ nhớ nhanh để giảm độ trễ, tải database và cải thiện hiệu suất tổng thể của hệ thống.
 
-## Cache Levels
+## Các cấp Cache
 
 ```
 ┌──────────────────────────────────────┐
@@ -16,20 +16,20 @@ Caching stores frequently accessed data in fast storage to reduce latency, datab
                │
                ▼
 ┌──────────────────────────────────────┐
-│      1. In-Memory Cache (Node)       │ ← Fastest (microseconds)
+│      1. In-Memory Cache (Node)       │ ← Nhanh nhất (microseconds)
 │      Map, LRU Cache                  │
 └──────────────┬───────────────────────┘
                │ Miss
                ▼
 ┌──────────────────────────────────────┐
-│      2. Redis Cache                  │ ← Fast (milliseconds)
-│      Shared across instances         │
+│      2. Redis Cache                  │ ← Nhanh (milliseconds)
+│      Chia sẻ giữa các instances      │
 └──────────────┬───────────────────────┘
                │ Miss
                ▼
 ┌──────────────────────────────────────┐
-│      3. Database                     │ ← Slow (tens of ms)
-│      Source of truth                 │
+│      3. Database                     │ ← Chậm (tens of ms)
+│      Nguồn chân lý                   │
 └──────────────────────────────────────┘
 ```
 
@@ -56,7 +56,7 @@ export class MemoryCache {
       return null;
     }
 
-    // Check expiration
+    // Kiểm tra hết hạn
     if (Date.now() > item.expiresAt) {
       this.cache.delete(key);
       return null;
@@ -77,7 +77,7 @@ export class MemoryCache {
 
 ### LRU Cache
 
-Least Recently Used cache with size limit.
+Least Recently Used cache với giới hạn kích thước.
 
 ```typescript
 import LRU from 'lru-cache';
@@ -164,7 +164,7 @@ export class RedisCacheService {
 
 ### Cache-Aside Pattern
 
-Application manages cache explicitly.
+Application quản lý cache một cách rõ ràng.
 
 ```typescript
 @Injectable()
@@ -177,14 +177,14 @@ export class UserService {
   async getUser(id: string): Promise<User> {
     const cacheKey = `user:${id}`;
 
-    // 1. Check cache
+    // 1. Kiểm tra cache
     const cached = await this.cache.get<User>(cacheKey);
     if (cached) {
       console.log('Cache hit');
       return cached;
     }
 
-    // 2. Cache miss - fetch from database
+    // 2. Cache miss - lấy từ database
     console.log('Cache miss');
     const user = await this.userRepository.findOne(id);
 
@@ -192,8 +192,8 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    // 3. Store in cache
-    await this.cache.set(cacheKey, user, 300); // 5 minutes
+    // 3. Lưu vào cache
+    await this.cache.set(cacheKey, user, 300); // 5 phút
 
     return user;
   }
@@ -201,7 +201,7 @@ export class UserService {
   async updateUser(id: string, data: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.update(id, data);
 
-    // Invalidate cache
+    // Vô hiệu hóa cache
     await this.cache.delete(`user:${id}`);
 
     return user;
@@ -221,7 +221,7 @@ export class HttpCacheInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const cacheKey = this.generateCacheKey(request);
 
-    // Check cache
+    // Kiểm tra cache
     const cached = await this.cacheManager.get(cacheKey);
     if (cached) {
       return of(cached);
@@ -229,7 +229,7 @@ export class HttpCacheInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap(async (response) => {
-        // Cache the response
+        // Cache response
         await this.cacheManager.set(cacheKey, response, { ttl: 60 });
       })
     );
@@ -241,39 +241,39 @@ export class HttpCacheInterceptor implements NestInterceptor {
 }
 ```
 
-**Usage:**
+**Cách sử dụng:**
 
 ```typescript
 @Controller('api')
 export class UsersController {
   @Get('users')
   @UseInterceptors(HttpCacheInterceptor)
-  @CacheTTL(300) // 5 minutes
+  @CacheTTL(300) // 5 phút
   async getUsers() {
     return this.userService.findAll();
   }
 
   @Get('users/:id')
   @UseInterceptors(HttpCacheInterceptor)
-  @CacheTTL(600) // 10 minutes
+  @CacheTTL(600) // 10 phút
   async getUser(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 }
 ```
 
-## Caching Strategies
+## Chiến lược Caching
 
 ### 1. Write-Through Cache
 
-Write to cache and database simultaneously.
+Ghi vào cache và database đồng thời.
 
 ```typescript
 async createUser(data: CreateUserDto): Promise<User> {
-  // 1. Write to database
+  // 1. Ghi vào database
   const user = await this.userRepository.save(data);
 
-  // 2. Write to cache
+  // 2. Ghi vào cache
   await this.cache.set(`user:${user.id}`, user, 300);
 
   return user;
@@ -282,7 +282,7 @@ async createUser(data: CreateUserDto): Promise<User> {
 
 ### 2. Write-Behind Cache
 
-Write to cache immediately, database asynchronously.
+Ghi vào cache ngay lập tức, database bất đồng bộ.
 
 ```typescript
 @Injectable()
@@ -293,7 +293,7 @@ export class WriteBehindCache {
     private cache: RedisCacheService,
     private repository: Repository<any>
   ) {
-    // Flush queue periodically
+    // Flush queue định kỳ
     setInterval(() => this.flushQueue(), 5000);
   }
 

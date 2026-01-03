@@ -558,14 +558,14 @@ bucket.tokens -= costs[endpoint];
 
 Sử dụng Redis cho các triển khai multi-instance:
 
-```
-┌─────────┐
-│Gateway 1│──┐
-└─────────┘  │
-             ├──→ Redis (Shared State)
-┌─────────┐  │
-│Gateway 2│──┘
-└─────────┘
+```mermaid
+flowchart LR
+    G1["Gateway 1"]
+    G2["Gateway 2"]
+    R["Redis\nShared State"]
+
+    G1 --> R
+    G2 --> R
 ```
 
 ## Giám sát

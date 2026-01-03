@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Prometheus là hệ thống giám sát mã nguồn mở thu thập **chỉ số chuỗi thời gian** từ các ứng dụng được đo lường.
 
-## 🎯 Tại sao Prometheus?
+## Why Prometheus?
 
 ### Vấn đề
 
@@ -39,7 +39,7 @@ rate(http_requests_total{status_code=~"5.."}[15m])
 
 ---
 
-## 📊 Các loại chỉ số
+## Các loại chỉ số
 
 ### 1. Counter (Chỉ tăng lên)
 

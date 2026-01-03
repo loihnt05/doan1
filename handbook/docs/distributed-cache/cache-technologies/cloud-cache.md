@@ -16,32 +16,16 @@ Cloud Cache là implementation của Cloudflare Workers Cache API cho NestJS, cu
 
 **Sơ đồ hoạt động:**
 
-```
-                                            ┌─────────────────┐
-                                            │   HTTP Request  │
-                                            │  /cloud-cache/* │
-                                            └────────┬────────┘
-                                                    │
-                                                    ▼
-                                            ┌─────────────────┐
-                                            │ CloudCache      │
-                                            │  Controller     │
-                                            └────────┬────────┘
-                                                    │
-                                                    ▼
-                                            ┌─────────────────┐
-                                            │ CloudCache      │
-                                            │   Service       │
-                                            │  - match()      │
-                                            │  - put()        │
-                                            │  - delete()     │
-                                            └────────┬────────┘
-                                                    │
-                                                    ▼
-                                            ┌─────────────────┐
-                                            │   In-Memory     │
-                                            │   Map Storage   │
-                                            └─────────────────┘
+```mermaid
+flowchart TD
+    A[HTTP Request<br/>/cloud-cache/*]
+    B[CloudCache Controller]
+    C[CloudCache Service<br/>match<br/>put<br/>delete]
+    D[In-Memory Map Storage]
+
+    A --> B
+    B --> C
+    C --> D
 ```
 
 ## Pre-conditions

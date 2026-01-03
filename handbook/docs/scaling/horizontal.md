@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-## Horizontal Scaling
+# Horizontal Scaling
 
 Thêm nhiều máy hơn để phân phối tải.
 

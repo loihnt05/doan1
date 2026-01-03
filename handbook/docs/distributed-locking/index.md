@@ -1,5 +1,7 @@
-
-# Distributed Locking
+---
+sidebar_position: 1
+---
+# Introduction
 
 ## Tổng quan
 
@@ -28,15 +30,31 @@ async processPayment(amount: number) {
 ```
 
 **Dòng thời gian:**
-```
-Time    Instance 1          Instance 2          Balance
-─────────────────────────────────────────────────────
-T1      Read: 1000                             1000
-T2                          Read: 1000         1000
-T3      Check: OK                              1000
-T4                          Check: OK          1000
-T5      Write: 900                             900
-T6                          Write: 900         900   Should be 800!
+```mermaid  
+sequenceDiagram
+    participant I1 as Instance 1
+    participant I2 as Instance 2
+    participant DB as Database
+
+    Note over DB: Initial balance = 1000
+
+    I1 ->> DB: Read balance
+    DB -->> I1: 1000
+
+    I2 ->> DB: Read balance
+    DB -->> I2: 1000
+
+    I1 ->> DB: Check OK
+    I2 ->> DB: Check OK
+
+    I1 ->> DB: Write new balance = 900
+    DB -->> I1: Success
+
+    I2 ->> DB: Write new balance = 900
+    DB -->> I2: Success
+
+    Note over DB: Final balance = 900 (should be 800)
+
 ```
 
 **Kết quả:** Mất $100 do race condition!

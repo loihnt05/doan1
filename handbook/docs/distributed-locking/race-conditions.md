@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # Race Conditions trong Hệ thống Phân tán
 
 ## Race Condition là gì?
@@ -28,15 +31,31 @@ async function processPayment(amount: number) {
 
 ### Điều gì xảy ra với Yêu cầu Đồng thời?
 
-```
-Time | Request A        | Request B        | Balance
------|------------------|------------------|--------
-T1   | Read: 1000      |                  | 1000
-T2   |                 | Read: 1000       | 1000
-T3   | Check: OK       |                  | 1000
-T4   |                 | Check: OK        | 1000
-T5   | Write: 900      |                  | 900
-T6   |                 | Write: 900       | 900
+```mermaid
+sequenceDiagram
+    participant A as Request A
+    participant B as Request B
+    participant DB as Database
+
+    Note over DB: Initial balance = 1000
+
+    A ->> DB: Read balance
+    DB -->> A: 1000
+
+    B ->> DB: Read balance
+    DB -->> B: 1000
+
+    A ->> DB: Check OK
+    B ->> DB: Check OK
+
+    A ->> DB: Write balance = 900
+    DB -->> A: Success
+
+    B ->> DB: Write balance = 900
+    DB -->> B: Success
+
+    Note over DB: Final balance = 900 (should be 800)
+
 ```
 
 **Dự kiến:** $800  

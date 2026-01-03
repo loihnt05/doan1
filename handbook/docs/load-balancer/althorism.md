@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 ---
-## Thuật toán Load Balancing
+# Thuật toán Load Balancing
 
 ### Static Algorithms
 

@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# API Gateway
+# Giới thiệu
 
 ## Tổng Quan
 

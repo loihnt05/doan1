@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 ---
-## Client-Side vs Server-Side Load Balancing
+# Client-Side vs Server-Side Load Balancing
 
 ### Server-Side (Truyền thống)
 

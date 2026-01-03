@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Giới thiệu về Mẫu Saga
 
 ## Saga là gì?
@@ -26,14 +29,18 @@ COMMIT;
 
 ### Thách thức Microservices
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Order     │────▶│  Payment    │────▶│  Inventory  │
-│  Service    │     │   Service   │     │   Service   │
-└─────────────┘     └─────────────┘     └─────────────┘
-     DB₁                  DB₂                  DB₃
+```mermaid
+flowchart LR
+    O["Order Service\n(Saga Orchestrator)"]
+    P["Payment Service"]
+    I["Inventory Service"]
 
-Làm thế nào để duy trì tính nhất quán trên 3 cơ sở dữ liệu?
+    O -->|Charge payment| P
+    P -->|Success / Fail| O
+
+    O -->|Reserve inventory| I
+    I -->|Success / Fail| O
+
 ```
 
 ## Giải pháp: Mẫu Saga
@@ -49,37 +56,52 @@ Thay vì một giao dịch ACID duy nhất, sử dụng một **chuỗi các gia
 
 ### Luồng ví dụ
 
-```
-┌──────────────────────────────────────────────────────┐
-│                  ĐƯỜNG THÀNH CÔNG                    │
-└──────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    %% START
+    S["Start Saga"]
 
-1. Order Service: Tạo đơn hàng → Commit cục bộ
-   ↓ emit OrderCreatedEvent
-   
-2. Payment Service: Xử lý thanh toán → Commit cục bộ
-   ↓ emit PaymentCompletedEvent
-   
-3. Inventory Service: Dự trữ hàng → Commit cục bộ
-   ↓ emit InventoryReservedEvent
-   
-✓ Saga Hoàn thành
+    %% ORDER
+    O["Order Service\nCreate Order\nLocal Commit"]
+    OE["Emit OrderCreatedEvent"]
 
+    %% PAYMENT
+    P["Payment Service\nProcess Payment"]
+    PC["Local Commit"]
+    PF["Payment Failed"]
+    PE_OK["Emit PaymentCompletedEvent"]
+    PE_FAIL["Emit PaymentFailedEvent"]
 
-┌──────────────────────────────────────────────────────┐
-│                 ĐƯỜNG BỒI THƯỜNG                    │
-└──────────────────────────────────────────────────────┘
+    %% INVENTORY
+    I["Inventory Service\nReserve Inventory\nLocal Commit"]
+    IE["Emit InventoryReservedEvent"]
 
-1. Order Service: Tạo đơn hàng → Commit cục bộ
-   ↓ emit OrderCreatedEvent
-   
-2. Payment Service: Thanh toán THẤT BẠI
-   ↓ emit PaymentFailedEvent
-   
-3. Order Service: BỒI THƯỜNG - Hủy đơn hàng
-   ↓ emit OrderCancelledEvent
-   
-✗ Saga Hủy (Bồi thường áp dụng)
+    %% COMPENSATION
+    OC["Order Service\nCancel Order\nCompensation"]
+    OCE["Emit OrderCancelledEvent"]
+
+    %% END STATES
+    SUCCESS["Saga Completed"]
+    FAIL["Saga Cancelled\nCompensation Applied"]
+
+    %% FLOW
+    S --> O
+    O --> OE
+    OE --> P
+
+    %% PAYMENT RESULT
+    P -->|Success| PC
+    PC --> PE_OK
+    PE_OK --> I
+    I --> IE
+    IE --> SUCCESS
+
+    P -->|Fail| PF
+    PF --> PE_FAIL
+    PE_FAIL --> OC
+    OC --> OCE
+    OCE --> FAIL
+
 ```
 
 ## Hai mẫu Saga

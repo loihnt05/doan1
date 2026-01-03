@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 ---
-## Vertical Scaling
+# Vertical Scaling
 
 Thêm nhiều tài nguyên hơn (CPU, RAM, disk) vào một máy duy nhất.
 

@@ -1,4 +1,7 @@
-# Mẫu Choreography
+---
+sidebar_position: 2
+---
+# Choreography Pattern
 
 ## Choreography là gì?
 
@@ -8,20 +11,16 @@ Hãy nghĩ về nó như một điệu nhảy: mỗi người nhảy (dịch v�
 
 ## Kiến trúc
 
-```
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│   Order     │       │  Payment    │       │  Inventory  │
-│  Service    │       │   Service   │       │   Service   │
-└──────┬──────┘       └──────┬──────┘       └──────┬──────┘
-       │                     │                     │
-       │ OrderCreated        │                     │
-       ├────────────────────▶│                     │
-       │                     │ PaymentCompleted    │
-       │                     ├────────────────────▶│
-       │                     │                     │
-       │                     │◀────────────────────┤
-       │                     │   InventoryReserved │
-       │                     │                     │
+```mermaid
+sequenceDiagram
+    participant O as Order Service
+    participant P as Payment Service
+    participant I as Inventory Service
+
+    O ->> P: OrderCreated
+    P ->> I: PaymentCompleted
+    I -->> P: InventoryReserved
+
 ```
 
 Mỗi dịch vụ:
@@ -343,38 +342,48 @@ export class InventoryServiceService implements OnModuleInit {
 
 ### Đường thành công
 
-```
-Order Service          Payment Service       Inventory Service
-     │                        │                      │
-     │  1. Tạo đơn hàng       │                      │
-     ├─────────────────────┐  │                      │
-     │ OrderCreatedEvent   │  │                      │
-     │                     └─▶│  2. Xử lý thanh toán │
-     │                        ├──────────────────┐   │
-     │                        │ PaymentCompleted │   │
-     │                        │                  └──▶│  3. Dự trữ hàng
-     │                        │                      ├──────────────────┐
-     │                        │                      │ InventoryReserved│
-     │                        │                      │                  │
-     ✓ Saga Hoàn thành        ✓                      ✓                  │
+```mermaid
+sequenceDiagram
+    participant O as Order Service
+    participant P as Payment Service
+    participant I as Inventory Service
+
+    %% Step 1
+    O ->> O: Create Order (local commit)
+    O ->> P: OrderCreatedEvent
+
+    %% Step 2
+    P ->> P: Process Payment (local commit)
+    P ->> I: PaymentCompletedEvent
+
+    %% Step 3
+    I ->> I: Reserve Inventory (local commit)
+    I -->> O: InventoryReservedEvent
+
+    Note over O: Saga Completed
 ```
 
 ### Đường bồi thường (Thanh toán thất bại)
 
-```
-Order Service          Payment Service
-     │                        │
-     │  1. Tạo đơn hàng       │
-     ├─────────────────────┐  │
-     │ OrderCreatedEvent   │  │
-     │                     └─▶│  2. Thanh toán thất bại
-     │                        ├──────────────────┐
-     │                        │ PaymentFailedEvent│
-     │  3. Bồi thường      ◀──┘                  │
-     ├─────────────────────┐  │
-     │ OrderCancelledEvent │  │
-     │                     │  │
-     ✗ Saga Hủy              │
+```mermaid
+sequenceDiagram
+    participant O as Order Service
+    participant P as Payment Service
+
+    %% Step 1: Create order
+    O ->> O: Create Order (local commit)
+    O ->> P: OrderCreatedEvent
+
+    %% Step 2: Payment fails
+    P ->> P: Process Payment (FAILED)
+    P -->> O: PaymentFailedEvent
+
+    %% Step 3: Compensation
+    O ->> O: Cancel Order (compensation)
+    O ->> P: OrderCancelledEvent
+
+    Note over O: Saga Cancelled
+
 ```
 
 ## Ưu và nhược điểm

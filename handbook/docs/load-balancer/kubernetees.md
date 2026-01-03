@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 ---
-## Kubernetes Load Balancing
+# Kubernetes Load Balancing
 
 ### 1. kube-proxy
 

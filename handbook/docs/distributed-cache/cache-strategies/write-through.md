@@ -16,51 +16,33 @@ Write Through là một chiến lược caching trong đó cache nằm giữa ap
 ## Flow Diagram
 
 ### Write Flow
-```
-┌─────────────┐
-│ Application │
-└──────┬──────┘
-       │
-       │ Write Request
-       ▼
-   ┌───────┐
-   │ Cache │ ◄──── Write to cache first
-   └───┬───┘
-       │
-       │ Sync write
-       ▼
-  ┌──────────┐
-  │ Database │ ◄──── Then write to DB
-  └────┬─────┘
-       │
-       │ Success
-       ▼
-  ┌─────────────┐
-  │   Return    │
-  └─────────────┘
+```mermaid
+flowchart TD
+    A["Application"]
+    B["Cache"]
+    C["Database"]
+    D["Return"]
+
+    A -->|Write request| B
+    B -->|Sync write| C
+    C -->|Success| D
+
 ```
 
 ### Read Flow
-```
-┌─────────────┐
-│ Application │
-└──────┬──────┘
-       │
-       ▼
-   ┌────────┐
-   │ Cache? │──No──┐
-   └────┬───┘      │
-        │Yes       ▼
-        │     ┌──────────┐
-        │     │ Database │
-        │     └────┬─────┘
-        │          │
-        │          ▼
-        │    ┌──────────┐
-        │    │Set Cache │
-        │    └────┬─────┘
-        │         │
-        └─────────┴─────▶ Return Data
+```mermaid
+flowchart TD
+    A["Application"]
+    B{Cache available?}
+    C["Database"]
+    D["Set Cache"]
+    E["Return Data"]
+
+    A --> B
+    B -- Yes --> E
+    B -- No --> C
+    C --> D
+    D --> E
 ```
 
 ## Implementation

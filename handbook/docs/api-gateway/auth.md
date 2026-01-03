@@ -3,15 +3,15 @@ sidebar_position: 3
 ---
 # Authentication & Authorization
 
-## Overview
+## Tổng quan
 
-Authentication verifies **who you are**, while authorization determines **what you can do**. In an API Gateway, these are critical for securing your microservices.
+Xác thực xác minh **bạn là ai**, trong khi ủy quyền xác định **bạn có thể làm gì**. Trong API Gateway, những điều này rất quan trọng để bảo mật các microservice của bạn.
 
-## Authentication
+## Xác thực
 
 ### JWT (JSON Web Tokens)
 
-The most common authentication method for microservices.
+Phương thức xác thực phổ biến nhất cho microservices.
 
 ```typescript
 // auth.service.ts
@@ -103,7 +103,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 }
 ```
 
-### Usage
+### Cách sử dụng
 
 ```typescript
 @Controller('api')
@@ -121,7 +121,7 @@ export class UserController {
 }
 ```
 
-## Authorization
+## Ủy quyền
 
 ### Role-Based Access Control (RBAC)
 
@@ -154,7 +154,7 @@ export class RolesGuard implements CanActivate {
 }
 ```
 
-**Usage:**
+**Cách sử dụng:**
 
 ```typescript
 @Controller('api/admin')
@@ -177,7 +177,7 @@ export class AdminController {
 
 ### Permission-Based Access Control
 
-More granular than roles.
+Chi tiết hơn so với roles.
 
 ```typescript
 // permissions.decorator.ts
@@ -202,7 +202,7 @@ export class PermissionsGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    // Fetch user permissions from database or cache
+    // Lấy quyền của user từ database hoặc cache
     const userPermissions = await this.getUserPermissions(user.userId);
 
     return requiredPermissions.every(permission =>
@@ -211,7 +211,7 @@ export class PermissionsGuard implements CanActivate {
   }
 
   private async getUserPermissions(userId: string): Promise<string[]> {
-    // Get from cache or database
+    // Lấy từ cache hoặc database
     const cached = await this.cache.get(`permissions:${userId}`);
     if (cached) return cached;
 
@@ -222,7 +222,7 @@ export class PermissionsGuard implements CanActivate {
 }
 ```
 
-**Usage:**
+**Cách sử dụng:**
 
 ```typescript
 @Controller('api/orders')
@@ -252,7 +252,7 @@ export class OrderController {
 
 ## API Keys
 
-For service-to-service communication.
+Dành cho giao tiếp service-to-service.
 
 ```typescript
 // api-key.guard.ts
@@ -274,7 +274,7 @@ export class ApiKeyGuard implements CanActivate {
       throw new UnauthorizedException('Invalid API key');
     }
 
-    // Attach service info to request
+    // Đính kèm thông tin service vào request
     request.service = await this.apiKeyService.getServiceInfo(apiKey);
     
     return true;
@@ -293,18 +293,18 @@ export class ApiKeyService {
   ) {}
 
   async validate(apiKey: string): Promise<boolean> {
-    // Check cache first
+    // Kiểm tra cache trước
     const cached = await this.redis.get(`apikey:${apiKey}`);
     if (cached) return cached === 'valid';
 
-    // Check database
+    // Kiểm tra database
     const key = await this.apiKeyRepository.findOne({
       where: { key: apiKey, active: true }
     });
 
     const isValid = !!key;
 
-    // Cache result
+    // Cache kết quả
     await this.redis.setex(`apikey:${apiKey}`, 300, isValid ? 'valid' : 'invalid');
 
     return isValid;
@@ -344,7 +344,7 @@ export class ApiKeyService {
 
 ## OAuth 2.0
 
-For third-party integrations.
+Dành cho tích hợp bên thứ ba.
 
 ```typescript
 // oauth.strategy.ts
@@ -383,16 +383,16 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   googleAuth() {
-    // Redirects to Google
+    // Chuyển hướng đến Google
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthCallback(@Request() req) {
-    // User info from Google
+    // Thông tin user từ Google
     const user = await this.authService.findOrCreateUser(req.user);
     
-    // Generate JWT
+    // Tạo JWT
     const token = this.authService.generateToken(user);
     
     return { token };
@@ -412,13 +412,13 @@ export class MfaService {
       length: 32
     });
 
-    // Store secret
+    // Lưu secret
     await this.userRepository.update(userId, {
       mfaSecret: secret.base32,
       mfaEnabled: false
     });
 
-    // Generate QR code
+    // Tạo QR code
     const qrCode = await QRCode.toDataURL(secret.otpauth_url);
 
     return {
@@ -451,20 +451,20 @@ export class MfaService {
   }
 }
 
-// Login with MFA
+// Đăng nhập với MFA
 @Post('login')
 async login(@Body() credentials: LoginDto) {
   const user = await this.authService.validateUser(credentials);
 
   if (user.mfaEnabled) {
-    // Return temporary token
+    // Trả về token tạm thời
     return {
       mfaRequired: true,
       tempToken: this.authService.generateTempToken(user.id)
     };
   }
 
-  // Regular login
+  // Đăng nhập thông thường
   return this.authService.generateToken(user);
 }
 
@@ -482,31 +482,31 @@ async verifyMfa(@Body() data: { tempToken: string; mfaToken: string }) {
 }
 ```
 
-## Best Practices
+## Các phương pháp tốt nhất
 
-### 1. Secure Token Storage
+### 1. Lưu trữ Token an toàn
 
 ```typescript
-//  GOOD: httpOnly cookies
+//  TỐT: httpOnly cookies
 @Post('login')
 async login(@Body() credentials: LoginDto, @Res() res: Response) {
   const token = await this.authService.login(credentials);
 
   res.cookie('access_token', token, {
-    httpOnly: true,    // Not accessible via JavaScript
-    secure: true,      // HTTPS only
+    httpOnly: true,    // Không thể truy cập qua JavaScript
+    secure: true,      // Chỉ HTTPS
     sameSite: 'strict',
-    maxAge: 3600000    // 1 hour
+    maxAge: 3600000    // 1 giờ
   });
 
   return res.json({ message: 'Logged in' });
 }
 
-//  BAD: localStorage (vulnerable to XSS)
+//  TỆ: localStorage (dễ bị tấn công XSS)
 // localStorage.setItem('token', token);
 ```
 
-### 2. Token Refresh
+### 2. Làm mới Token
 
 ```typescript
 @Post('refresh')
@@ -524,25 +524,25 @@ async refreshToken(@Req() req: Request) {
 }
 ```
 
-### 3. Rate Limiting for Auth Endpoints
+### 3. Giới hạn tốc độ cho Auth Endpoints
 
 ```typescript
 @Post('login')
 @UseGuards(ThrottlerGuard)
-@Throttle(5, 60) // 5 attempts per minute
+@Throttle(5, 60) // 5 lần thử mỗi phút
 async login(@Body() credentials: LoginDto) {
   return this.authService.login(credentials);
 }
 ```
 
-### 4. Audit Logging
+### 4. Ghi log kiểm tra
 
 ```typescript
 @Post('login')
 async login(@Body() credentials: LoginDto, @Req() req: Request) {
   const result = await this.authService.login(credentials);
 
-  // Log authentication attempt
+  // Ghi log nỗ lực xác thực
   await this.auditService.log({
     action: 'LOGIN',
     userId: result.user.id,
@@ -556,7 +556,7 @@ async login(@Body() credentials: LoginDto, @Req() req: Request) {
 }
 ```
 
-## Testing
+## Kiểm thử
 
 ```typescript
 describe('Authentication', () => {
@@ -589,8 +589,8 @@ describe('Authentication', () => {
 });
 ```
 
-## Next Steps
+## Các bước tiếp theo
 
-- Learn about [Rate Limiting](./rate-limiting.md)
-- Explore [Circuit Breaker](./circuit-breaker.md)
-- Check [Service Discovery](./service-discovery.md)
+- Tìm hiểu về [Rate Limiting](./rate-limiting.md)
+- Khám phá [Circuit Breaker](./circuit-breaker.md)
+- Kiểm tra [Service Discovery](./service-discovery.md)

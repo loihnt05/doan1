@@ -4,10 +4,10 @@ sidebar_position: 1
 
 # Lời mở đầu
 
-Chào mừng bạn đến với **Handbook do đội backend xây dựng**. Đây là bản tóm lược tiếng Việt của toàn bộ triển khai trong thư mục `backend/`, giúp chúng ta bám sát hiện trạng code thay vì lý thuyết chung chung.
+Chào mừng bạn. Đây là bản tóm lược tiếng Việt của toàn bộ triển khai trong thư mục `backend/`, giúp chúng ta bám sát hiện trạng code thay vì lý thuyết chung chung.
 
 ## Cách sử dụng nhanh
-- Đọc [Sổ Tay Điều Hành Microservices 2026](./handbook-intro.md) để nắm cấu trúc 0 → 10 (Runtime, Auth, Cache, Data, ...).
+- Đọc [handbook](./handbook-intro.md) để nắm cấu trúc 0 → 10 (Runtime, Auth, Cache, Data, ...).
 - Mỗi mục đều chỉ thẳng tới thư mục thực thi trong `backend/apps/*` hoặc `backend/libs/*`; mở file tương ứng để xem mã nguồn.
 - Khi chỉnh sửa kiến trúc, cập nhật song song cả handbook lẫn code để giữ tính đồng bộ.
 

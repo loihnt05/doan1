@@ -3,76 +3,58 @@ sidebar_position: 7
 ---
 # Circuit Breaker Pattern
 
-## Overview
+## Tổng quan
 
-The Circuit Breaker pattern prevents cascading failures by detecting when a service is unhealthy and temporarily blocking requests to it, allowing the service time to recover.
+Circuit Breaker pattern ngăn chặn cascading failures bằng cách phát hiện khi một service không khỏe mạnh và tạm thời chặn requests đến nó, cho phép service có thời gian phục hồi.
 
-## The Problem
+## Vấn đề
 
-Without a circuit breaker:
+Không có circuit breaker:
 
 ```
 API Gateway → Failing Service (5s timeout)
-Request 1: Wait 5s → Fail
-Request 2: Wait 5s → Fail
-Request 3: Wait 5s → Fail
+Request 1: Chờ 5s → Fail
+Request 2: Chờ 5s → Fail
+Request 3: Chờ 5s → Fail
 ...
-Result: All requests slow, resources exhausted
+Kết quả: Tất cả requests chậm, tài nguyên bị cạn kiệt
 ```
 
-With a circuit breaker:
+Với circuit breaker:
 
 ```
 API Gateway → Circuit Breaker → Service
-Request 1: Try → Fail (5s)
-Request 2: Try → Fail (5s)
+Request 1: Thử → Fail (5s)
+Request 2: Thử → Fail (5s)
 Request 3: Circuit OPEN → Fail Fast (1ms) 
 Request 4: Circuit OPEN → Fail Fast (1ms) 
 ...
-After timeout: Circuit HALF-OPEN → Try again
+Sau timeout: Circuit HALF-OPEN → Thử lại
 ```
 
 ## Circuit States
 
-```
-         Success
-    ┌──────────────┐
-    │              │
-    │   CLOSED     │◄─────┐
-    │  (Normal)    │      │
-    │              │      │ Success
-    └───────┬──────┘      │ threshold
-            │             │
-     Failure threshold    │
-            │             │
-            ▼             │
-    ┌──────────────┐      │
-    │              │      │
-    │    OPEN      │      │
-    │  (Failing)   │      │
-    │              │      │
-    └───────┬──────┘      │
-            │             │
-     After timeout        │
-            │             │
-            ▼             │
-    ┌──────────────┐      │
-    │              │      │
-    │  HALF-OPEN   │──────┘
-    │  (Testing)   │
-    │              │
-    └──────────────┘
+```mermaid
+flowchart TD
+    C["CLOSED\nNormal"]
+    O["OPEN\nFailing"]
+    H["HALF-OPEN\nTesting"]
+
+    C -->|Failure threshold reached| O
+    O -->|After timeout| H
+    H -->|Success threshold reached| C
+    H -->|Failure| O
 ```
 
 **States:**
 
-- **CLOSED**: Normal operation, requests pass through
-- **OPEN**: Service failing, fail fast without calling service
-- **HALF-OPEN**: Testing if service recovered
+- **CLOSED**: Hoạt động bình thường, requests đi qua
+- **OPEN**: Service đang fail, fail fast mà không gọi service
+- **HALF-OPEN**: Đang kiểm tra xem service đã phục hồi chưa
 
-## Implementation
+## Triển khai
 
-### Basic Circuit Breaker
+### Circuit Breaker cơ bản
 
 ```typescript
 enum CircuitState {
@@ -168,14 +150,14 @@ export class CircuitBreakerInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const key = `${request.method}:${request.url}`;
 
-    // Get or create circuit breaker for this endpoint
+    // Lấy hoặc tạo circuit breaker cho endpoint này
     if (!this.circuitBreakers.has(key)) {
       this.circuitBreakers.set(key, new CircuitBreaker(5, 2, 60000));
     }
 
     const breaker = this.circuitBreakers.get(key)!;
 
-    // Check if circuit is open
+    // Kiểm tra xem circuit có mở không
     if (breaker.getState() === CircuitState.OPEN) {
       return throwError(() => new ServiceUnavailableException(
         'Service temporarily unavailable (circuit breaker open)'
@@ -193,7 +175,7 @@ export class CircuitBreakerInterceptor implements NestInterceptor {
 }
 ```
 
-**Usage:**
+**Cách sử dụng:**
 
 ```typescript
 @Controller('api')
@@ -201,13 +183,13 @@ export class CircuitBreakerInterceptor implements NestInterceptor {
 export class GatewayController {
   @Get('users')
   async getUsers() {
-    // If user service is down, circuit opens after 5 failures
+    // Nếu user service down, circuit mở sau 5 lần fail
     return this.userService.getUsers();
   }
 }
 ```
 
-### Service-Specific Circuit Breaker
+### Circuit Breaker dành riêng cho Service
 
 ```typescript
 @Injectable()
@@ -248,7 +230,7 @@ export class UserServiceClient {
 
 ### Fallback Response
 
-Return cached or default data when circuit is open.
+Trả về dữ liệu cached hoặc mặc định khi circuit mở.
 
 ```typescript
 export class CircuitBreakerWithFallback<T> extends CircuitBreaker {
@@ -275,7 +257,7 @@ export class CircuitBreakerWithFallback<T> extends CircuitBreaker {
 }
 ```
 
-**Usage:**
+**Cách sử dụng:**
 
 ```typescript
 @Injectable()
@@ -311,9 +293,9 @@ export class UserServiceClient {
 }
 ```
 
-### Error Rate-Based Circuit Breaker
+### Circuit Breaker dựa trên tỷ lệ lỗi
 
-Open circuit based on error percentage, not just count.
+Mở circuit dựa trên tỷ lệ lỗi, không chỉ số lượng.
 
 ```typescript
 export class ErrorRateCircuitBreaker extends CircuitBreaker {
@@ -348,8 +330,8 @@ export class ErrorRateCircuitBreaker extends CircuitBreaker {
       this.window.shift();
     }
 
-    // Calculate error rate
-    if (this.window.length >= 10) { // Minimum sample size
+    // Tính tỷ lệ lỗi
+    if (this.window.length >= 10) { // Kích thước mẫu tối thiểu
       const errors = this.window.filter(r => !r.success).length;
       const errorRate = (errors / this.window.length) * 100;
 
@@ -367,9 +349,9 @@ export class ErrorRateCircuitBreaker extends CircuitBreaker {
 }
 ```
 
-### Multiple Circuit Breakers
+### Nhiều Circuit Breakers
 
-Manage circuit breakers for multiple services.
+Quản lý circuit breakers cho nhiều services.
 
 ```typescript
 @Injectable()
@@ -393,7 +375,7 @@ export class CircuitBreakerManager {
   }
 
   private getConfig(serviceName: string) {
-    // Service-specific configurations
+    // Cấu hình dành riêng cho service
     const configs = {
       'user-service': { failureThreshold: 5, successThreshold: 2, timeout: 60000 },
       'order-service': { failureThreshold: 3, successThreshold: 2, timeout: 30000 },
@@ -413,7 +395,7 @@ export class CircuitBreakerManager {
 }
 ```
 
-## Monitoring
+## Giám sát
 
 ```typescript
 @Injectable()
@@ -452,7 +434,7 @@ export class MonitoredCircuitBreaker extends CircuitBreaker {
         service: this.serviceName
       });
 
-      // Alert on circuit open
+      // Cảnh báo khi circuit mở
       this.alerting.send({
         severity: 'warning',
         message: `Circuit breaker opened for ${this.serviceName}`,
@@ -484,35 +466,35 @@ export class CircuitBreakerController {
 }
 ```
 
-## Best Practices
+## Các phương pháp tốt nhất
 
-### 1. Set Appropriate Thresholds
+### 1. Đặt ngưỡng phù hợp
 
 ```typescript
-// Critical services - open quickly
+// Critical services - mở nhanh
 const paymentBreaker = new CircuitBreaker(2, 3, 120000);
 
-// Non-critical services - more tolerant
+// Non-critical services - khoan dung hơn
 const recommendationBreaker = new CircuitBreaker(10, 2, 60000);
 ```
 
-### 2. Provide Fallbacks
+### 2. Cung cấp Fallbacks
 
 ```typescript
-//  GOOD: Graceful degradation
+//  TỐT: Graceful degradation
 async getRecommendations(): Promise<Product[]> {
   try {
     return await this.circuitBreaker.execute(() =>
       this.recommendationService.get()
     );
   } catch (error) {
-    // Return popular products as fallback
+    // Trả về sản phẩm phổ biến làm fallback
     return this.getPopularProducts();
   }
 }
 ```
 
-### 3. Monitor State Changes
+### 3. Giám sát thay đổi trạng thái
 
 ```typescript
 breaker.on('stateChange', (from, to) => {
@@ -527,7 +509,7 @@ breaker.on('stateChange', (from, to) => {
 });
 ```
 
-### 4. Test Circuit Breaker
+### 4. Kiểm thử Circuit Breaker
 
 ```typescript
 describe('Circuit Breaker', () => {
@@ -535,7 +517,7 @@ describe('Circuit Breaker', () => {
     const breaker = new CircuitBreaker(3, 2, 60000);
     const failingFn = jest.fn().mockRejectedValue(new Error('Failed'));
 
-    // First 3 failures
+    // 3 lần fail đầu tiên
     for (let i = 0; i < 3; i++) {
       await expect(breaker.execute(failingFn)).rejects.toThrow();
     }
@@ -553,24 +535,24 @@ describe('Circuit Breaker', () => {
       breaker.execute(() => Promise.reject('error'))
     ).rejects.toThrow();
 
-    // Circuit is now open, should use fallback
+    // Circuit giờ mở, nên dùng fallback
     const result = await breaker.execute(() => Promise.reject('error'));
     expect(result).toBe('fallback');
   });
 });
 ```
 
-## Integration with Hystrix
+## Tích hợp với Hystrix
 
-For advanced features, use Netflix Hystrix (via opossum library):
+Để có các tính năng nâng cao, sử dụng Netflix Hystrix (thông qua thư viện opossum):
 
 ```typescript
 import CircuitBreaker from 'opossum';
 
 const options = {
-  timeout: 3000,                  // If function takes longer, trigger fallback
-  errorThresholdPercentage: 50,   // Open circuit if 50% errors
-  resetTimeout: 30000             // Try again after 30s
+  timeout: 3000,                  // Nếu function mất thời gian lâu hơn, kích hoạt fallback
+  errorThresholdPercentage: 50,   // Mở circuit nếu 50% lỗi
+  resetTimeout: 30000             // Thử lại sau 30s
 };
 
 const breaker = new CircuitBreaker(asyncFunction, options);
@@ -581,12 +563,12 @@ breaker.on('open', () => console.log('Circuit opened'));
 breaker.on('halfOpen', () => console.log('Circuit half-open'));
 breaker.on('close', () => console.log('Circuit closed'));
 
-// Execute
+// Thực thi
 const result = await breaker.fire(arg1, arg2);
 ```
 
-## Next Steps
+## Các bước tiếp theo
 
-- Learn about [Retry & Backoff](./retry-backoff.md)
-- Explore [Service Mesh](./service-mesh.md)
-- Check [Observability](../observability/index.md)
+- Tìm hiểu về [Retry & Backoff](./retry-backoff.md)
+- Khám phá [Service Mesh](./service-mesh.md)
+- Kiểm tra [Observability](../observability/index.md)

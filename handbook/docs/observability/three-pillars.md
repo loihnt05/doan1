@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Ba Trụ Cột của Khả Năng Quan Sát
+# Three Pilliars
 
 **"Nếu bạn không thể đo lường nó, bạn không thể cải thiện nó"**
 
@@ -10,7 +10,7 @@ Khả năng quan sát là khả năng hiểu trạng thái bên trong của hệ
 
 ## 🎯 Ba Trụ Cột
 
-### 1️⃣ Metrics – "Cái gì"
+### 1️⃣ Metrics - "what"
 
 **Dữ liệu chuỗi thời gian định lượng**
 
@@ -38,7 +38,7 @@ Metrics cho bạn biết **cái gì** đang xảy ra trong hệ thống của b�
 - Tính toán SLOs (99% requests &lt; 500ms)
 - Trực quan hóa dashboard
 
-### 2️⃣ Logs – "Tại sao"
+### 2️⃣ Logs – "why"
 
 **Bản ghi sự kiện định tính với ngữ cảnh**
 
@@ -89,10 +89,17 @@ Tại sao cấu trúc tốt hơn:
 
 Traces cho bạn biết **ở đâu** thời gian được dành trong các request phân tán:
 
-```
-[API Gateway] --150ms--> [Order Service] --200ms--> [Payment Service]
-                                   |
-                                   +--100ms--> [Inventory Service]
+```mermaid
+sequenceDiagram
+    participant G as API Gateway
+    participant O as Order Service
+    participant P as Payment Service
+    participant I as Inventory Service
+
+    G ->> O: Request (150 ms)
+    O ->> P: Call Payment (200 ms)
+    O ->> I: Call Inventory (100 ms)
+
 ```
 
 **Ví dụ: Trace ID propagation**

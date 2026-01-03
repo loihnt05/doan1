@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 ---
-# Mô hình Quan hệ (PostgreSQL + Sequelize)
+# Relational Model (PostgreSQL + Sequelize)
 
 Mô hình quan hệ tổ chức dữ liệu thành các bảng (relations) với các hàng và cột. Đây là mô hình cơ sở dữ liệu trưởng thành và được sử dụng rộng rãi nhất, hoàn hảo cho dữ liệu có cấu trúc với các mối quan hệ rõ ràng.
 

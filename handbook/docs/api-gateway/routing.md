@@ -13,19 +13,21 @@ Routing is the fundamental capability of an API Gateway - directing incoming req
 
 The most common routing strategy, where the URL path determines the target service.
 
-```
-┌─────────────────────────────────────┐
-│  Client Request                     │
-└─────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────┐
-│  API Gateway                        │
-│                                     │
-│  /api/users/*    → User Service     │
-│  /api/orders/*   → Order Service    │
-│  /api/payments/* → Payment Service  │
-└─────────────────────────────────────┘
+```mermaid
+flowchart TD
+    C["Client Request"]
+
+    G["API Gateway /api/users/*    -> User Service /api/orders/*   -> Order Service /api/payments/* -> Payment Service"]
+
+    U["User Service"]
+    O["Order Service"]
+    P["Payment Service"]
+
+    C --> G
+    G --> U
+    G --> O
+    G --> P
+
 ```
 
 **Implementation:**
