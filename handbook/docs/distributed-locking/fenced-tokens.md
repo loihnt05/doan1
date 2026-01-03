@@ -1,10 +1,10 @@
 # Fenced Tokens
 
-## The Problem: Lock Expiration
+## Vấn đề: Lock Expiration
 
-Even with distributed locks, there's a subtle bug that can cause data corruption.
+Ngay cả với distributed locks, vẫn có một lỗi tinh tế có thể gây hỏng dữ liệu.
 
-### Scenario
+### Kịch bản
 
 ```
 Time | Worker A                  | Worker B        | Lock
@@ -19,25 +19,25 @@ T7   | Resume from GC pause     |                 | B owns
 T8   | Write data ← STALE!    |                 | B owns
 ```
 
-**Worker A writes stale data** even though it no longer holds the lock!
+**Worker A ghi dữ liệu cũ** ngay cả khi nó không còn giữ lock!
 
-## Why Locks Aren't Enough
+## Tại sao Locks Không Đủ
 
-Distributed locks solve **mutual exclusion** but not **timing bugs**:
+Distributed locks giải quyết **mutual exclusion** nhưng không phải **timing bugs**:
 
-1.  Only one process holds lock at a time
-2.  Process can continue after lock expires
-3.  Delayed process writes stale data
+1. Chỉ một tiến trình giữ lock tại một thời điểm
+2. Tiến trình có thể tiếp tục sau khi lock hết hạn
+3. Tiến trình bị trễ ghi dữ liệu cũ
 
-## Solution: Fenced Tokens
+## Giải pháp: Fenced Tokens
 
-Martin Kleppmann (author of "Designing Data-Intensive Applications") proposed **fenced tokens** to solve this.
+Martin Kleppmann (tác giả của "Designing Data-Intensive Applications") đề xuất **fenced tokens** để giải quyết điều này.
 
-### How It Works
+### Cách Hoạt động
 
-1. **Token increments** with each lock acquisition
-2. **Storage validates** token before accepting write
-3. **Stale tokens rejected** automatically
+1. **Token tăng** với mỗi lần acquire lock
+2. **Storage validate** token trước khi chấp nhận write
+3. **Stale tokens bị reject** tự động
 
 ### Implementation
 
@@ -47,7 +47,7 @@ const token = await redis.incr('fence:resource:123');
 // Returns: 1, 2, 3, 4, 5, ...
 ```
 
-### Complete Flow
+### Luồng Hoàn chỉnh
 
 ```
 Time | Worker A        | Worker B        | Token | Storage
@@ -63,11 +63,11 @@ T8   | Resume          |                 | 2     |
 T9   | Write(token=1)  |                 | 2     |  Reject
 ```
 
-**Storage rejects token=1** because current token is 2!
+**Storage reject token=1** vì token hiện tại là 2!
 
-## Code Example
+## Ví dụ Code
 
-### Acquiring Lock with Token
+### Acquire Lock với Token
 
 ```typescript
 async function processOrder(orderId: string) {
@@ -110,7 +110,7 @@ async function processOrder(orderId: string) {
 }
 ```
 
-### Storage-Side Validation
+### Validation Bên Storage
 
 ```typescript
 async function saveToDatabase(data, token) {
@@ -128,67 +128,67 @@ async function saveToDatabase(data, token) {
 }
 ```
 
-## Why This Works
+## Tại sao Điều này Hoạt động
 
-### Token Properties
+### Thuộc tính Token
 
-1. **Monotonically Increasing**: Never decreases
+1. **Tăng đơn điệu**: Không bao giờ giảm
    ```
    Token: 1 → 2 → 3 → 4 → 5 ...
    ```
 
-2. **Atomic Generation**: Redis INCR is atomic
+2. **Tạo atomic**: Redis INCR là atomic
    ```typescript
    await redis.incr('fence:key'); // Thread-safe
    ```
 
-3. **Independent of Lock**: Token exists even after lock expires
+3. **Độc lập với Lock**: Token tồn tại ngay cả sau khi lock hết hạn
    ```
-   Lock expires → New process gets lock + new token
-   Old process → Tries to write with old token → Rejected
+   Lock hết hạn → Tiến trình mới nhận lock + token mới
+   Tiến trình cũ → Cố ghi với token cũ → Bị reject
    ```
 
-## Use Cases
+## Trường hợp Sử dụng
 
-### When You MUST Use Fenced Tokens
+### Khi Bạn PHẢI Sử dụng Fenced Tokens
 
- **Financial transactions**
-- Money transfers
-- Payment processing
-- Account balance updates
+ **Giao dịch tài chính**
+- Chuyển tiền
+- Xử lý thanh toán
+- Cập nhật số dư tài khoản
 
- **Inventory management**
-- Stock quantity updates
-- Reservation systems
-- Ticket booking
+ **Quản lý kho hàng**
+- Cập nhật số lượng hàng tồn
+- Hệ thống đặt chỗ
+- Đặt vé
 
- **Critical state updates**
-- User permissions
-- Configuration changes
-- Database migrations
+ **Cập nhật trạng thái quan trọng**
+- Quyền người dùng
+- Thay đổi cấu hình
+- Migration database
 
-### When Fenced Tokens Are Optional
+### Khi Fenced Tokens Là Tùy chọn
 
- **Best-effort operations**
-- Metrics collection
-- Cache updates
-- Log aggregation
+ **Hoạt động best-effort**
+- Thu thập metrics
+- Cập nhật cache
+- Tổng hợp log
 
- **Idempotent operations**
-- Sending emails (with deduplication)
-- Publishing events (with message IDs)
+ **Hoạt động idempotent**
+- Gửi email (với deduplication)
+- Xuất bản events (với message IDs)
 
-## Comparison
+## So sánh
 
-| Approach | Mutual Exclusion | Prevents Stale Writes | Complexity |
+| Phương pháp | Mutual Exclusion | Ngăn Stale Writes | Độ phức tạp |
 |----------|------------------|----------------------|------------|
-| **No Lock** |  |  | Low |
-| **Distributed Lock** |  |  | Medium |
-| **Lock + Fenced Token** |  |  | High |
+| **Không Lock** |  |  | Thấp |
+| **Distributed Lock** |  |  | Trung bình |
+| **Lock + Fenced Token** |  |  | Cao |
 
-## Implementation Tips
+## Mẹo Triển khai
 
-### 1. Generate Token Before Lock
+### 1. Tạo Token Trước Lock
 
 ```typescript
 //  Correct order
@@ -200,7 +200,7 @@ const lock = await acquireLock();
 const token = await getToken();
 ```
 
-### 2. Store Token with Data
+### 2. Lưu Token với Data
 
 ```typescript
 await database.save({
@@ -210,7 +210,7 @@ await database.save({
 });
 ```
 
-### 3. Validate on Every Write
+### 3. Validate trên Mọi Write
 
 ```typescript
 // Always validate before critical writes
@@ -218,7 +218,7 @@ await validateToken(resource, token);
 await database.save(data);
 ```
 
-## Real-World Example: Bank Transfer
+## Ví dụ Thực tế: Chuyển khoản Ngân hàng
 
 ```typescript
 async function transferMoney(from: string, to: string, amount: number) {
@@ -257,13 +257,13 @@ async function transferMoney(from: string, to: string, amount: number) {
 }
 ```
 
-## Key Takeaways
+## Những Điểm Chính
 
-1. **Distributed locks** solve mutual exclusion
-2. **Fenced tokens** solve timing bugs
-3. **Always use both** for critical operations
-4. **Token increments** automatically (Redis INCR)
-5. **Storage validates** token before write
-6. **Essential** for financial systems
+1. **Distributed locks** giải quyết mutual exclusion
+2. **Fenced tokens** giải quyết timing bugs
+3. **Luôn sử dụng cả hai** cho hoạt động quan trọng
+4. **Token tăng** tự động (Redis INCR)
+5. **Storage validate** token trước write
+6. **Thiết yếu** cho hệ thống tài chính
 
-Next: Explore Redlock algorithm for multi-node Redis setups
+Tiếp theo: Khám phá thuật toán Redlock cho thiết lập Redis đa node

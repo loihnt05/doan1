@@ -1,12 +1,13 @@
+
 # Distributed Locking
 
-## Overview
+## Tổng quan
 
-Distributed locking ensures that only one process can access a shared resource at a time across multiple instances of an application. This is critical for preventing race conditions, data corruption, and ensuring consistency in distributed systems.
+Distributed locking đảm bảo rằng chỉ một tiến trình có thể truy cập tài nguyên chia sẻ tại một thời điểm trên nhiều instance của ứng dụng. Điều này rất quan trọng để ngăn chặn race conditions, hỏng dữ liệu và đảm bảo tính nhất quán trong hệ thống phân tán.
 
-## The Problem
+## Vấn đề
 
-### Race Condition Example
+### Ví dụ Race Condition
 
 ```typescript
 // Two API instances processing the same order
@@ -26,7 +27,7 @@ async processPayment(amount: number) {
 }
 ```
 
-**Timeline:**
+**Dòng thời gian:**
 ```
 Time    Instance 1          Instance 2          Balance
 ─────────────────────────────────────────────────────
@@ -38,11 +39,11 @@ T5      Write: 900                             900
 T6                          Write: 900         900   Should be 800!
 ```
 
-**Result:** Lost $100 due to race condition!
+**Kết quả:** Mất $100 do race condition!
 
 ## Single-Instance Locking
 
-### In-Memory Lock (Not Distributed)
+### In-Memory Lock (Không Phân tán)
 
 ```typescript
 //  DOESN'T WORK across instances
@@ -62,12 +63,12 @@ async processWithLock() {
   }
 }
 
-// Problem: Each instance has its own `isLocked` variable!
+// Vấn đề: Mỗi instance có biến `isLocked` riêng!
 ```
 
 ### Advisory Locks (PostgreSQL)
 
-Database-level locks that work across connections.
+Locks cấp database hoạt động trên các kết nối.
 
 ```typescript
 @Injectable()

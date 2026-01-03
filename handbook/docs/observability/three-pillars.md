@@ -2,19 +2,19 @@
 sidebar_position: 1
 ---
 
-# Three Pillars of Observability
+# Ba Trụ Cột của Khả Năng Quan Sát
 
-**"If you can't measure it, you can't improve it"**
+**"Nếu bạn không thể đo lường nó, bạn không thể cải thiện nó"**
 
-Observability is the ability to understand the internal state of a system by examining its external outputs. For distributed systems, this requires three complementary approaches:
+Khả năng quan sát là khả năng hiểu trạng thái bên trong của hệ thống bằng cách kiểm tra các đầu ra bên ngoài. Đối với các hệ thống phân tán, điều này yêu cầu ba cách tiếp cận bổ sung cho nhau:
 
-## 🎯 The Three Pillars
+## 🎯 Ba Trụ Cột
 
-### 1️⃣ Metrics – The "What"
+### 1️⃣ Metrics – "Cái gì"
 
-**Quantitative time-series data**
+**Dữ liệu chuỗi thời gian định lượng**
 
-Metrics tell you **what** is happening in your system through numbers:
+Metrics cho bạn biết **cái gì** đang xảy ra trong hệ thống của bạn thông qua các con số:
 
 ```
 - Requests per second: 1,524 RPS
@@ -23,26 +23,26 @@ Metrics tell you **what** is happening in your system through numbers:
 - Kafka consumer lag: 342 messages
 ```
 
-**Types of Metrics:**
+**Các loại Metrics:**
 
-| Type | Behavior | Example | Use Case |
+| Loại | Hành vi | Ví dụ | Trường hợp sử dụng |
 |------|----------|---------|----------|
-| **Counter** | Only increases | `http_requests_total` | Track events |
-| **Gauge** | Can go up/down | `active_connections` | Track current state |
-| **Histogram** | Distribution | `http_request_duration` | Track latency percentiles |
-| **Summary** | Distribution (client-side) | `api_call_duration` | Track quantiles |
+| **Counter** | Chỉ tăng | `http_requests_total` | Theo dõi sự kiện |
+| **Gauge** | Có thể tăng/giảm | `active_connections` | Theo dõi trạng thái hiện tại |
+| **Histogram** | Phân phối | `http_request_duration` | Theo dõi phần trăm độ trễ |
+| **Summary** | Phân phối (client-side) | `api_call_duration` | Theo dõi quantiles |
 
-**When to use metrics:**
-- Set up alerts (error rate > 5%)
-- Track trends over time
-- Calculate SLOs (99% of requests < 500ms)
-- Dashboard visualizations
+**Khi nào sử dụng metrics:**
+- Thiết lập cảnh báo (error rate > 5%)
+- Theo dõi xu hướng theo thời gian
+- Tính toán SLOs (99% requests &lt; 500ms)
+- Trực quan hóa dashboard
 
-### 2️⃣ Logs – The "Why"
+### 2️⃣ Logs – "Tại sao"
 
-**Qualitative event records with context**
+**Bản ghi sự kiện định tính với ngữ cảnh**
 
-Logs tell you **why** something happened by providing detailed context:
+Logs cho bạn biết **tại sao** điều gì đó xảy ra bằng cách cung cấp ngữ cảnh chi tiết:
 
 ```json
 {
@@ -59,35 +59,35 @@ Logs tell you **why** something happened by providing detailed context:
 }
 ```
 
-**Structured vs Unstructured:**
+**Cấu trúc vs Không cấu trúc:**
 
- **Unstructured (Bad):**
+ **Không cấu trúc (Tệ):**
 ```
 2024-01-15 10:30:45 ERROR Payment failed for user user-123 order order-456 amount 99.99
 ```
 
- **Structured (Good):**
+ **Cấu trúc (Tốt):**
 ```json
 {"level":"ERROR","userId":"user-123","orderId":"order-456","amount":99.99}
 ```
 
-Why structured is better:
-- Can filter by any field programmatically
-- Can aggregate errors by type
-- Can query with JSON tools (jq, grep)
-- Machine-readable for analysis
+Tại sao cấu trúc tốt hơn:
+- Có thể lọc theo bất kỳ trường nào theo chương trình
+- Có thể tổng hợp lỗi theo loại
+- Có thể truy vấn với công cụ JSON (jq, grep)
+- Có thể đọc được bằng máy để phân tích
 
-**When to use logs:**
-- Debug specific request failures
-- Investigate user-reported issues
-- Audit trail (who did what when)
-- Root cause analysis
+**Khi nào sử dụng logs:**
+- Debug các lỗi request cụ thể
+- Điều tra các vấn đề được báo cáo bởi người dùng
+- Dấu vết kiểm toán (ai đã làm gì khi nào)
+- Phân tích nguyên nhân gốc
 
-### 3️⃣ Traces – The "Where"
+### 3️⃣ Traces – "Ở đâu"
 
-**Request journey across services**
+**Hành trình request qua các dịch vụ**
 
-Traces tell you **where** time is spent in distributed requests:
+Traces cho bạn biết **ở đâu** thời gian được dành trong các request phân tán:
 
 ```
 [API Gateway] --150ms--> [Order Service] --200ms--> [Payment Service]
@@ -95,7 +95,7 @@ Traces tell you **where** time is spent in distributed requests:
                                    +--100ms--> [Inventory Service]
 ```
 
-**Example: Trace ID propagation**
+**Ví dụ: Trace ID propagation**
 
 ```typescript
 // 1. API Gateway generates trace ID
@@ -112,65 +112,65 @@ logger.info({ traceId }, 'Processing payment');
 // Now you can filter all logs by trace ID!
 ```
 
-**When to use traces:**
-- Find bottlenecks in distributed flows
-- Understand service dependencies
-- Measure end-to-end latency
-- Debug timeout issues
+**Khi nào sử dụng traces:**
+- Tìm nút thắt trong luồng phân tán
+- Hiểu phụ thuộc dịch vụ
+- Đo độ trễ end-to-end
+- Debug các vấn đề timeout
 
-## 🔄 How They Work Together
+## 🔄 Cách Chúng Hoạt Động Cùng Nhau
 
-**Scenario: "Orders are slow today"**
+**Kịch bản: "Đơn hàng chậm hôm nay"**
 
-1. **Start with Metrics** (Dashboard)
-   ```
-   - Order endpoint P95 latency: 2,500ms (usually 200ms)
-   - Payment service error rate: 15% (usually <1%)
-   ```
-   **Insight:** Payment service is slow and failing
+1. **Bắt đầu với Metrics** (Dashboard)
+```
+- Order endpoint P95 latency: 2,500ms (thường 200ms)
+- Payment service error rate: 15% (thường &lt;1%)
+```
+**Sự hiểu biết:** Payment service chậm và thất bại
 
-2. **Drill down with Logs** (Search)
-   ```json
-   {"service":"payment-service","level":"ERROR","error":"ConnectionTimeout"}
-   ```
-   **Insight:** Database connections timing out
+2. **Đào sâu với Logs** (Tìm kiếm)
+```json
+{"service":"payment-service","level":"ERROR","error":"ConnectionTimeout"}
+```
+**Sự hiểu biết:** Kết nối database timeout
 
-3. **Trace specific request** (Follow trace ID)
-   ```
-   [Order] 50ms → [Payment] 2,400ms (DB query) → [Confirm] 50ms
-   ```
-   **Insight:** Database query taking 2.4s (should be &lt;100ms)
+3. **Trace request cụ thể** (Theo dõi trace ID)
+```
+Order: 50ms → Payment: 2,400ms (DB query) → Confirm: 50ms
+```
+**Sự hiểu biết:** Database query mất 2.4s (nên &lt;100ms)
 
-4. **Root Cause:** Database connection pool exhausted
-   **Fix:** Increase connection pool size
+4. **Nguyên nhân gốc:** Database connection pool kiệt sức
+   **Khắc phục:** Tăng kích thước connection pool
 
 ---
 
-## 🎯 Key Concepts
+## 🎯 Khái Niệm Chính
 
 ### Observability vs Monitoring
 
-| Aspect | Monitoring | Observability |
+| Khía cạnh | Monitoring | Observability |
 |--------|-----------|---------------|
-| **Definition** | Watching predefined metrics | Understanding unknown unknowns |
-| **Questions** | "Is CPU > 80%?" | "Why is this request slow?" |
-| **Approach** | Dashboards + alerts | Exploration + debugging |
-| **Scope** | Known failure modes | Any failure mode |
+| **Định nghĩa** | Theo dõi các metrics được định nghĩa trước | Hiểu những điều chưa biết |
+| **Câu hỏi** | "CPU > 80%?" | "Tại sao request này chậm?" |
+| **Cách tiếp cận** | Dashboards + cảnh báo | Khám phá + debugging |
+| **Phạm vi** | Các chế độ thất bại đã biết | Bất kỳ chế độ thất bại nào |
 
-**Example:**
-- **Monitoring:** Alert when error rate > 5%
-- **Observability:** Debug why specific request failed using logs/traces
+**Ví dụ:**
+- **Monitoring:** Cảnh báo khi error rate > 5%
+- **Observability:** Debug tại sao request cụ thể thất bại sử dụng logs/traces
 
 ### SLI, SLO, SLA
 
-| Term | Definition | Example |
+| Thuật ngữ | Định nghĩa | Ví dụ |
 |------|-----------|---------|
-| **SLI** | Service Level Indicator (what you measure) | Request latency, error rate |
-| **SLO** | Service Level Objective (target value) | 99.9% requests < 500ms |
-| **SLA** | Service Level Agreement (contract) | 99.95% uptime or refund |
-| **Error Budget** | Allowed downtime | 0.1% = 43 minutes/month |
+| **SLI** | Service Level Indicator (cái bạn đo lường) | Request latency, error rate |
+| **SLO** | Service Level Objective (giá trị mục tiêu) | 99.9% requests &lt; 500ms |
+| **SLA** | Service Level Agreement (hợp đồng) | 99.95% uptime hoặc hoàn tiền |
+| **Error Budget** | Thời gian downtime được phép | 0.1% = 43 phút/tháng |
 
-**Example:**
+**Ví dụ:**
 ```
 SLI:  Request success rate
 SLO:  99.9% of requests succeed (3 nines)
@@ -183,20 +183,20 @@ Error Budget: 0.1% failure allowed
 
 ### The Four Golden Signals (Google SRE)
 
-| Signal | Definition | Example Metric |
+| Tín hiệu | Định nghĩa | Ví dụ Metric |
 |--------|-----------|----------------|
-| **Latency** | How long requests take | P95 latency: 245ms |
-| **Traffic** | How many requests | 1,524 requests/sec |
-| **Errors** | How many failures | 0.03% error rate |
-| **Saturation** | How full resources are | CPU: 65%, Memory: 78% |
+| **Latency** | Request mất bao lâu | P95 latency: 245ms |
+| **Traffic** | Bao nhiêu request | 1,524 requests/sec |
+| **Errors** | Bao nhiêu thất bại | 0.03% error rate |
+| **Saturation** | Tài nguyên đầy bao nhiêu | CPU: 65%, Memory: 78% |
 
-**Why these 4?**
-- **Latency + Errors** → User experience
-- **Traffic + Saturation** → Capacity planning
+**Tại sao 4 cái này?**
+- **Latency + Errors** → Trải nghiệm người dùng
+- **Traffic + Saturation** → Lập kế hoạch dung lượng
 
 ---
 
-## 🛠️ Implementation in Our System
+## 🛠️ Triển Khai Trong Hệ Thống Của Chúng Ta
 
 ### Prometheus Metrics
 
@@ -323,55 +323,55 @@ kafka_consumer_lag{topic="orders"}
 
 ---
 
-##  Production Checklist
+##  Danh Sách Kiểm Tra Production
 
 ### Metrics
-- [ ] All services expose `/metrics` endpoint
-- [ ] Prometheus scraping configured
-- [ ] Grafana dashboards created
-- [ ] Alert rules defined
-- [ ] On-call rotation set up
+- [ ] Tất cả services expose `/metrics` endpoint
+- [ ] Prometheus scraping được cấu hình
+- [ ] Grafana dashboards được tạo
+- [ ] Alert rules được định nghĩa
+- [ ] On-call rotation được thiết lập
 
 ### Logging
-- [ ] All logs are structured JSON
-- [ ] Trace IDs propagated across services
-- [ ] Log aggregation configured (ELK, Loki)
-- [ ] PII data redacted
-- [ ] Log retention policy defined
+- [ ] Tất cả logs là structured JSON
+- [ ] Trace IDs được propagate qua các services
+- [ ] Log aggregation được cấu hình (ELK, Loki)
+- [ ] PII data được redact
+- [ ] Log retention policy được định nghĩa
 
 ### Tracing
-- [ ] Trace IDs generated at entry point
-- [ ] Trace IDs propagated via headers
-- [ ] Trace ID included in all logs
-- [ ] (Optional) OpenTelemetry instrumented
+- [ ] Trace IDs được generate tại entry point
+- [ ] Trace IDs được propagate qua headers
+- [ ] Trace ID được include trong tất cả logs
+- [ ] (Tùy chọn) OpenTelemetry được instrument
 
 ### Health Checks
 - [ ] `/health` endpoint (liveness)
 - [ ] `/ready` endpoint (readiness)
-- [ ] Kubernetes probes configured
+- [ ] Kubernetes probes được cấu hình
 
 ---
 
-## 🎯 Key Takeaways
+## 🎯 Những Điểm Chính
 
-1. **Metrics** = Quantitative → Dashboards & alerts
-2. **Logs** = Qualitative → Debug specific failures
-3. **Traces** = Flow → Find distributed bottlenecks
+1. **Metrics** = Định lượng → Dashboards & cảnh báo
+2. **Logs** = Định tính → Debug các thất bại cụ thể
+3. **Traces** = Luồng → Tìm nút thắt phân tán
 
-4. **Always add trace IDs** to correlate logs across services
-5. **Monitor the 4 Golden Signals**: Latency, Traffic, Errors, Saturation
-6. **Alert on symptoms, not causes** (high error rate, not CPU)
-7. **Observability is non-negotiable** for production systems
+4. **Luôn thêm trace IDs** để correlate logs qua các services
+5. **Monitor 4 Golden Signals**: Latency, Traffic, Errors, Saturation
+6. **Cảnh báo trên triệu chứng, không phải nguyên nhân** (high error rate, không phải CPU)
+7. **Observability là không thể thương lượng** cho các hệ thống production
 
-**Without observability:**
-> "It's slow... I don't know why" 🤷
+**Không có observability:**
+> "Nó chậm... Tôi không biết tại sao" 🤷
 
-**With observability:**
-> "P95 latency is 2.5s on payment service due to database connection pool exhaustion" 🎯
+**Có observability:**
+> "P95 latency là 2.5s trên payment service do database connection pool exhaustion" 🎯
 
 ---
 
-## 📚 Further Reading
+## 📚 Đọc Thêm
 
 - [Google SRE Book - Monitoring](https://sre.google/sre-book/monitoring-distributed-systems/)
 - [The Three Pillars of Observability](https://www.oreilly.com/library/view/distributed-systems-observability/9781492033431/)

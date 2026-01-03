@@ -1,14 +1,14 @@
-# Introduction to Saga Pattern
+# Giới thiệu về Mẫu Saga
 
-## What is a Saga?
+## Saga là gì?
 
-A **saga** is a sequence of local transactions where each transaction updates data within a single service. The saga pattern is used to manage distributed transactions across multiple microservices.
+Một **saga** là một chuỗi các giao dịch cục bộ nơi mỗi giao dịch cập nhật dữ liệu trong một dịch vụ duy nhất. Mẫu saga được sử dụng để quản lý các giao dịch phân tán trên nhiều microservices.
 
-## The Problem: Distributed Transactions
+## Vấn đề: Giao dịch phân tán
 
-### Traditional Approach (Doesn't Work)
+### Cách tiếp cận truyền thống (Không hoạt động)
 
-In a monolithic application, you can use database transactions:
+Trong ứng dụng monolithic, bạn có thể sử dụng giao dịch cơ sở dữ liệu:
 
 ```sql
 BEGIN TRANSACTION;
@@ -18,13 +18,13 @@ BEGIN TRANSACTION;
 COMMIT;
 ```
 
-**Problem**: This doesn't work across microservices because:
-- Each service has its own database
-- No distributed transactions across HTTP/Kafka
-- 2PC (Two-Phase Commit) is blocking and fragile
-- Tight coupling between services
+**Vấn đề**: Điều này không hoạt động trên microservices vì:
+- Mỗi dịch vụ có cơ sở dữ liệu riêng
+- Không có giao dịch phân tán trên HTTP/Kafka
+- 2PC (Two-Phase Commit) là chặn và dễ vỡ
+- Ghép chặt giữa các dịch vụ
 
-### Microservices Challenge
+### Thách thức Microservices
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -33,60 +33,60 @@ COMMIT;
 └─────────────┘     └─────────────┘     └─────────────┘
      DB₁                  DB₂                  DB₃
 
-How to maintain consistency across 3 databases?
+Làm thế nào để duy trì tính nhất quán trên 3 cơ sở dữ liệu?
 ```
 
-## The Solution: Saga Pattern
+## Giải pháp: Mẫu Saga
 
-Instead of a single ACID transaction, use a **sequence of local transactions** coordinated by events or orchestration.
+Thay vì một giao dịch ACID duy nhất, sử dụng một **chuỗi các giao dịch cục bộ** được phối hợp bởi sự kiện hoặc orchestration.
 
-### Key Characteristics
+### Đặc điểm chính
 
-1. **Local Transactions**: Each service commits locally
-2. **No Distributed Lock**: Services don't wait for each other
-3. **Eventual Consistency**: System reaches consistent state over time
-4. **Compensation**: Forward actions to undo effects (not rollback)
+1. **Giao dịch cục bộ**: Mỗi dịch vụ commit cục bộ
+2. **Không khóa phân tán**: Các dịch vụ không chờ đợi lẫn nhau
+3. **Tính nhất quán cuối cùng**: Hệ thống đạt trạng thái nhất quán theo thời gian
+4. **Bồi thường**: Hành động chuyển tiếp để hoàn tác hiệu ứng (không phải rollback)
 
-### Example Flow
+### Luồng ví dụ
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│                  SUCCESS PATH                         │
+│                  ĐƯỜNG THÀNH CÔNG                    │
 └──────────────────────────────────────────────────────┘
 
-1. Order Service: Create order → Commit locally
+1. Order Service: Tạo đơn hàng → Commit cục bộ
    ↓ emit OrderCreatedEvent
    
-2. Payment Service: Process payment → Commit locally
+2. Payment Service: Xử lý thanh toán → Commit cục bộ
    ↓ emit PaymentCompletedEvent
    
-3. Inventory Service: Reserve items → Commit locally
+3. Inventory Service: Dự trữ hàng → Commit cục bộ
    ↓ emit InventoryReservedEvent
    
-✓ Saga Complete
+✓ Saga Hoàn thành
 
 
 ┌──────────────────────────────────────────────────────┐
-│                 COMPENSATION PATH                     │
+│                 ĐƯỜNG BỒI THƯỜNG                    │
 └──────────────────────────────────────────────────────┘
 
-1. Order Service: Create order → Commit locally
+1. Order Service: Tạo đơn hàng → Commit cục bộ
    ↓ emit OrderCreatedEvent
    
-2. Payment Service: Payment FAILS
+2. Payment Service: Thanh toán THẤT BẠI
    ↓ emit PaymentFailedEvent
    
-3. Order Service: COMPENSATE - Cancel order
+3. Order Service: BỒI THƯỜNG - Hủy đơn hàng
    ↓ emit OrderCancelledEvent
    
-✗ Saga Cancelled (Compensation Applied)
+✗ Saga Hủy (Bồi thường áp dụng)
 ```
 
-## Two Saga Patterns
+## Hai mẫu Saga
 
-### 1. Choreography (Event-Driven)
+### 1. Choreography (Hướng sự kiện)
 
-Services react to events without central coordination.
+Các dịch vụ phản ứng với sự kiện mà không có phối hợp trung tâm.
 
 ```mermaid
 graph LR
@@ -95,111 +95,111 @@ graph LR
     B -->|PaymentFailed| A
 ```
 
-**Pros:**
--  Loose coupling
--  No single point of failure
--  Easy to extend
+**Ưu điểm:**
+-  Ghép lỏng
+-  Không có điểm thất bại duy nhất
+-  Dễ mở rộng
 
-**Cons:**
--  Hard to track overall flow
--  Cyclic dependencies possible
--  Difficult to debug
+**Nhược điểm:**
+-  Khó theo dõi luồng tổng thể
+-  Có thể có phụ thuộc vòng tròn
+-  Khó debug
 
-### 2. Orchestration (Centralized)
+### 2. Orchestration (Trung tâm)
 
-Central orchestrator coordinates the saga.
+Orchestrator trung tâm phối hợp saga.
 
 ```mermaid
 graph TD
-    O[Saga Orchestrator] -->|1. Process Payment| P[Payment Service]
-    P -->|Success| O
-    O -->|2. Reserve Inventory| I[Inventory Service]
-    I -->|Success| O
-    O -->|3. Complete Order| OO[Order Service]
+    O[Saga Orchestrator] -->|1. Xử lý thanh toán| P[Payment Service]
+    P -->|Thành công| O
+    O -->|2. Dự trữ hàng tồn kho| I[Inventory Service]
+    I -->|Thành công| O
+    O -->|3. Hoàn thành đơn hàng| OO[Order Service]
 ```
 
-**Pros:**
--  Clear control flow
--  Easy to understand
--  Centralized state
+**Ưu điểm:**
+-  Luồng kiểm soát rõ ràng
+-  Dễ hiểu
+-  Trạng thái trung tâm
 
-**Cons:**
--  Central point of failure
--  Orchestrator complexity
--  Tight coupling
+**Nhược điểm:**
+-  Điểm thất bại trung tâm
+-  Độ phức tạp của orchestrator
+-  Ghép chặt
 
-## When to Use Sagas
+## Khi nào sử dụng Sagas
 
-### Good Use Cases 
+### Các trường hợp tốt
 
-- **E-commerce orders**: Order → Payment → Inventory → Shipping
-- **Travel booking**: Flight + Hotel + Car rental
-- **Financial transactions**: Transfer between accounts
-- **Multi-step workflows**: Any process across services
+- **Đơn hàng thương mại điện tử**: Đơn hàng → Thanh toán → Hàng tồn kho → Vận chuyển
+- **Đặt chỗ du lịch**: Chuyến bay + Khách sạn + Thuê xe
+- **Giao dịch tài chính**: Chuyển khoản giữa các tài khoản
+- **Luồng công việc nhiều bước**: Bất kỳ quy trình nào trên các dịch vụ
 
-### Not Recommended 
+### Không khuyến nghị
 
-- **Within a single service**: Use database transactions
-- **Real-time requirements**: Sagas are eventually consistent
-- **Cannot compensate**: Some actions can't be undone (e.g., sent email)
+- **Trong một dịch vụ duy nhất**: Sử dụng giao dịch cơ sở dữ liệu
+- **Yêu cầu thời gian thực**: Sagas là nhất quán cuối cùng
+- **Không thể bồi thường**: Một số hành động không thể hoàn tác (ví dụ: gửi email)
 
-## Compensation vs Rollback
+## Bồi thường so với Rollback
 
-### Database Rollback
+### Rollback cơ sở dữ liệu
 
 ```sql
 BEGIN TRANSACTION;
   INSERT INTO orders (...);
-  -- Error occurs
-ROLLBACK; -- Undo everything
+  -- Lỗi xảy ra
+ROLLBACK; -- Hoàn tác mọi thứ
 ```
 
-**Result**: State restored to before transaction
+**Kết quả**: Trạng thái được khôi phục về trước giao dịch
 
-### Saga Compensation
+### Bồi thường Saga
 
 ```
-1. Create order (status: pending)
-2. Process payment (status: completed)
-3. Reserve inventory (FAILS)
-4. COMPENSATE: Refund payment
-5. COMPENSATE: Cancel order (status: cancelled)
+1. Tạo đơn hàng (trạng thái: pending)
+2. Xử lý thanh toán (trạng thái: completed)
+3. Dự trữ hàng tồn kho (THẤT BẠI)
+4. BỒI THƯỜNG: Hoàn tiền thanh toán
+5. BỒI THƯỜNG: Hủy đơn hàng (trạng thái: cancelled)
 ```
 
-**Result**: New state (cancelled), not restored to initial state
+**Kết quả**: Trạng thái mới (cancelled), không khôi phục về trạng thái ban đầu
 
-### Key Differences
+### Sự khác biệt chính
 
-| Aspect | Rollback | Compensation |
-|--------|----------|--------------|
-| Action | Undo (backward) | Forward action |
-| Timing | Immediate | Asynchronous |
-| State | Previous state | New state |
-| Example | DELETE order | Mark as cancelled |
-| Scope | Single database | Distributed |
+| Khía cạnh | Rollback | Bồi thường |
+|-----------|----------|------------|
+| Hành động | Hoàn tác (lùi lại) | Hành động chuyển tiếp |
+| Thời gian | Ngay lập tức | Bất đồng bộ |
+| Trạng thái | Trạng thái trước | Trạng thái mới |
+| Ví dụ | DELETE đơn hàng | Đánh dấu đã hủy |
+| Phạm vi | Cơ sở dữ liệu duy nhất | Phân tán |
 
-## Compensation Design
+## Thiết kế bồi thường
 
-### Guidelines
+### Nguyên tắc
 
-1. **Design compensatable steps**: Not all actions can be compensated
-2. **Forward actions**: Cancel order, refund payment (don't try to delete)
-3. **Idempotency**: Compensations can be retried
-4. **Business logic**: Refund vs store credit? Business decision!
+1. **Thiết kế các bước có thể bồi thường**: Không phải tất cả hành động đều có thể bồi thường
+2. **Hành động chuyển tiếp**: Hủy đơn hàng, hoàn tiền (đừng cố gắng xóa)
+3. **Idempotency**: Bồi thường có thể được thử lại
+4. **Logic kinh doanh**: Hoàn tiền so với tín dụng cửa hàng? Quyết định kinh doanh!
 
-### Cannot Compensate
+### Không thể bồi thường
 
-Some actions cannot be undone:
--  Email sent
--  Physical item shipped
--  External API called (cannot guarantee undo)
--  Time-sensitive actions (concert tickets sold)
+Một số hành động không thể hoàn tác:
+-  Email đã gửi
+-  Hàng vật lý đã vận chuyển
+-  API bên ngoài đã gọi (không thể đảm bảo hoàn tác)
+-  Hành động nhạy cảm thời gian (vé hòa nhạc đã bán)
 
-**Solution**: Design saga to minimize irreversible steps, or accept eventual consistency.
+**Giải pháp**: Thiết kế saga để giảm thiểu các bước không thể đảo ngược, hoặc chấp nhận tính nhất quán cuối cùng.
 
-## Next Steps
+## Các bước tiếp theo
 
-- [Choreography Pattern](./choreography.md) - Event-driven saga
-- Learn about orchestration pattern for centralized saga control
-- Study compensation strategies for designing rollback logic
-- [Streaming vs Messaging](./streaming-vs-messaging.md) - Event processing
+- [Mẫu Choreography](./choreography.md) - Saga hướng sự kiện
+- Học về mẫu orchestration để kiểm soát saga trung tâm
+- Nghiên cứu chiến lược bồi thường để thiết kế logic rollback
+- [Streaming so với Messaging](./streaming-vs-messaging.md) - Xử lý sự kiện

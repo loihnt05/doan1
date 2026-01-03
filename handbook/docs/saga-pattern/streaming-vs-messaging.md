@@ -1,30 +1,30 @@
-# Streaming vs Messaging
+# Streaming so với Messaging
 
-## Overview
+## Tổng quan
 
-**Messaging** and **Streaming** are both event-driven patterns, but they serve different purposes and have different characteristics.
+**Messaging** và **Streaming** đều là các mẫu hướng sự kiện, nhưng chúng phục vụ các mục đích khác nhau và có các đặc điểm khác nhau.
 
-## Key Differences
+## Sự khác biệt chính
 
-| Aspect | Messaging | Streaming |
-|--------|-----------|-----------|
-| **Purpose** | Task execution | Data processing |
-| **State** | Stateless | Stateful |
-| **Processing** | Discrete events | Continuous flow |
-| **Retention** | Short (minutes/hours) | Long (days/weeks) |
-| **Example** | Send email | Calculate revenue |
-| **Consumption** | Queue (consume once) | Pub/Sub (multiple consumers) |
+| Khía cạnh | Messaging | Streaming |
+|-----------|-----------|-----------|
+| **Mục đích** | Thực thi nhiệm vụ | Xử lý dữ liệu |
+| **Trạng thái** | Không trạng thái | Có trạng thái |
+| **Xử lý** | Sự kiện rời rạc | Luồng liên tục |
+| **Giữ lại** | Ngắn (phút/giờ) | Dài (ngày/tuần) |
+| **Ví dụ** | Gửi email | Tính doanh thu |
+| **Tiêu thụ** | Hàng đợi (tiêu thụ một lần) | Pub/Sub (nhiều người tiêu thụ) |
 
-## Messaging Pattern
+## Mẫu Messaging
 
-### Characteristics
+### Đặc điểm
 
-- **Discrete Events**: Each event is independent
-- **Stateless Processing**: No memory between events
-- **Task-Oriented**: Do something once
-- **Fire-and-Forget**: Event consumed and done
+- **Sự kiện rời rạc**: Mỗi sự kiện là độc lập
+- **Xử lý không trạng thái**: Không có bộ nhớ giữa các sự kiện
+- **Hướng nhiệm vụ**: Làm gì đó một lần
+- **Bắn và quên**: Sự kiện được tiêu thụ và xong
 
-### Example: Email Notification
+### Ví dụ: Thông báo Email
 
 ```typescript
 @Injectable()
@@ -51,22 +51,22 @@ export class NotificationService implements OnModuleInit {
 }
 ```
 
-**Use Cases:**
-- Send notifications (email, SMS)
-- Trigger webhooks
-- Execute commands
-- One-time tasks
+**Các trường hợp sử dụng:**
+- Gửi thông báo (email, SMS)
+- Kích hoạt webhooks
+- Thực thi lệnh
+- Nhiệm vụ một lần
 
-## Streaming Pattern
+## Mẫu Streaming
 
-### Characteristics
+### Đặc điểm
 
-- **Continuous Flow**: Events are part of a stream
-- **Stateful Processing**: Maintain state across events
-- **Analytics-Oriented**: Aggregate, calculate, analyze
-- **Time-Based**: Windows, intervals, periods
+- **Luồng liên tục**: Sự kiện là một phần của luồng
+- **Xử lý có trạng thái**: Duy trì trạng thái qua các sự kiện
+- **Hướng phân tích**: Tổng hợp, tính toán, phân tích
+- **Dựa trên thời gian**: Cửa sổ, khoảng, giai đoạn
 
-### Example: Revenue Analytics
+### Ví dụ: Phân tích Doanh thu
 
 ```typescript
 @Injectable()
@@ -149,18 +149,18 @@ export class AnalyticsService implements OnModuleInit {
 }
 ```
 
-**Use Cases:**
-- Real-time analytics
-- Revenue tracking
-- Dashboard metrics
-- Fraud detection
-- Monitoring systems
+**Các trường hợp sử dụng:**
+- Phân tích thời gian thực
+- Theo dõi doanh thu
+- Chỉ số bảng điều khiển
+- Phát hiện gian lận
+- Hệ thống giám sát
 
-## Stream Processing Patterns
+## Các mẫu xử lý luồng
 
-### 1. Aggregation
+### 1. Tổng hợp
 
-Combine multiple events into summary:
+Kết hợp nhiều sự kiện thành tóm tắt:
 
 ```typescript
 // Sum, count, average
@@ -169,9 +169,9 @@ orderCount++;
 averageOrderValue = totalRevenue / orderCount;
 ```
 
-### 2. Windowing
+### 2. Cửa sổ
 
-Group events by time:
+Nhóm sự kiện theo thời gian:
 
 ```typescript
 // Tumbling window (non-overlapping)
@@ -187,9 +187,9 @@ if (timeSinceLastOrder > 5 * 60 * 1000) {
 }
 ```
 
-### 3. Filtering
+### 3. Lọc
 
-Select subset of events:
+Chọn tập con của sự kiện:
 
 ```typescript
 // High-value orders
@@ -203,9 +203,9 @@ if (event.eventType === 'PaymentFailed') {
 }
 ```
 
-### 4. Enrichment
+### 4. Làm giàu
 
-Add context to events:
+Thêm ngữ cảnh vào sự kiện:
 
 ```typescript
 // Add user details
@@ -216,9 +216,9 @@ const enrichedEvent = {
 };
 ```
 
-### 5. Joining
+### 5. Kết hợp
 
-Combine multiple streams:
+Kết hợp nhiều luồng:
 
 ```typescript
 // Join orders with payments
@@ -233,9 +233,9 @@ const joined = {
 };
 ```
 
-## Lambda vs Kappa Architecture
+## Kiến trúc Lambda so với Kappa
 
-### Lambda Architecture (Traditional)
+### Kiến trúc Lambda (Truyền thống)
 
 ```
                     ┌──────────────────┐
@@ -256,24 +256,24 @@ Events ────────────▶│   Hadoop/Spark   │───�
                                     └───────────────┘
 ```
 
-**Characteristics:**
-- Two processing pipelines (batch + streaming)
-- Batch layer: Accurate but slow
-- Speed layer: Fast but approximate
-- Merge results in serving layer
+**Đặc điểm:**
+- Hai đường ống xử lý (batch + streaming)
+- Lớp batch: Chính xác nhưng chậm
+- Lớp tốc độ: Nhanh nhưng gần đúng
+- Kết hợp kết quả trong lớp phục vụ
 
-**Pros:**
--  Accurate results (batch)
--  Low latency (speed)
--  Best of both worlds
+**Ưu điểm:**
+- Kết quả chính xác (batch)
+- Độ trễ thấp (tốc độ)
+- Tốt nhất của cả hai thế giới
 
-**Cons:**
--  Complex (maintain two systems)
--  Hard to sync batch and speed layers
--  Different codebases
--  Duplicate logic
+**Nhược điểm:**
+- Phức tạp (duy trì hai hệ thống)
+- Khó đồng bộ lớp batch và tốc độ
+- Các cơ sở mã khác nhau
+- Logic trùng lặp
 
-### Kappa Architecture (Modern)
+### Kiến trúc Kappa (Hiện đại)
 
 ```
 Events ──▶ Stream Processor (Kafka Streams) ──▶ Serving Layer
@@ -282,27 +282,27 @@ Events ──▶ Stream Processor (Kafka Streams) ──▶ Serving Layer
                     └── Reprocess from beginning if needed
 ```
 
-**Characteristics:**
-- Single processing pipeline
-- Kafka-centric
-- Replay capability
-- Same code for batch and streaming
+**Đặc điểm:**
+- Đường ống xử lý đơn
+- Tập trung vào Kafka
+- Khả năng phát lại
+- Cùng mã cho batch và streaming
 
-**Pros:**
--  Simple (one system)
--  Easy to maintain
--  Kafka replay for reprocessing
--  Modern approach
+**Ưu điểm:**
+- Đơn giản (một hệ thống)
+- Dễ duy trì
+- Phát lại Kafka để xử lý lại
+- Cách tiếp cận hiện đại
 
-**Cons:**
--  Need to reprocess for schema changes
--  Single processing model (no batch optimization)
+**Nhược điểm:**
+- Cần xử lý lại cho thay đổi schema
+- Mô hình xử lý đơn (không tối ưu hóa batch)
 
-**Most systems today use Kappa**
+**Hầu hết các hệ thống ngày nay sử dụng Kappa**
 
-## Kafka Topics: Messaging vs Streaming
+## Chủ đề Kafka: Messaging so với Streaming
 
-### Messaging Topics
+### Chủ đề Messaging
 
 ```typescript
 // Short retention (1 day)
@@ -314,13 +314,13 @@ ConsumerGroups.PAYMENT_SERVICE
 ConsumerGroups.INVENTORY_SERVICE
 ```
 
-**Configuration:**
+**Cấu hình:**
 ```
 retention.ms=86400000  # 1 day
 cleanup.policy=delete
 ```
 
-### Streaming Topics
+### Chủ đề Streaming
 
 ```typescript
 // Long retention (7 days or more)
@@ -333,15 +333,15 @@ ConsumerGroups.FRAUD_DETECTION_SERVICE
 ConsumerGroups.REPORTING_SERVICE
 ```
 
-**Configuration:**
+**Cấu hình:**
 ```
 retention.ms=604800000  # 7 days
 cleanup.policy=compact  # Keep latest per key
 ```
 
-## Stateful vs Stateless
+## Có trạng thái so với Không trạng thái
 
-### Stateless (Messaging)
+### Không trạng thái (Messaging)
 
 ```typescript
 // No state between events
@@ -351,13 +351,13 @@ async handleEvent(event) {
 }
 ```
 
-**Characteristics:**
-- No memory
-- Each event independent
-- Easy to scale (add more instances)
-- No coordination needed
+**Đặc điểm:**
+- Không bộ nhớ
+- Mỗi sự kiện độc lập
+- Dễ mở rộng (thêm nhiều instance)
+- Không cần phối hợp
 
-### Stateful (Streaming)
+### Có trạng thái (Streaming)
 
 ```typescript
 // Maintain state
@@ -371,41 +371,41 @@ async handleEvent(event) {
 }
 ```
 
-**Characteristics:**
-- Memory of previous events
-- Must handle state management
-- Harder to scale (state partitioning)
-- Need coordination
+**Đặc điểm:**
+- Bộ nhớ của các sự kiện trước
+- Phải xử lý quản lý trạng thái
+- Khó mở rộng hơn (phân vùng trạng thái)
+- Cần phối hợp
 
-**State Management Solutions:**
-- In-memory (our demo)
-- Redis (shared state)
+**Giải pháp quản lý trạng thái:**
+- Trong bộ nhớ (demo của chúng ta)
+- Redis (trạng thái chia sẻ)
 - RocksDB (Kafka Streams)
-- Database (persistent state)
+- Cơ sở dữ liệu (trạng thái bền vững)
 
-## When to Use Each
+## Khi nào sử dụng mỗi loại
 
-### Use Messaging When:
+### Sử dụng Messaging khi:
 
--  Task execution (send email, call API)
--  One-time operations
--  No state needed
--  Simple event handling
--  Independent events
+- Thực thi nhiệm vụ (gửi email, gọi API)
+- Hoạt động một lần
+- Không cần trạng thái
+- Xử lý sự kiện đơn giản
+- Sự kiện độc lập
 
-### Use Streaming When:
+### Sử dụng Streaming khi:
 
--  Analytics and metrics
--  Aggregations (sum, count, average)
--  Time-based processing
--  Need to combine multiple events
--  Dashboard and reporting
--  Fraud detection
--  Monitoring systems
+- Phân tích và chỉ số
+- Tổng hợp (tổng, đếm, trung bình)
+- Xử lý dựa trên thời gian
+- Cần kết hợp nhiều sự kiện
+- Bảng điều khiển và báo cáo
+- Phát hiện gian lận
+- Hệ thống giám sát
 
-## Implementation in Phase 5
+## Triển khai trong Phase 5
 
-### Messaging Examples
+### Ví dụ Messaging
 
 ```typescript
 // Payment Service (messaging)
@@ -422,7 +422,7 @@ handleOrderCreated(event) {
 }
 ```
 
-### Streaming Examples
+### Ví dụ Streaming
 
 ```typescript
 // Analytics Service (streaming)
@@ -450,22 +450,22 @@ setInterval(() => {
 }, 10000);
 ```
 
-## Summary
+## Tóm tắt
 
-| Pattern | Purpose | State | Example |
-|---------|---------|-------|---------|
-| **Messaging** | Task execution | Stateless | Send email |
-| **Streaming** | Data processing | Stateful | Calculate revenue |
+| Mẫu | Mục đích | Trạng thái | Ví dụ |
+|-----|----------|------------|-------|
+| **Messaging** | Thực thi nhiệm vụ | Không trạng thái | Gửi email |
+| **Streaming** | Xử lý dữ liệu | Có trạng thái | Tính doanh thu |
 
-**Key Takeaways:**
-- Messaging = Do something once
-- Streaming = Analyze continuous data
-- Both use Kafka, different purposes
-- Can use both in same system (like Phase 5)
+**Điểm chính:**
+- Messaging = Làm gì đó một lần
+- Streaming = Phân tích dữ liệu liên tục
+- Cả hai đều sử dụng Kafka, mục đích khác nhau
+- Có thể sử dụng cả hai trong cùng hệ thống (như Phase 5)
 
-**In Phase 5:**
-- Saga services use messaging (order → payment → inventory)
-- Analytics service uses streaming (revenue aggregation)
-- Both patterns working together
+**Trong Phase 5:**
+- Dịch vụ saga sử dụng messaging (đơn hàng → thanh toán → hàng tồn kho)
+- Dịch vụ phân tích sử dụng streaming (tổng hợp doanh thu)
+- Cả hai mẫu hoạt động cùng nhau
 
-Next: Explore Lambda and Kappa architectures for stream processing
+Tiếp theo: Khám phá kiến trúc Lambda và Kappa cho xử lý luồng

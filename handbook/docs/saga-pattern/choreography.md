@@ -1,12 +1,12 @@
-# Choreography Pattern
+# Mẫu Choreography
 
-## What is Choreography?
+## Choreography là gì?
 
-**Choreography** is a decentralized saga pattern where each service reacts to events and emits new events. There is **no central coordinator**.
+**Choreography** là mẫu saga phi tập trung nơi mỗi dịch vụ phản ứng với sự kiện và phát ra sự kiện mới. Không có **coordinator trung tâm**.
 
-Think of it like a dance: each dancer (service) knows their steps and reacts to other dancers without a conductor.
+Hãy nghĩ về nó như một điệu nhảy: mỗi người nhảy (dịch vụ) biết bước của họ và phản ứng với những người nhảy khác mà không có nhạc trưởng.
 
-## Architecture
+## Kiến trúc
 
 ```
 ┌─────────────┐       ┌─────────────┐       ┌─────────────┐
@@ -24,17 +24,17 @@ Think of it like a dance: each dancer (service) knows their steps and reacts to 
        │                     │                     │
 ```
 
-Each service:
-1. Listens for specific events
-2. Performs local transaction
-3. Emits next event
-4. Other services react
+Mỗi dịch vụ:
+1. Lắng nghe sự kiện cụ thể
+2. Thực hiện giao dịch cục bộ
+3. Phát ra sự kiện tiếp theo
+4. Các dịch vụ khác phản ứng
 
-## Implementation
+## Triển khai
 
-### 1. Event Types
+### 1. Các loại sự kiện
 
-First, define all events in the saga:
+Đầu tiên, định nghĩa tất cả sự kiện trong saga:
 
 ```typescript
 // libs/kafka/events.types.ts
@@ -98,7 +98,7 @@ export interface OrderCancelledEvent {
 
 ### 2. Saga Initiator (Order Service)
 
-The order service starts the saga and handles compensation:
+Dịch vụ đơn hàng bắt đầu saga và xử lý bồi thường:
 
 ```typescript
 // apps/order-service/src/order-service.service.ts
@@ -182,7 +182,7 @@ export class OrderServiceService implements OnModuleInit {
 
 ### 3. Saga Participant (Payment Service)
 
-Payment service listens for OrderCreated and emits success/failure:
+Dịch vụ thanh toán lắng nghe OrderCreated và phát ra thành công/thất bại:
 
 ```typescript
 // apps/payment-service/src/payment-service.service.ts
@@ -260,7 +260,7 @@ export class PaymentServiceService implements OnModuleInit {
 
 ### 4. Saga Participant (Inventory Service)
 
-Inventory service listens for PaymentCompleted and emits success/failure:
+Dịch vụ hàng tồn kho lắng nghe PaymentCompleted và phát ra thành công/thất bại:
 
 ```typescript
 // apps/inventory-service/src/inventory-service.service.ts
@@ -339,103 +339,103 @@ export class InventoryServiceService implements OnModuleInit {
 }
 ```
 
-## Event Flow Diagram
+## Sơ đồ luồng sự kiện
 
-### Success Path
+### Đường thành công
 
 ```
 Order Service          Payment Service       Inventory Service
      │                        │                      │
-     │  1. Create Order       │                      │
+     │  1. Tạo đơn hàng       │                      │
      ├─────────────────────┐  │                      │
      │ OrderCreatedEvent   │  │                      │
-     │                     └─▶│  2. Process Payment  │
+     │                     └─▶│  2. Xử lý thanh toán │
      │                        ├──────────────────┐   │
      │                        │ PaymentCompleted │   │
-     │                        │                  └──▶│  3. Reserve Items
+     │                        │                  └──▶│  3. Dự trữ hàng
      │                        │                      ├──────────────────┐
      │                        │                      │ InventoryReserved│
      │                        │                      │                  │
-     ✓ Saga Complete          ✓                      ✓                  │
+     ✓ Saga Hoàn thành        ✓                      ✓                  │
 ```
 
-### Compensation Path (Payment Fails)
+### Đường bồi thường (Thanh toán thất bại)
 
 ```
 Order Service          Payment Service
      │                        │
-     │  1. Create Order       │
+     │  1. Tạo đơn hàng       │
      ├─────────────────────┐  │
      │ OrderCreatedEvent   │  │
-     │                     └─▶│  2. Payment Fails
+     │                     └─▶│  2. Thanh toán thất bại
      │                        ├──────────────────┐
      │                        │ PaymentFailedEvent│
-     │  3. Compensation    ◀──┘                  │
+     │  3. Bồi thường      ◀──┘                  │
      ├─────────────────────┐  │
      │ OrderCancelledEvent │  │
      │                     │  │
-     ✗ Saga Cancelled        │
+     ✗ Saga Hủy              │
 ```
 
-## Pros and Cons
+## Ưu và nhược điểm
 
-### Advantages 
+### Ưu điểm
 
-1. **Loose Coupling**
-   - Services don't know about each other
-   - Easy to add new participants
-   - No direct dependencies
+1. **Ghép lỏng**
+   - Các dịch vụ không biết về nhau
+   - Dễ thêm người tham gia mới
+   - Không có phụ thuộc trực tiếp
 
-2. **No Single Point of Failure**
-   - No central orchestrator to fail
-   - Each service is independent
-   - Resilient to partial failures
+2. **Không có điểm thất bại duy nhất**
+   - Không có orchestrator trung tâm để thất bại
+   - Mỗi dịch vụ độc lập
+   - Bền vững với các thất bại một phần
 
-3. **Scalability**
-   - Services can scale independently
-   - Event-driven by nature
-   - Kafka handles load distribution
+3. **Khả năng mở rộng**
+   - Các dịch vụ có thể mở rộng độc lập
+   - Hướng sự kiện theo bản chất
+   - Kafka xử lý phân phối tải
 
-4. **Flexibility**
-   - Easy to add new event handlers
-   - Multiple services can react to same event
-   - Example: Analytics service subscribes to all events
+4. **Tính linh hoạt**
+   - Dễ thêm trình xử lý sự kiện mới
+   - Nhiều dịch vụ có thể phản ứng với cùng sự kiện
+   - Ví dụ: Dịch vụ Analytics đăng ký tất cả sự kiện
 
-### Disadvantages 
+### Nhược điểm
 
-1. **Complex Flow Understanding**
-   - Hard to see overall saga flow
-   - Must trace events across services
-   - No single place shows complete process
+1. **Hiểu luồng phức tạp**
+   - Khó thấy luồng saga tổng thể
+   - Phải theo dõi sự kiện trên các dịch vụ
+   - Không có nơi duy nhất hiển thị quy trình hoàn chỉnh
 
-2. **Cyclic Dependencies**
-   - Services react to events from each other
-   - Can create circular event chains
-   - Example: A → B → C → A (loop!)
+2. **Phụ thuộc vòng tròn**
+   - Các dịch vụ phản ứng với sự kiện từ nhau
+   - Có thể tạo chuỗi sự kiện vòng tròn
+   - Ví dụ: A → B → C → A (vòng lặp!)
 
-3. **Difficult Debugging**
-   - Events scattered across services
-   - Must check logs of all services
-   - No centralized saga state
+3. **Khó debug**
+   - Sự kiện phân tán trên các dịch vụ
+   - Phải kiểm tra log của tất cả dịch vụ
+   - Không có trạng thái saga trung tâm
 
-4. **Testing Complexity**
-   - Must test entire event chain
-   - Integration tests required
-   - Hard to mock event flow
+4. **Độ phức tạp kiểm thử**
+   - Phải kiểm thử toàn bộ chuỗi sự kiện
+   - Cần kiểm thử tích hợp
+   - Khó mock luồng sự kiện
 
-## Best Practices
+## Các thực hành tốt nhất
 
-### 1. Event Naming Convention
+### 1. Quy ước đặt tên sự kiện
 
-Use clear, domain-driven event names:
+Sử dụng tên sự kiện rõ ràng, hướng miền:
 
 ```typescript
-//  Good
+//  Tốt
 OrderCreated
 PaymentCompleted
 InventoryReserved
 
-//  Bad
+//  Tệ
 OrderEvent
 PaymentDone
 StockChecked
@@ -443,7 +443,7 @@ StockChecked
 
 ### 2. Idempotency
 
-Always handle duplicate events:
+Luôn xử lý sự kiện trùng lặp:
 
 ```typescript
 private processedEvents = new Set<string>();
@@ -465,7 +465,7 @@ async handleEvent(event: any) {
 
 ### 3. Correlation ID
 
-Track saga across services:
+Theo dõi saga trên các dịch vụ:
 
 ```typescript
 const event = {
@@ -475,9 +475,9 @@ const event = {
 };
 ```
 
-### 4. Timeout Handling
+### 4. Xử lý timeout
 
-Implement saga timeout:
+Triển khai timeout saga:
 
 ```typescript
 const sagaTimeout = setTimeout(() => {
@@ -489,7 +489,7 @@ const sagaTimeout = setTimeout(() => {
 
 ### 5. Dead Letter Queue
 
-Handle failed events:
+Xử lý sự kiện thất bại:
 
 ```typescript
 try {
@@ -500,34 +500,34 @@ try {
 }
 ```
 
-## When to Use Choreography
+## Khi nào sử dụng Choreography
 
-### Good Use Cases 
+### Các trường hợp tốt
 
-- **Simple workflows** (2-4 steps)
-- **Independent services** (truly autonomous)
-- **Event-driven architecture** (already using events)
-- **No complex business logic** in coordination
+- **Luồng công việc đơn giản** (2-4 bước)
+- **Dịch vụ độc lập** (thực sự tự trị)
+- **Kiến trúc hướng sự kiện** (đã sử dụng sự kiện)
+- **Không có logic kinh doanh phức tạp** trong phối hợp
 
-### When to Use Orchestration Instead 
+### Khi nào sử dụng Orchestration thay thế
 
-- **Complex workflows** (5+ steps)
-- **Need saga state tracking**
-- **Complex branching logic**
-- **Clear ownership required**
+- **Luồng công việc phức tạp** (5+ bước)
+- **Cần theo dõi trạng thái saga**
+- **Logic phân nhánh phức tạp**
+- **Cần quyền sở hữu rõ ràng**
 
-## Summary
+## Tóm tắt
 
-Choreography is ideal for:
-- Simple, linear workflows
-- Event-driven microservices
-- When you want loose coupling
-- When services are truly independent
+Choreography lý tưởng cho:
+- Luồng công việc tuyến tính đơn giản
+- Microservices hướng sự kiện
+- Khi bạn muốn ghép lỏng
+- Khi các dịch vụ thực sự độc lập
 
-Key points:
-- Each service reacts to events
-- No central coordinator
-- Compensation via events
-- Eventually consistent
+Điểm chính:
+- Mỗi dịch vụ phản ứng với sự kiện
+- Không có coordinator trung tâm
+- Bồi thường qua sự kiện
+- Nhất quán cuối cùng
 
-Next: Compare with orchestration pattern for centralized control
+Tiếp theo: So sánh với mẫu orchestration để kiểm soát trung tâm

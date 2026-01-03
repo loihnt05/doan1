@@ -4,46 +4,46 @@ sidebar_position: 2
 
 # Prometheus Metrics
 
-Prometheus is an open-source monitoring system that collects **time-series metrics** from instrumented applications.
+Prometheus là hệ thống giám sát mã nguồn mở thu thập **chỉ số chuỗi thời gian** từ các ứng dụng được đo lường.
 
-## 🎯 Why Prometheus?
+## 🎯 Tại sao Prometheus?
 
-### The Problem
+### Vấn đề
 
-Without metrics:
+Không có chỉ số:
 ```
-Manager: "How many orders did we process today?"
-You: "Uhh... let me query the database..."
+Quản lý: "Chúng ta đã xử lý bao nhiêu đơn hàng hôm nay?"
+Bạn: "Ừm... để tôi truy vấn cơ sở dữ liệu..."
 
-Manager: "What was our peak traffic?"
-You: "I don't know..."
+Quản lý: "Lưu lượng truy cập đỉnh của chúng ta là gì?"
+Bạn: "Tôi không biết..."
 
-Manager: "Did that deploy break anything?"
-You: "Let me check logs..." *searches for hours*
+Quản lý: "Việc triển khai đó có phá vỡ gì không?"
+Bạn: "Để tôi kiểm tra log..." *tìm kiếm hàng giờ*
 ```
 
-### The Solution
+### Giải pháp
 
-With Prometheus:
+Với Prometheus:
 ```promql
-# Orders in last 24h
+# Đơn hàng trong 24h qua
 sum(increase(orders_created_total[24h]))
 
-# Peak RPS today
+# RPS đỉnh hôm nay
 max_over_time(rate(http_requests_total[5m])[24h:])
 
-# Error rate after deploy (last 15 minutes)
+# Tỷ lệ lỗi sau triển khai (15 phút qua)
 rate(http_requests_total{status_code=~"5.."}[15m])
 / rate(http_requests_total[15m]) * 100
 ```
 
 ---
 
-## 📊 Metric Types
+## 📊 Các loại chỉ số
 
-### 1. Counter (Only Goes Up)
+### 1. Counter (Chỉ tăng lên)
 
-Tracks cumulative values that **only increase** (or reset to zero).
+Theo dõi các giá trị tích lũy **chỉ tăng** (hoặc đặt lại về không).
 
 ```typescript
 import { Counter } from 'prom-client';
@@ -54,7 +54,7 @@ const httpRequestsTotal = new Counter({
   labelNames: ['method', 'route', 'status_code', 'service'],
 });
 
-// Increment counter
+// Tăng counter
 httpRequestsTotal.inc({ 
   method: 'POST', 
   route: '/orders', 
@@ -63,27 +63,27 @@ httpRequestsTotal.inc({
 });
 ```
 
-**Use cases:**
-- HTTP requests
-- Events processed
-- Errors encountered
-- Business events (orders, payments)
+**Các trường hợp sử dụng:**
+- Yêu cầu HTTP
+- Sự kiện được xử lý
+- Lỗi gặp phải
+- Sự kiện kinh doanh (đơn hàng, thanh toán)
 
-**PromQL queries:**
+**Truy vấn PromQL:**
 ```promql
-# Total requests
+# Tổng yêu cầu
 http_requests_total
 
-# Requests per second (rate)
+# Yêu cầu mỗi giây (rate)
 rate(http_requests_total[5m])
 
-# Total orders in last 24h
+# Tổng đơn hàng trong 24h qua
 sum(increase(orders_created_total[24h]))
 ```
 
-### 2. Gauge (Can Go Up or Down)
+### 2. Gauge (Có thể tăng hoặc giảm)
 
-Tracks values that can **increase or decrease**.
+Theo dõi các giá trị có thể **tăng hoặc giảm**.
 
 ```typescript
 import { Gauge } from 'prom-client';
@@ -94,35 +94,35 @@ const activeConnections = new Gauge({
   labelNames: ['service'],
 });
 
-// Set value
+// Đặt giá trị
 activeConnections.set({ service: 'api-gateway' }, 42);
 
-// Increment/decrement
+// Tăng/giảm
 activeConnections.inc({ service: 'api-gateway' });
 activeConnections.dec({ service: 'api-gateway' });
 ```
 
-**Use cases:**
-- In-flight requests
-- Queue depth
-- Memory usage
-- Kafka consumer lag
+**Các trường hợp sử dụng:**
+- Yêu cầu đang bay
+- Độ sâu hàng đợi
+- Sử dụng bộ nhớ
+- Độ trễ consumer Kafka
 
-**PromQL queries:**
+**Truy vấn PromQL:**
 ```promql
-# Current value
+# Giá trị hiện tại
 http_active_connections
 
-# Average over time
+# Trung bình theo thời gian
 avg_over_time(http_active_connections[5m])
 
-# Max in last hour
+# Tối đa trong giờ qua
 max_over_time(kafka_consumer_lag[1h])
 ```
 
-### 3. Histogram (Distribution of Values)
+### 3. Histogram (Phân phối giá trị)
 
-Tracks the **distribution** of values with configurable buckets.
+Theo dõi **phân phối** của các giá trị với các bucket có thể cấu hình.
 
 ```typescript
 import { Histogram } from 'prom-client';
@@ -141,40 +141,40 @@ httpRequestDuration.observe(
 );
 ```
 
-**What it tracks:**
+**Điều nó theo dõi:**
 ```
-_bucket{le="0.01"}    142  # 142 requests < 10ms
-_bucket{le="0.05"}    378  # 378 requests < 50ms
-_bucket{le="0.1"}     1203 # 1203 requests < 100ms
-_bucket{le="+Inf"}    1524 # All requests
-_sum                  45.23 # Total duration
-_count                1524  # Total count
+_bucket{le="0.01"}    142  # 142 yêu cầu < 10ms
+_bucket{le="0.05"}    378  # 378 yêu cầu < 50ms
+_bucket{le="0.1"}     1203 # 1203 yêu cầu < 100ms
+_bucket{le="+Inf"}    1524 # Tất cả yêu cầu
+_sum                  45.23 # Tổng thời lượng
+_count                1524  # Tổng số
 ```
 
-**Use cases:**
-- Request latency
-- Processing duration
-- Database query time
+**Các trường hợp sử dụng:**
+- Độ trễ yêu cầu
+- Thời lượng xử lý
+- Thời gian truy vấn cơ sở dữ liệu
 
-**PromQL queries:**
+**Truy vấn PromQL:**
 ```promql
-# P50 latency (median)
+# Độ trễ P50 (trung vị)
 histogram_quantile(0.5, rate(http_request_duration_seconds_bucket[5m]))
 
-# P95 latency
+# Độ trễ P95
 histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
 
-# P99 latency
+# Độ trễ P99
 histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
 
-# Average latency
+# Độ trễ trung bình
 rate(http_request_duration_seconds_sum[5m])
 / rate(http_request_duration_seconds_count[5m])
 ```
 
-### 4. Summary (Client-Side Quantiles)
+### 4. Summary (Quantiles phía client)
 
-Similar to Histogram but calculates quantiles **on the client**.
+Tương tự Histogram nhưng tính toán quantiles **trên client**.
 
 ```typescript
 import { Summary } from 'prom-client';
@@ -185,38 +185,38 @@ const dbQueryDuration = new Summary({
   percentiles: [0.5, 0.9, 0.95, 0.99],
 });
 
-// Record observation
+// Ghi nhận quan sát
 dbQueryDuration.observe(0.042); // 42ms
 ```
 
-**Histogram vs Summary:**
+**Histogram so với Summary:**
 
-| Aspect | Histogram | Summary |
-|--------|-----------|---------|
-| **Quantile calculation** | Server-side (Prometheus) | Client-side (app) |
-| **Bucket configuration** | Required | Not required |
-| **Aggregation across instances** |  Yes |  No |
-| **Memory usage** | Lower | Higher |
-| **Recommended** |  Use histograms |  Use only if needed |
+| Khía cạnh | Histogram | Summary |
+|-----------|-----------|---------|
+| **Tính toán quantile** | Server-side (Prometheus) | Client-side (app) |
+| **Cấu hình bucket** | Bắt buộc | Không bắt buộc |
+| **Tổng hợp trên các instance** |  Có |  Không |
+| **Sử dụng bộ nhớ** | Thấp hơn | Cao hơn |
+| **Khuyến nghị** |  Sử dụng histogram |  Chỉ sử dụng khi cần |
 
 ---
 
-## 🛠️ Our Metrics Implementation
+## 🛠️ Triển khai chỉ số của chúng ta
 
-### HTTP Metrics
+### Chỉ số HTTP
 
 ```typescript
 // libs/observability/metrics.ts
 import { Counter, Histogram, Gauge } from 'prom-client';
 
-// Total requests
+// Tổng yêu cầu
 export const httpRequestsTotal = new Counter({
   name: 'http_requests_total',
   help: 'Total HTTP requests',
   labelNames: ['method', 'route', 'status_code', 'service'],
 });
 
-// Request duration
+// Thời lượng yêu cầu
 export const httpRequestDuration = new Histogram({
   name: 'http_request_duration_seconds',
   help: 'HTTP request duration',
@@ -224,7 +224,7 @@ export const httpRequestDuration = new Histogram({
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2.5, 5],
 });
 
-// In-flight requests
+// Yêu cầu đang bay
 export const httpRequestsInFlight = new Gauge({
   name: 'http_requests_in_flight',
   help: 'Currently processing HTTP requests',
@@ -232,7 +232,7 @@ export const httpRequestsInFlight = new Gauge({
 });
 ```
 
-### Middleware to Track Metrics
+### Middleware để theo dõi chỉ số
 
 ```typescript
 // libs/observability/middleware.ts
@@ -246,7 +246,7 @@ export class MetricsMiddleware implements NestMiddleware {
     const serviceName = process.env.SERVICE_NAME || 'unknown';
     const startTime = Date.now();
 
-    // Increment in-flight
+    // Tăng đang bay
     httpRequestsInFlight.inc({ service: serviceName });
 
     res.on('finish', () => {
@@ -482,39 +482,39 @@ rate(payments_processed_total{status="success"}[5m])
 
 ---
 
-## 🎯 Best Practices
+## 🎯 Các thực hành tốt nhất
 
-### 1. Use Labels Wisely
+### 1. Sử dụng nhãn một cách khôn ngoan
 
- **Good:**
+ **Tốt:**
 ```typescript
 httpRequestsTotal.inc({ method: 'POST', route: '/orders', status_code: 200 });
 ```
 
- **Bad (high cardinality):**
+ **Tệ (cardinality cao):**
 ```typescript
 httpRequestsTotal.inc({ method: 'POST', route: '/orders', user_id: 'user-12345' });
 ```
 
-**Why?** Each unique label combination creates a new time series. With millions of users, this explodes memory.
+**Tại sao?** Mỗi tổ hợp nhãn duy nhất tạo ra một chuỗi thời gian mới. Với hàng triệu người dùng, điều này làm nổ bộ nhớ.
 
-### 2. Choose Histogram Buckets Carefully
+### 2. Chọn bucket Histogram cẩn thận
 
 ```typescript
-// Web API (milliseconds matter)
+// Web API (milliseconds quan trọng)
 buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2.5, 5]
 
-// Batch processing (seconds matter)
+// Xử lý batch (seconds quan trọng)
 buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120]
 
-// Background jobs (minutes matter)
+// Công việc nền (minutes quan trọng)
 buckets: [1, 5, 10, 30, 60, 300, 600, 1800, 3600]
 ```
 
-### 3. Use Helper Functions
+### 3. Sử dụng hàm helper
 
 ```typescript
-// Helper: Start timer
+// Helper: Bắt đầu timer
 export function startTimer(histogram: Histogram) {
   const start = Date.now();
   return (labels?: Record<string, string>) => {
@@ -522,13 +522,13 @@ export function startTimer(histogram: Histogram) {
   };
 }
 
-// Usage
+// Sử dụng
 const endTimer = startTimer(httpRequestDuration);
-// ... do work ...
+// ... làm việc ...
 endTimer({ method: 'POST', route: '/orders' });
 ```
 
-### 4. Add Default Labels
+### 4. Thêm nhãn mặc định
 
 ```typescript
 import { register } from 'prom-client';
@@ -542,27 +542,27 @@ register.setDefaultLabels({
 
 ---
 
-## 🎯 Key Takeaways
+## 🎯 Điểm chính
 
-1. **Counter** → Only goes up (requests, events)
-2. **Gauge** → Current value (active connections, lag)
-3. **Histogram** → Distribution (latency percentiles)
-4. **Summary** → Avoid (use histogram instead)
+1. **Counter** → Chỉ tăng lên (yêu cầu, sự kiện)
+2. **Gauge** → Giá trị hiện tại (kết nối hoạt động, lag)
+3. **Histogram** → Phân phối (phân vị độ trễ)
+4. **Summary** → Tránh (sử dụng histogram thay thế)
 
-5. **Low cardinality** → Labels with few unique values
-6. **High cardinality** → Labels with many unique values (avoid!)
+5. **Cardinality thấp** → Nhãn với ít giá trị duy nhất
+6. **Cardinality cao** → Nhãn với nhiều giá trị duy nhất (tránh!)
 
-7. **Histograms are powerful** → Calculate any percentile (P50, P95, P99)
-8. **Rate() is essential** → Convert counters to per-second values
+7. **Histogram mạnh mẽ** → Tính bất kỳ phân vị nào (P50, P95, P99)
+8. **Rate() thiết yếu** → Chuyển counter thành giá trị mỗi giây
 
-9. **/metrics endpoint** → Must be accessible to Prometheus
-10. **Monitor the 4 Golden Signals** → Latency, Traffic, Errors, Saturation
+9. **Endpoint /metrics** → Phải truy cập được cho Prometheus
+10. **Giám sát 4 tín hiệu vàng** → Độ trễ, Lưu lượng, Lỗi, Độ bão hòa
 
 ---
 
-## 📚 Further Reading
+## 📚 Đọc thêm
 
-- [Prometheus Metric Types](https://prometheus.io/docs/concepts/metric_types/)
-- [Histogram vs Summary](https://prometheus.io/docs/practices/histograms/)
-- [PromQL Basics](https://prometheus.io/docs/prometheus/latest/querying/basics/)
-- [Best Practices](https://prometheus.io/docs/practices/naming/)
+- [Các loại chỉ số Prometheus](https://prometheus.io/docs/concepts/metric_types/)
+- [Histogram so với Summary](https://prometheus.io/docs/practices/histograms/)
+- [Cơ bản PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/)
+- [Các thực hành tốt nhất](https://prometheus.io/docs/practices/naming/)

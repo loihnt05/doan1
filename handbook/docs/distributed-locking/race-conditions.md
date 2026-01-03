@@ -1,12 +1,12 @@
-# Race Conditions in Distributed Systems
+# Race Conditions trong Hệ thống Phân tán
 
-## What is a Race Condition?
+## Race Condition là gì?
 
-A **race condition** occurs when multiple processes access and modify shared data concurrently, and the final result depends on the timing of execution.
+Một **race condition** xảy ra khi nhiều tiến trình truy cập và sửa đổi dữ liệu chia sẻ đồng thời, và kết quả cuối cùng phụ thuộc vào thời gian thực thi.
 
-## Example: The Lost Update Problem
+## Ví dụ: Vấn đề Lost Update
 
-### Scenario: Payment Processing
+### Kịch bản: Xử lý Thanh toán
 
 ```typescript
 let balance = 1000; // Shared account balance
@@ -26,7 +26,7 @@ async function processPayment(amount: number) {
 }
 ```
 
-### What Happens with Concurrent Requests?
+### Điều gì xảy ra với Yêu cầu Đồng thời?
 
 ```
 Time | Request A        | Request B        | Balance
@@ -39,20 +39,20 @@ T5   | Write: 900      |                  | 900
 T6   |                 | Write: 900       | 900
 ```
 
-**Expected:** $800  
-**Actual:** $900  
-**Lost:** $100 
+**Dự kiến:** $800  
+**Thực tế:** $900  
+**Mất:** $100 
 
-## Why Does This Happen?
+## Tại sao Điều này xảy ra?
 
-This is called a **check-then-act** race condition:
+Điều này được gọi là **check-then-act** race condition:
 
-1. Both requests **read** the same value (1000)
-2. Both **check** sufficient funds (OK)
-3. Both **write** the same result (900)
-4. Second write **overwrites** the first
+1. Cả hai yêu cầu **đọc** cùng giá trị (1000)
+2. Cả hai **kiểm tra** đủ tiền (OK)
+3. Cả hai **ghi** cùng kết quả (900)
+4. Ghi thứ hai **ghi đè** ghi đầu tiên
 
-## Types of Race Conditions
+## Các Loại Race Conditions
 
 ### 1. Read-Modify-Write
 
@@ -79,9 +79,9 @@ if (hasPermission(user)) {  // Check at T1
 }
 ```
 
-## Why Local Locks Don't Work in Distributed Systems
+## Tại sao Local Locks Không Hoạt động trong Hệ thống Phân tán
 
-### Single Process Lock (BAD for Microservices)
+### Single Process Lock (XẤU cho Microservices)
 
 ```typescript
 let locked = false;
@@ -102,7 +102,7 @@ async function processPayment() {
 }
 ```
 
-### Why This Fails
+### Tại sao Điều này Thất bại
 
 ```
 Instance 1:
@@ -116,11 +116,11 @@ Instance 2:
   also processes payment 
 ```
 
-**Problem:** Each instance has its own `locked` variable!
+**Vấn đề:** Mỗi instance có biến `locked` riêng!
 
-## Real-World Examples
+## Ví dụ Thực tế
 
-### 1. E-commerce Inventory
+### 1. Kho hàng E-commerce
 
 ```
 2 customers buy last item simultaneously
@@ -129,7 +129,7 @@ Instance 2:
 → Oversold! 
 ```
 
-### 2. Bank Transfer
+### 2. Chuyển khoản Ngân hàng
 
 ```
 Account has $100
@@ -139,7 +139,7 @@ Transfer B: -$50
 → Final balance: -$50 
 ```
 
-### 3. Ticket Booking
+### 3. Đặt vé
 
 ```
 Last seat available
@@ -149,9 +149,9 @@ User B: Reserve seat 1A
 → Double booking! 
 ```
 
-## Solution Preview
+## Xem trước Giải pháp
 
-The solution is **distributed locking**:
+Giải pháp là **distributed locking**:
 
 ```typescript
 // Acquire distributed lock
@@ -170,4 +170,4 @@ try {
 }
 ```
 
-We'll explore distributed locking solutions in detail in the next sections.
+Chúng ta sẽ khám phá các giải pháp distributed locking chi tiết trong các phần tiếp theo.

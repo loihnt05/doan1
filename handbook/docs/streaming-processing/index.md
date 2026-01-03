@@ -6,14 +6,21 @@ Xử lý luồng là xử lý thời gian thực của các luồng dữ liệu 
 
 ## Xử lý Luồng vs Xử lý Hàng loạt
 
-```
-Xử lý Hàng loạt:
-Data → Storage → Process → Results
-       (giờ/ngày sau đó)
+```mermaid
+flowchart TD
+    subgraph Batch["Batch Processing (Bulk)"]
+        D1[Data] --> S1[Storage]
+        S1 --> P1[Process]
+        P1 --> R1[Results]
+        note1((Processed hours/days later))
+    end
 
-Xử lý Luồng:
-Data → Process → Results
-       (mili giây)
+    subgraph Stream["Stream Processing (Real-time)"]
+        D2[Data] --> P2[Process]
+        P2 --> R2[Results]
+        note2((Processed in milliseconds))
+    end
+
 ```
 
 ## Kiến trúc
@@ -22,27 +29,17 @@ Data → Process → Results
 
 Kết hợp xử lý hàng loạt và luồng để hoàn thiện và độ trễ thấp.
 
-```
-                          ┌─────────────┐
-                          │ Data Source │
-                          └──────┬──────┘
-                                 │
-                    ┌────────────┼────────────┐
-                    │                         │
-              ┌─────▼──────┐           ┌─────▼──────┐
-              │   Batch    │           │   Speed    │
-              │   Layer    │           │   Layer    │
-              │ (Complete) │           │  (Fast)    │
-              └─────┬──────┘           └─────┬──────┘
-                    │                         │
-              (Batch View)              (Real-time View)
-                    │                         │
-                    └────────────┬────────────┘
-                                 │
-                          ┌──────▼──────┐
-                          │   Serving   │
-                          │    Layer    │
-                          └─────────────┘
+```mermaid
+flowchart TD
+    DS[Data Source] --> BL[Batch Layer ]
+    DS --> SL[Speed Layer ]
+
+    BL --> BV[Batch View]
+    SL --> RV[Real-time View]
+
+    BV --> SV[Serving Layer]
+    RV --> SV
+
 ```
 
 **Lớp:**
@@ -91,19 +88,11 @@ async getMetrics() {
 
 Phiên bản đơn giản hóa - chỉ xử lý luồng.
 
-```
-                    ┌─────────────┐
-                    │ Data Source │
-                    └──────┬──────┘
-                           │
-                    ┌──────▼──────┐
-                    │   Stream    │
-                    │ Processing  │
-                    └──────┬──────┘
-                           │
-                    ┌──────▼──────┐
-                    │   Serving   │
-                    └─────────────┘
+```mermaid
+flowchart TD
+    DS[Data Source] --> SP[Stream Processing]
+    SP --> SV[Serving Layer]
+
 ```
 
 **Ý tưởng Chính:** Giữ tất cả dữ liệu trong luồng (Kafka), xử lý lại nếu cần.
@@ -146,13 +135,15 @@ async reprocess() {
 
 Microservices hướng sự kiện với xử lý luồng.
 
-```
-Order Service ──> [order-created] ──> Payment Service
-                                  └──> Inventory Service
-                                  └──> Notification Service
-                                  └──> Analytics Service
+```mermaid
+flowchart TD
+    OS[Order Service] --> EVT[order-created]
 
-Mỗi dịch vụ xử lý sự kiện độc lập
+    EVT --> PS[Payment Service]
+    EVT --> IS[Inventory Service]
+    EVT --> NS[Notification Service]
+    EVT --> AS[Analytics Service]
+
 ```
 
 ```typescript
@@ -668,9 +659,9 @@ describe('Order Saga', () => {
 });
 ```
 
-## Project Implementation
+## Triển khai Dự án
 
-See:
+Xem:
 - [Saga implementation](../../../backend/PHASE5-STREAMING-SAGA.md)
 - [Orchestration vs Choreography](../../../backend/ORCHESTRATION-VS-CHOREOGRAPHY.md)
 - [Event handlers](../../../backend/apps/)
