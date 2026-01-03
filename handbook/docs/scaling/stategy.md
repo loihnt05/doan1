@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 ---
-## Chiến lược Scaling
+# Strategy Scaling
 
 ### 1. Request Per Second (RPS)
 
