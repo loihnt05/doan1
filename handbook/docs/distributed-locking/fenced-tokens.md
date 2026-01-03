@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # Fenced Tokens
 
 ## Vấn đề: Lock Expiration
@@ -6,17 +9,32 @@ Ngay cả với distributed locks, vẫn có một lỗi tinh tế có thể gâ
 
 ### Kịch bản
 
-```
-Time | Worker A                  | Worker B        | Lock
------|---------------------------|-----------------|--------
-T1   | Acquire lock             |                 | A owns
-T2   | Start processing...      |                 | A owns
-T3   | GC pause (STW)           |                 | A owns
-T4   |                          |                 | Expired!
-T5   |                          | Acquire lock    | B owns
-T6   |                          | Process + write | B owns
-T7   | Resume from GC pause     |                 | B owns
-T8   | Write data ← STALE!    |                 | B owns
+```mermaid
+sequenceDiagram
+    participant A as Worker A
+    participant B as Worker B
+    participant L as Lock Service
+    participant DB as Database
+
+    A ->> L: Acquire lock
+    L -->> A: Lock granted (A owns)
+
+    A ->> A: Start processing
+
+    Note over A: GC pause (Stop-The-World)
+
+    Note over L: Lock TTL expires
+
+    B ->> L: Acquire lock
+    L -->> B: Lock granted (B owns)
+
+    B ->> DB: Process and write data
+    DB -->> B: Write success
+
+    Note over A: GC pause ends
+
+    A ->> DB: Write data (STALE)
+    DB -->> A: Write success (corruption)
 ```
 
 **Worker A ghi dữ liệu cũ** ngay cả khi nó không còn giữ lock!
@@ -49,18 +67,36 @@ const token = await redis.incr('fence:resource:123');
 
 ### Luồng Hoàn chỉnh
 
-```
-Time | Worker A        | Worker B        | Token | Storage
------|-----------------|-----------------|-------|----------
-T1   | Get token=1     |                 | 1     |
-T2   | Acquire lock    |                 | 1     |
-T3   | Process...      |                 | 1     |
-T4   | GC pause        |                 | 1     |
-T5   | (paused)        | Get token=2     | 2     |
-T6   | (paused)        | Acquire lock    | 2     |
-T7   | (paused)        | Write(token=2)  | 2     |  Accept
-T8   | Resume          |                 | 2     |
-T9   | Write(token=1)  |                 | 2     |  Reject
+```mermaid
+sequenceDiagram
+    participant A as Worker A
+    participant B as Worker B
+    participant L as Lock Service
+    participant S as Storage
+
+    A ->> L: Get token = 1
+    L -->> A: Token 1
+
+    A ->> L: Acquire lock (token 1)
+    L -->> A: Lock granted
+
+    A ->> A: Process work
+
+    Note over A: GC pause (STW)
+
+    B ->> L: Get token = 2
+    L -->> B: Token 2
+
+    B ->> L: Acquire lock (token 2)
+    L -->> B: Lock granted
+
+    B ->> S: Write data (token 2)
+    S -->> B: Accept (latest token)
+
+    Note over A: Resume from GC pause
+
+    A ->> S: Write data (token 1)
+    S -->> A: Reject (stale token)
 ```
 
 **Storage reject token=1** vì token hiện tại là 2!
@@ -180,11 +216,11 @@ async function saveToDatabase(data, token) {
 
 ## So sánh
 
-| Phương pháp | Mutual Exclusion | Ngăn Stale Writes | Độ phức tạp |
-|----------|------------------|----------------------|------------|
-| **Không Lock** |  |  | Thấp |
-| **Distributed Lock** |  |  | Trung bình |
-| **Lock + Fenced Token** |  |  | Cao |
+| Phương pháp             | Mutual Exclusion | Ngăn Stale Writes                   | Độ phức tạp |
+| ----------------------- | ---------------- | ----------------------------------- | ----------- |
+| **Không Lock**          | Không          |  Không                             | Thấp        |
+| **Distributed Lock**    |  Có             |  Không (có thể xảy ra stale write) | Trung bình  |
+| **Lock + Fenced Token** | Có             |  Có                                | Cao         |
 
 ## Mẹo Triển khai
 
