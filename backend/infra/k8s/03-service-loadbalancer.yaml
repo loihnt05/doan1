@@ -69,14 +69,14 @@ spec:
 #   http://a1b2c3.us-west-2.elb.amazonaws.com
 #
 # Talking Points:
-# ✅ Production-ready external access
-# ✅ Automatic provisioning and management
-# ✅ Health checks handled by cloud provider
-# ✅ SSL/TLS termination at load balancer
-# ✅ High availability across zones
-# ❌ Only works with cloud providers (AWS, GCP, Azure)
-# ❌ Costs money (LB resource charges)
-# ❌ One load balancer per service (can be expensive)
+#  Production-ready external access
+#  Automatic provisioning and management
+#  Health checks handled by cloud provider
+#  SSL/TLS termination at load balancer
+#  High availability across zones
+#  Only works with cloud providers (AWS, GCP, Azure)
+#  Costs money (LB resource charges)
+#  One load balancer per service (can be expensive)
 # 💡 For multiple services, use Ingress instead
 #
 # Comparison to Docker Compose nginx:

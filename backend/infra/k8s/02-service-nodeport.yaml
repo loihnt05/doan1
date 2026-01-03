@@ -57,10 +57,10 @@ spec:
 #   * Drawback: Uneven load if pods are not evenly distributed
 #
 # Talking Points:
-# ✅ Simple external access without cloud load balancer
-# ✅ Good for development/testing
-# ✅ No additional infrastructure needed
-# ❌ Must know node IPs (nodes can be added/removed)
-# ❌ Requires firewall rules for node ports
-# ❌ Not recommended for production (use LoadBalancer or Ingress)
-# ❌ Limited port range (30000-32767)
+#  Simple external access without cloud load balancer
+#  Good for development/testing
+#  No additional infrastructure needed
+#  Must know node IPs (nodes can be added/removed)
+#  Requires firewall rules for node ports
+#  Not recommended for production (use LoadBalancer or Ingress)
+#  Limited port range (30000-32767)

@@ -1,0 +1,8 @@
+{
+  "label": "Saga Pattern",
+  "position": 14,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn about Saga Pattern for distributed transactions and streaming processing."
+  }
+}

@@ -77,6 +77,64 @@ export interface PaymentProcessedEvent {
   };
 }
 
+export interface PaymentCompletedEvent {
+  eventType: 'PaymentCompleted';
+  eventId: string;
+  timestamp: string;
+  data: {
+    orderId: string;
+    paymentId: string;
+    amount: number;
+    transactionId: string;
+  };
+}
+
+export interface PaymentFailedEvent {
+  eventType: 'PaymentFailed';
+  eventId: string;
+  timestamp: string;
+  data: {
+    orderId: string;
+    paymentId: string;
+    amount: number;
+    reason: string;
+    errorCode: string;
+  };
+}
+
+// ===================================================================
+// INVENTORY EVENTS (Phase 5 - Saga Pattern)
+// ===================================================================
+
+export interface InventoryReservedEvent {
+  eventType: 'InventoryReserved';
+  eventId: string;
+  timestamp: string;
+  data: {
+    orderId: string;
+    reservationId: string;
+    items: Array<{
+      productId: string;
+      quantity: number;
+    }>;
+  };
+}
+
+export interface InventoryFailedEvent {
+  eventType: 'InventoryFailed';
+  eventId: string;
+  timestamp: string;
+  data: {
+    orderId: string;
+    reason: string;
+    items: Array<{
+      productId: string;
+      requestedQuantity: number;
+      availableQuantity: number;
+    }>;
+  };
+}
+
 // ===================================================================
 // NOTIFICATION EVENTS
 // ===================================================================
@@ -123,6 +181,10 @@ export type DomainEvent =
   | OrderCancelledEvent
   | PaymentRequestedEvent
   | PaymentProcessedEvent
+  | PaymentCompletedEvent
+  | PaymentFailedEvent
+  | InventoryReservedEvent
+  | InventoryFailedEvent
   | NotificationRequestedEvent
   | DeadLetterEvent;
 
@@ -148,11 +210,16 @@ export const Topics = {
   ORDER_CANCELLED: 'order-cancelled',
   PAYMENT_REQUESTED: 'payment-requested',
   PAYMENT_PROCESSED: 'payment-processed',
+  PAYMENT_COMPLETED: 'payment-completed',
+  PAYMENT_FAILED: 'payment-failed',
+  INVENTORY_RESERVED: 'inventory-reserved',
+  INVENTORY_FAILED: 'inventory-failed',
   NOTIFICATION_REQUESTED: 'notification-requested',
   
   // Dead Letter Queues
   ORDER_CREATED_DLQ: 'order-created-dlq',
   PAYMENT_REQUESTED_DLQ: 'payment-requested-dlq',
+  PAYMENT_COMPLETED_DLQ: 'payment-completed-dlq',
 } as const;
 
 export type TopicName = typeof Topics[keyof typeof Topics];
@@ -163,6 +230,8 @@ export type TopicName = typeof Topics[keyof typeof Topics];
 
 export const ConsumerGroups = {
   PAYMENT_SERVICE: 'payment-service-group',
+  INVENTORY_SERVICE: 'inventory-service-group',
+  ORDER_SERVICE: 'order-service-group',
   NOTIFICATION_SERVICE: 'notification-service-group',
   ANALYTICS_SERVICE: 'analytics-service-group',
   AUDIT_SERVICE: 'audit-service-group',

@@ -1,0 +1,8 @@
+{
+  "label": "4. API Gateway",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Điểm vào duy nhất của hệ thống: routing, auth, rate limiting, circuit breaker và observability tại apps/api-gateway/."
+  }
+}

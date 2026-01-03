@@ -114,14 +114,14 @@ spec:
 # - ImplementationSpecific: Controller-specific logic
 #
 # Talking Points:
-# ✅ Single load balancer for multiple services (cost effective)
-# ✅ Layer 7 routing (host, path, headers)
-# ✅ SSL/TLS termination
-# ✅ Virtual hosting (multiple domains on one IP)
-# ✅ URL rewriting and redirects
-# ✅ Rate limiting and authentication (with annotations)
-# ❌ Requires Ingress Controller to be installed
-# ❌ More complex than Service LoadBalancer
+#  Single load balancer for multiple services (cost effective)
+#  Layer 7 routing (host, path, headers)
+#  SSL/TLS termination
+#  Virtual hosting (multiple domains on one IP)
+#  URL rewriting and redirects
+#  Rate limiting and authentication (with annotations)
+#  Requires Ingress Controller to be installed
+#  More complex than Service LoadBalancer
 #
 # Comparison:
 # ┌────────────────┬─────────────┬──────────────┐

@@ -1,0 +1,8 @@
+{
+  "label": "10. Distributed Locking",
+  "position": 10,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn about distributed locking, race conditions, and reliability patterns."
+  }
+}

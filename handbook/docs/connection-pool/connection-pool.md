@@ -750,7 +750,6 @@ async function example10_errorHandling(poolManager: ConnectionPoolManager) {
    ```
 ## Tài Liệu Tham Khảo
 
-- [Source Code](../../backend/src/connection-pool/)
-- [Configuration](../../backend/src/connection-pool/types/pool-config.interface.ts)
-- [Examples](../../backend/src/connection-pool/connection-pool.examples.ts)
-- [Test Results](../../backend/src/connection-pool/TEST_RESULTS.md)
+- Source code examples available in the backend repository
+- Configuration interfaces for pool settings
+- Connection pool implementation examples

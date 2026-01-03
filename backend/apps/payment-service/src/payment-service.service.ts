@@ -4,7 +4,8 @@ import {
   Topics,
   ConsumerGroups,
   OrderCreatedEvent,
-  PaymentProcessedEvent,
+  PaymentCompletedEvent,
+  PaymentFailedEvent,
 } from '../../../libs/kafka';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -42,23 +43,18 @@ export class PaymentServiceService implements OnModuleInit {
   }
 
   /**
-   * Handle OrderCreated event
+   * Handle OrderCreated event - SAGA CHOREOGRAPHY STEP 1
    * 
-   * Consumer Group Behavior:
-   * - Consumer Group: "payment-service"
-   * - If multiple payment-service instances running:
-   *   - Kafka distributes partitions among them (load balancing)
-   *   - Each message processed by only ONE instance
-   * - If payment-service instance crashes:
-   *   - Kafka rebalances partitions to remaining instances
-   *   - Processing continues automatically
+   * Saga Flow:
+   * 1. Order Service creates order → OrderCreatedEvent
+   * 2. Payment Service processes payment → PaymentCompleted/Failed
+   * 3. If PaymentCompleted → Inventory Service reserves items
+   * 4. If PaymentFailed → Order Service cancels order (compensation)
    * 
-   * Example with 4 partitions, 2 instances:
-   *   Instance 1: Partitions 0, 1
-   *   Instance 2: Partitions 2, 3
-   * 
-   * If Instance 1 crashes:
-   *   Instance 2: Partitions 0, 1, 2, 3 (takes over all)
+   * This implements CHOREOGRAPHY pattern:
+   * - Each service listens, acts, and emits next event
+   * - No central orchestrator
+   * - Services are loosely coupled
    */
   private async handleOrderCreated(
     event: OrderCreatedEvent,
@@ -70,50 +66,96 @@ export class PaymentServiceService implements OnModuleInit {
       headers: Record<string, any>;
     },
   ): Promise<void> {
-    console.log('\n📨 Received OrderCreatedEvent:', {
-      orderId: event.orderId,
-      total: event.total,
+    const orderId = event.data.orderId;
+    console.log('\n📨 [SAGA STEP 1] Received OrderCreatedEvent:', {
+      orderId,
+      total: event.data.total,
       partition: metadata.partition,
       offset: metadata.offset,
     });
 
     // Idempotency check
-    // In production, check if this eventId already processed (Redis, DB, etc.)
     const alreadyProcessed = await this.checkIfProcessed(event.eventId);
     if (alreadyProcessed) {
       console.log(`⏭ Event ${event.eventId} already processed, skipping`);
-      return; // Skip duplicate
+      return;
     }
 
     // Simulate payment processing
-    console.log(`💳 Processing payment for order ${event.orderId}...`);
-    await this.sleep(2000); // Simulate API call to payment gateway
+    console.log(`💳 Processing payment for order ${orderId}...`);
+    await this.sleep(1500);
 
-    // Random failure for demonstration (10% chance)
-    if (Math.random() < 0.1) {
-      throw new Error('Payment gateway timeout');
+    // Simulate payment failure (30% chance for demo)
+    const paymentSucceeds = Math.random() > 0.3;
+
+    if (paymentSucceeds) {
+      // SUCCESS PATH
+      await this.handlePaymentSuccess(event);
+    } else {
+      // FAILURE PATH - Trigger compensation
+      await this.handlePaymentFailure(event);
     }
-
-    // Payment successful!
-    console.log(`✓ Payment processed successfully for order ${event.orderId}`);
 
     // Mark as processed (idempotency)
     await this.markAsProcessed(event.eventId);
+  }
 
-    // Emit PaymentProcessed event
-    const paymentEvent: PaymentProcessedEvent = {
-      eventType: 'PaymentProcessed',
+  /**
+   * Payment Success - Continue Saga
+   */
+  private async handlePaymentSuccess(event: OrderCreatedEvent): Promise<void> {
+    const orderId = event.data.orderId;
+    const paymentId = uuidv4();
+
+    console.log(`✓ Payment successful for order ${orderId}`);
+
+    // Emit PaymentCompletedEvent → triggers Inventory Service
+    const completedEvent: PaymentCompletedEvent = {
+      eventType: 'PaymentCompleted',
       eventId: uuidv4(),
       timestamp: new Date().toISOString(),
-      orderId: event.orderId,
-      paymentId: uuidv4(),
-      amount: event.total,
-      status: 'success',
+      data: {
+        orderId,
+        paymentId,
+        amount: event.data.total,
+        transactionId: `txn_${uuidv4().substring(0, 8)}`,
+      },
     };
 
-    await this.kafkaProducer.send(Topics.PAYMENT_PROCESSED, paymentEvent, event.orderId);
+    await this.kafkaProducer.send(Topics.PAYMENT_COMPLETED, completedEvent, orderId);
+    console.log(`✓ [SAGA STEP 2] PaymentCompletedEvent published for order ${orderId}\n`);
+  }
 
-    console.log(`✓ PaymentProcessedEvent published for order ${event.orderId}\n`);
+  /**
+   * Payment Failure - Trigger Compensation
+   * 
+   * Compensation Action:
+   * - Instead of rollback (not possible in distributed systems)
+   * - Emit compensating event (PaymentFailedEvent)
+   * - Order Service will cancel the order
+   */
+  private async handlePaymentFailure(event: OrderCreatedEvent): Promise<void> {
+    const orderId = event.data.orderId;
+    const paymentId = uuidv4();
+
+    console.log(`✗ Payment failed for order ${orderId}`);
+
+    // Emit PaymentFailedEvent → triggers Order Service compensation
+    const failedEvent: PaymentFailedEvent = {
+      eventType: 'PaymentFailed',
+      eventId: uuidv4(),
+      timestamp: new Date().toISOString(),
+      data: {
+        orderId,
+        paymentId,
+        amount: event.data.total,
+        reason: 'Insufficient funds',
+        errorCode: 'PAYMENT_DECLINED',
+      },
+    };
+
+    await this.kafkaProducer.send(Topics.PAYMENT_FAILED, failedEvent, orderId);
+    console.log(`✗ [SAGA COMPENSATION] PaymentFailedEvent published for order ${orderId}\n`);
   }
 
   /**
