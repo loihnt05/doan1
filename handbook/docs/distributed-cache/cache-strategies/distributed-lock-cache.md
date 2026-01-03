@@ -17,21 +17,32 @@ Cache Stampede xảy ra khi:
 4. Tất cả requests đồng thời query database
 5. Database bị overwhelmed với duplicate queries
 
-```
-Time: T0 - Cache expires
-┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐
-│Request1│  │Request2│  │Request3│  │Request4│  │Request5│
-└───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘
-    │           │           │           │           │
-    ▼           ▼           ▼           ▼           ▼
-┌─────────────────────────────────────────────────────┐
-│              Cache - All MISS!                       │
-└────┬────────┬─────────┬─────────┬─────────┬─────────┘
-     │        │         │         │         │
-     ▼        ▼         ▼         ▼         ▼
-┌──────────────────────────────────────────────────────┐
-│         Database - 5 identical queries!              │
-└──────────────────────────────────────────────────────┘
+```mermaid  
+flowchart TD
+    T["Time T0\nCache expires"]
+
+    R1["Request 1"]
+    R2["Request 2"]
+    R3["Request 3"]
+    R4["Request 4"]
+    R5["Request 5"]
+
+    C["Cache\nAll MISS"]
+    D["Database\nMultiple identical queries"]
+
+    T --> R1
+    T --> R2
+    T --> R3
+    T --> R4
+    T --> R5
+
+    R1 --> C
+    R2 --> C
+    R3 --> C
+    R4 --> C
+    R5 --> C
+
+    C --> D
 ```
 
 ### Impact của Cache Stampede
@@ -48,38 +59,43 @@ Sử dụng distributed lock để:
 2. Các requests khác đợi lock holder populate cache
 3. Sau khi cache populated, tất cả requests đọc từ cache
 
-```
-Time: T0 - Cache expires
-┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐
-│Request1│  │Request2│  │Request3│  │Request4│  │Request5│
-└───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘
-    │           │           │           │           │
-    ▼           ▼           ▼           ▼           ▼
-┌─────────────────────────────────────────────────────┐
-│              Cache - All MISS!                       │
-└────┬────────┬─────────┬─────────┬─────────┬─────────┘
-     │        │         │         │         │
-     │        │         │         │         │
-     ▼        ▼         ▼         ▼         ▼
-┌──────────────────────────────────────────────────────┐
-│           Try to acquire lock                         │
-└────┬─────────────────────────────────────────────────┘
-     │                    │
-     ✓ Lock acquired     ✗ Wait for cache
-     │                    │
-     ▼                    │
-┌──────────┐              │
-│ Database │ ← Only 1     │
-└────┬─────┘   query      │
-     │                    │
-     ▼                    │
-┌─────────┐               │
-│  Cache  │ ← Update      │
-└────┬────┘               │
-     │                    │
-     │    ┌───────────────┘
-     ▼    ▼
-  All read from cache ✓
+```mermaid
+flowchart TD
+    T["Time T0\nCache expires"]
+
+    R1["Request 1"]
+    R2["Request 2"]
+    R3["Request 3"]
+    R4["Request 4"]
+    R5["Request 5"]
+
+    C["Cache\nAll MISS"]
+    L{Acquire lock?}
+
+    DB["Database\nSingle query"]
+    U["Update Cache"]
+    RET["All read from Cache"]
+
+    T --> R1
+    T --> R2
+    T --> R3
+    T --> R4
+    T --> R5
+
+    R1 --> C
+    R2 --> C
+    R3 --> C
+    R4 --> C
+    R5 --> C
+
+    C --> L
+
+    L -- Lock acquired --> DB
+    DB --> U
+    U --> RET
+
+    L -- Wait --> RET
+
 ```
 
 ## Implementation

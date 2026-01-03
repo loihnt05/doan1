@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 ---
-# Mô hình Graph (Neo4j)
+# Graph Model (Neo4j)
 
 Mô hình đồ thị biểu diễn dữ liệu dưới dạng các nút (nodes - thực thể) và các mối quan hệ (relationships - kết nối). Nó xuất sắc trong việc quản lý dữ liệu có nhiều kết nối và các truy vấn quan hệ phức tạp.
 

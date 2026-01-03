@@ -16,34 +16,26 @@ Read Through là một chiến lược caching trong đó cache nằm giữa app
 ## Flow Diagram
 
 ### Read Flow
-```
-┌─────────────┐
-│ Application │
-└──────┬──────┘
-       │
-       │ Read Request
-       ▼
-   ┌───────┐
-   │ Cache │ ◄──── Application talks to cache only
-   └───┬───┘
-       │
-   Cache Hit?
-       │
-       ├── Yes ──▶ Return from Cache (FAST)
-       │
-       └── No ───▶ ┌──────────────────┐
-                   │ Cache loads from │
-                   │    Database      │ ◄── Cache responsibility
-                   └────────┬─────────┘
-                            │
-                            ▼
-                      ┌──────────┐
-                      │  Cache   │
-                      │  stores  │
-                      └────┬─────┘
-                           │
-                           ▼
-                     Return to App
+```mermaid
+flowchart TD
+    A["Application"]
+    B["Cache"]
+    C{Cache hit?}
+    D["Return from Cache"]
+    E["Load from Database"]
+    F["Store in Cache"]
+    G["Return to Application"]
+
+    A -->|Read request| B
+    B --> C
+
+    C -- Yes --> D
+    D --> G
+
+    C -- No --> E
+    E --> F
+    F --> G
+
 ```
 
 ### Comparison with Cache Aside

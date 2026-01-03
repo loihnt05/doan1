@@ -16,53 +16,32 @@ Write Behind, còn gọi là Write Back, là một chiến lược caching trong
 ## Flow Diagram
 
 ### Write Flow
-```
-┌─────────────┐
-│ Application │
-└──────┬──────┘
-       │
-       │ Write Request
-       ▼
-   ┌───────┐
-   │ Cache │ ◄──── Write to cache immediately (FAST)
-   └───┬───┘
-       │
-       │ Return Success ✓
-       ▼
-  ┌─────────────┐
-  │   Client    │
-  └─────────────┘
-  
-       │
-       │ Background Process
-       ▼
-  ┌─────────────┐
-  │ Write Queue │ ◄──── Queue DB write
-  └──────┬──────┘
-         │
-         │ Async (5s interval)
-         ▼
-    ┌──────────┐
-    │ Database │ ◄──── Batch write to DB
-    └──────────┘
+```mermaid
+flowchart TD
+    A["Application"]
+    B["Cache"]
+    C["Client"]
+    D["Write Queue"]
+    E["Database"]
+
+    A -->|Write request| B
+    B -->|Return success| C
+
+    B -->|Enqueue write| D
+    D -->|Async batch write| E
+
 ```
 
 ### Read Flow
-```
-┌─────────────┐
-│ Application │
-└──────┬──────┘
-       │
-       ▼
-   ┌───────┐
-   │ Cache │ ◄──── Always read from cache
-   └───┬───┘
-       │
-       │ (Data always in cache from writes)
-       ▼
-  ┌─────────────┐
-  │   Return    │
-  └─────────────┘
+```mermaid
+flowchart TD
+    A["Application"]
+    B["Cache"]
+    C["Return"]
+
+    A --> B
+    B -->|Read| C
+
 ```
 
 ## Implementation
