@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # Streaming so với Messaging
 
 ## Tổng quan
@@ -237,23 +240,21 @@ const joined = {
 
 ### Kiến trúc Lambda (Truyền thống)
 
-```
-                    ┌──────────────────┐
-                    │   Batch Layer    │
-                    │   (Accurate)     │
-Events ────────────▶│   Hadoop/Spark   │────┐
-    │               └──────────────────┘    │
-    │                                       │
-    │               ┌──────────────────┐    │
-    └──────────────▶│   Speed Layer    │────┤
-                    │   (Fast)         │    │
-                    │   Storm/Flink    │    │
-                    └──────────────────┘    │
-                                            ▼
-                                    ┌───────────────┐
-                                    │ Serving Layer │
-                                    │  (Combined)   │
-                                    └───────────────┘
+```mermaid
+flowchart LR
+    E["Events"]
+
+    B["Batch Layer\nAccurate\nHadoop / Spark"]
+    S["Speed Layer\nFast\nStorm / Flink"]
+
+    SL["Serving Layer\nCombined View"]
+
+    E --> B
+    E --> S
+
+    B --> SL
+    S --> SL
+
 ```
 
 **Đặc điểm:**
@@ -275,11 +276,17 @@ Events ────────────▶│   Hadoop/Spark   │───�
 
 ### Kiến trúc Kappa (Hiện đại)
 
-```
-Events ──▶ Stream Processor (Kafka Streams) ──▶ Serving Layer
-                    ▲
-                    │
-                    └── Reprocess from beginning if needed
+```mermaid
+flowchart LR
+    E["Events"]
+
+    SP["Stream Processor\nKafka Streams / Flink"]
+
+    SL["Serving Layer"]
+
+    E --> SP --> SL
+    SP -->|Reprocess from beginning| SP
+
 ```
 
 **Đặc điểm:**
