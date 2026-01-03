@@ -3,41 +3,37 @@ sidebar_position: 4
 ---
 # Blocking vs Non-Blocking I/O
 
-## Overview
+## Tổng quan
 
-Understanding blocking vs non-blocking I/O is crucial for building high-performance API Gateways. Node.js's event-driven, non-blocking architecture makes it excellent for I/O-heavy operations, but CPU-intensive tasks can block the event loop and kill performance.
+Hiểu biết về blocking vs non-blocking I/O rất quan trọng để xây dựng API Gateway hiệu suất cao. Kiến trúc event-driven, non-blocking của Node.js làm cho nó tuyệt vời cho các hoạt động nặng về I/O, nhưng các tác vụ đòi hỏi nhiều CPU có thể chặn event loop và làm giảm hiệu suất.
 
-## The Event Loop
+## Event Loop
 
-Node.js operates on a single-threaded event loop:
+Node.js hoạt động trên một event loop đơn luồng:
 
-```
-┌───────────────────────────┐
-┌─>│        Timers            │
-│  └─────────────┬────────────┘
-│  ┌─────────────▼────────────┐
-│  │    Pending Callbacks     │
-│  └─────────────┬────────────┘
-│  ┌─────────────▼────────────┐
-│  │       Idle, Prepare      │
-│  └─────────────┬────────────┘
-│  ┌─────────────▼────────────┐
-│  │         Poll             │<── I/O operations
-│  └─────────────┬────────────┘
-│  ┌─────────────▼────────────┐
-│  │         Check            │
-│  └─────────────┬────────────┘
-│  ┌─────────────▼────────────┐
-│  │    Close Callbacks       │
-│  └─────────────┬────────────┘
-└──────────────────────────────┘
+```mermaid
+flowchart TD
+    T["Timers"]
+    P["Pending Callbacks"]
+    I["Idle, Prepare"]
+    O["Poll\nI/O operations"]
+    C["Check"]
+    X["Close Callbacks"]
+
+    T --> P
+    P --> I
+    I --> O
+    O --> C
+    C --> X
+    X --> T
+
 ```
 
 ## Blocking Operations
 
-### What Blocks the Event Loop?
+### Điều gì chặn Event Loop?
 
-1. **CPU-Intensive Computations**
+1. **Tính toán đòi hỏi nhiều CPU**
    ```typescript
    //  BAD: Blocks event loop
    @Get('fibonacci')
@@ -50,35 +46,35 @@ Node.js operates on a single-threaded event loop:
    }
    ```
 
-2. **Synchronous File Operations**
+2. **Các hoạt động File đồng bộ**
    ```typescript
-   //  BAD: Blocks event loop
+   //  TỆ: Chặn event loop
    const data = fs.readFileSync('/large-file.txt');
    ```
 
-3. **Synchronous Crypto Operations**
+3. **Các hoạt động Crypto đồng bộ**
    ```typescript
-   //  BAD: Blocks event loop
+   //  TỆ: Chặn event loop
    const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512');
    ```
 
-4. **Complex JSON Parsing**
+4. **Phân tích JSON phức tạp**
    ```typescript
-   //  BAD: Can block for very large payloads
+   //  TỆ: Có thể chặn với payload rất lớn
    const data = JSON.parse(hugeJsonString);
    ```
 
-### Real-World Example from Our Project
+### Ví dụ thực tế từ dự án của chúng ta
 
-Our project demonstrates the blocking problem:
+Dự án của chúng ta minh họa vấn đề blocking:
 
 ```typescript
-// This endpoint simulates CPU-intensive work
+// Endpoint này mô phỏng công việc đòi hỏi nhiều CPU
 @Get('cpu-intensive')
 async cpuIntensive() {
   const start = Date.now();
   
-  // Simulate heavy computation
+  // Mô phỏng tính toán nặng
   let result = 0;
   for (let i = 0; i < 10_000_000_000; i++) {
     result += Math.sqrt(i);
@@ -92,48 +88,48 @@ async cpuIntensive() {
 }
 ```
 
-**Test Results:**
-- **Single Instance**: 53,364ms (blocks all other requests!)
-- **3 Instances**: 116ms per instance (requests distributed)
+**Kết quả kiểm thử:**
+- **Một instance**: 53,364ms (chặn tất cả request khác!)
+- **3 instances**: 116ms mỗi instance (requests được phân phối)
 
 ## Non-Blocking Operations
 
-### I/O Operations (Naturally Non-Blocking)
+### Các hoạt động I/O (Tự nhiên Non-Blocking)
 
 ```typescript
-//  GOOD: Non-blocking
+//  TỐT: Non-blocking
 @Get('users')
 async getUsers() {
-  // Database query doesn't block
+  // Database query không chặn
   return await this.userRepository.find();
 }
 
 @Get('external-api')
 async fetchData() {
-  // HTTP request doesn't block
+  // HTTP request không chặn
   return await this.httpService.get('https://api.example.com/data');
 }
 ```
 
-### How Non-Blocking Works
+### Cách thức hoạt động của Non-Blocking
 
 ```
-Request 1 arrives → Event Loop → Initiate DB query → Continue
-Request 2 arrives → Event Loop → Initiate API call → Continue
-Request 3 arrives → Event Loop → Initiate File read → Continue
+Request 1 đến → Event Loop → Khởi tạo DB query → Tiếp tục
+Request 2 đến → Event Loop → Khởi tạo API call → Tiếp tục
+Request 3 đến → Event Loop → Khởi tạo File read → Tiếp tục
                          ↓
-                  DB query completes → Callback → Response 1
-                  API call completes → Callback → Response 2
-                  File read completes → Callback → Response 3
+                  DB query hoàn thành → Callback → Response 1
+                  API call hoàn thành → Callback → Response 2
+                  File read hoàn thành → Callback → Response 3
 ```
 
-All three requests are handled concurrently on a single thread!
+Tất cả ba requests được xử lý đồng thời trên một luồng duy nhất!
 
-## Solutions for CPU-Intensive Work
+## Giải pháp cho công việc đòi hỏi nhiều CPU
 
 ### 1. Worker Threads
 
-Use worker threads for CPU-intensive tasks:
+Sử dụng worker threads cho các tác vụ đòi hỏi nhiều CPU:
 
 ```typescript
 import { Worker } from 'worker_threads';
@@ -158,20 +154,20 @@ export class CpuService {
 }
 ```
 
-**Worker file (cpu-worker.js):**
+**File worker (cpu-worker.js):**
 ```javascript
 const { parentPort, workerData } = require('worker_threads');
 
-// Perform heavy computation
+// Thực hiện tính toán nặng
 const result = computeHeavyTask(workerData);
 
-// Send result back
+// Gửi kết quả về
 parentPort.postMessage(result);
 ```
 
 ### 2. Cluster Module
 
-Fork multiple processes to utilize all CPU cores:
+Fork nhiều processes để tận dụng tất cả CPU cores:
 
 ```typescript
 import cluster from 'cluster';
@@ -203,13 +199,13 @@ if (cluster.isPrimary) {
 
 ### 3. Message Queue
 
-Offload heavy tasks to a background worker via message queue:
+Chuyển các tác vụ nặng sang background worker thông qua message queue:
 
 ```typescript
 // API Gateway - Producer
 @Post('process-data')
 async processData(@Body() data: any) {
-  // Send to queue immediately (non-blocking)
+  // Gửi đến queue ngay lập tức (non-blocking)
   await this.kafkaService.send('heavy-tasks', {
     taskId: uuid(),
     data: data,
@@ -227,45 +223,50 @@ async processData(@Body() data: any) {
 export class HeavyTaskConsumer {
   @EventPattern('heavy-tasks')
   async handleTask(data: any) {
-    // CPU-intensive work happens here
-    // Doesn't block the API Gateway
+    // Công việc đòi hỏi nhiều CPU diễn ra ở đây
+    // Không chặn API Gateway
     const result = await this.performHeavyComputation(data);
     
-    // Store result or notify client
+    // Lưu kết quả hoặc thông báo cho client
     await this.storeResult(data.taskId, result);
   }
 }
 ```
 
-### 4. Async/Await Properly
+### 4. Sử dụng Async/Await đúng cách
 
-Always use async/await for I/O operations:
+Luôn sử dụng async/await cho các hoạt động I/O:
 
 ```typescript
-//  GOOD: Non-blocking
+//  TỐT: Non-blocking
 @Get('data')
 async getData() {
   const [users, orders] = await Promise.all([
-    this.userService.getUsers(),      // Runs concurrently
-    this.orderService.getOrders()     // Runs concurrently
+    this.userService.getUsers(),      // Chạy đồng thời
+    this.orderService.getOrders()     // Chạy đồng thời
   ]);
   
   return { users, orders };
 }
 
-//  BAD: Sequential (slower but still non-blocking)
+  ]);
+  
+  return { users, orders };
+}
+
+//  TỆ: Tuần tự (chậm hơn nhưng vẫn non-blocking)
 @Get('data')
 async getData() {
-  const users = await this.userService.getUsers();   // Wait
-  const orders = await this.orderService.getOrders(); // Then wait again
+  const users = await this.userService.getUsers();   // Chờ
+  const orders = await this.orderService.getOrders(); // Sau đó chờ lại
   
   return { users, orders };
 }
 ```
 
-## Monitoring Event Loop Lag
+## Giám sát Event Loop Lag
 
-Detect when event loop is blocked:
+Phát hiện khi event loop bị chặn:
 
 ```typescript
 import { performance } from 'perf_hooks';
@@ -283,7 +284,7 @@ export class EventLoopMonitor {
         
         if (lag > this.threshold) {
           console.warn(`Event loop lag detected: ${lag.toFixed(2)}ms`);
-          // Alert or log metric
+          // Cảnh báo hoặc ghi metric
         }
       });
     }, 1000);
@@ -291,7 +292,7 @@ export class EventLoopMonitor {
 }
 ```
 
-### Metrics to Track
+### Metrics để theo dõi
 
 ```typescript
 import v8 from 'v8';
@@ -313,25 +314,25 @@ getMetrics() {
 }
 ```
 
-## Best Practices
+## Các phương pháp tốt nhất
 
-### 1. Never Block the Event Loop
+### 1. Không bao giờ chặn Event Loop
 
 ```typescript
-//  NEVER DO THIS
+//  KHÔNG BAO GIỜ LÀM VẬY
 app.get('/bad', (req, res) => {
-  const result = doHeavySync(); // Blocks everything!
+  const result = doHeavySync(); // Chặn mọi thứ!
   res.json(result);
 });
 
-//  DO THIS
+//  LÀM NHƯ VẬY
 app.get('/good', async (req, res) => {
   const result = await doHeavyAsync(); // Non-blocking
   res.json(result);
 });
 ```
 
-### 2. Use Streaming for Large Data
+### 2. Sử dụng Streaming cho dữ liệu lớn
 
 ```typescript
 //  Stream large responses
@@ -342,7 +343,7 @@ downloadLargeFile(@Res() res: Response) {
 }
 ```
 
-### 3. Set Timeouts
+### 3. Đặt Timeouts
 
 ```typescript
 @Get('external-api')
@@ -350,7 +351,7 @@ async fetchExternal() {
   try {
     const response = await this.httpService.axiosRef.get(
       'https://slow-api.com/data',
-      { timeout: 5000 } // 5 second timeout
+      { timeout: 5000 } // 5 giây timeout
     );
     return response.data;
   } catch (error) {
@@ -362,84 +363,84 @@ async fetchExternal() {
 }
 ```
 
-### 4. Limit Payload Size
+### 4. Giới hạn kích thước Payload
 
 ```typescript
-// In main.ts
+// Trong main.ts
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 ```
 
-### 5. Use Connection Pooling
+### 5. Sử dụng Connection Pooling
 
 ```typescript
 // Database connection pool
 const pool = new Pool({
-  max: 20,                // Maximum connections
-  min: 5,                 // Minimum connections
+  max: 20,                // Số kết nối tối đa
+  min: 5,                 // Số kết nối tối thiểu
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
 ```
 
-## Performance Comparison
+## So sánh hiệu suất
 
-### Blocking Example
+### Ví dụ Blocking
 ```typescript
-// Single instance handling requests sequentially
-Request 1: CPU task (50s) → blocks
-Request 2: Waiting... (50s)
-Request 3: Waiting... (100s)
+// Một instance xử lý requests tuần tự
+Request 1: CPU task (50s) → chặn
+Request 2: Đang chờ... (50s)
+Request 3: Đang chờ... (100s)
 
-Total time: 150 seconds for 3 requests
+Tổng thời gian: 150 giây cho 3 requests
 ```
 
-### Non-Blocking Example
+### Ví dụ Non-Blocking
 ```typescript
-// Single instance handling I/O concurrently
-Request 1: DB query → continues
-Request 2: API call → continues
-Request 3: File read → continues
+// Một instance xử lý I/O đồng thời
+Request 1: DB query → tiếp tục
+Request 2: API call → tiếp tục
+Request 3: File read → tiếp tục
 
-All complete in ~1 second (concurrent I/O)
+Tất cả hoàn thành trong ~1 giây (I/O đồng thời)
 ```
 
-### Horizontal Scaling for CPU Tasks
+### Horizontal Scaling cho CPU Tasks
 ```typescript
-// 3 instances with load balancer
+// 3 instances với load balancer
 Request 1: Instance 1 (CPU task 50s)
 Request 2: Instance 2 (CPU task 50s)
 Request 3: Instance 3 (CPU task 50s)
 
-Total time: 50 seconds for 3 requests (parallel)
+Tổng thời gian: 50 giây cho 3 requests (song song)
 ```
 
-## Testing
+## Kiểm thử
 
-Test event loop blocking in your application:
+Kiểm thử event loop blocking trong ứng dụng của bạn:
 
 ```bash
-# Terminal 1: Start your service
+# Terminal 1: Khởi động service
 npm run start:dev
 
-# Terminal 2: Trigger CPU-intensive task
+# Terminal 2: Kích hoạt tác vụ đòi hỏi nhiều CPU
 curl http://localhost:3000/api/cpu-intensive
 
-# Terminal 3: Immediately try another request
+# Terminal 3: Ngay lập tức thử request khác
 time curl http://localhost:3000/api/health
 
-# If blocked, health check will take a long time
+# Nếu bị chặn, health check sẽ mất nhiều thời gian
 ```
 
-## Project Implementation
+## Triển khai dự án
 
-See our implementation:
+Xem triển khai của chúng ta:
 - [Cluster setup](../../../backend/apps/api-gateway/src/cluster.ts)
 - [CPU-intensive test](../../../backend/test-scaling.sh)
 - [Scaling demonstration](../../../backend/SCALING-DEMO.md)
 
-## Next Steps
+## Các bước tiếp theo
 
-- Learn about [Scaling](../scaling/index.md) strategies
-- Explore [Load Balancing](../load-balancer/index.md)
-- Check [Observability](../observability/index.md) for monitoring
+- Tìm hiểu về chiến lược [Scaling](../scaling/index.md)
+- Khám phá [Load Balancing](../load-balancer/index.md)
+- Kiểm tra [Observability](../observability/index.md) để giám sát
