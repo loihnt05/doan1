@@ -49,7 +49,7 @@ Các nguyên tắc chung:
 - **Memory Leak detection (`-inspect`, heap snapshots)** – `test-race-condition.sh` mô phỏng leak để huấn luyện.
 - **Performance Hooks (`perf_hooks`)** – `performance.mark()`/`measure()` ghi nhận từng bước Saga.
 
-## 1. Authentication & Authorization @Kiên Nguyễn Trung
+## 1. Authentication & Authorization
 
 ### Authentication
 - **Password hashing (bcrypt, argon2)** – `user-service` mặc định bcrypt cost 12, tùy chọn argon2 cho khách hàng yêu cầu cao.
@@ -65,7 +65,7 @@ Các nguyên tắc chung:
 - **Context-based policies** – Kết hợp device fingerprint + IP + thời gian để hạ mức trust.
 - **Policy enforcement layer** – Guard + interceptor chung tại `apps/api-gateway/src/app.module.ts` gửi audit log lên Kafka topic `auth-audit`.
 
-## 2. Distributed Cache - Cache @Lợi Hồ Nguyễn Tài
+## 2. Distributed Cache
 
 ### 2.1. Cache Technologies
 - **Redis (Strings, Hashes, Lists, Sets, Sorted Sets)** – Sorted Set dùng cho bảng xếp hạng hàng tồn.
