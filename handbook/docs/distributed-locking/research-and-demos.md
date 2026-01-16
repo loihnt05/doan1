@@ -25,7 +25,7 @@ Các demo về Distributed Locking bao gồm race condition prevention, Redis lo
 - Instance 1 và 2 đồng thời đọc balance (cả 2 thấy 1000)
 - Cả 2 check đủ tiền để trừ 100
 - Instance 1 ghi balance = 900, Instance 2 cũng ghi balance = 900
-- Kết quả sai: balance = 900 (đáng lẽ phải là 800)
+- Kết quả sai: balance = 900 (đáng lẽ phải là 800)x
 - Đây là race condition: "check-then-act" pattern
 - Giống như 2 người cùng lấy cùng 1 chiếc ghế trống vì cả 2 đều thấy ghế trống lúc check
 

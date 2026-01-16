@@ -27,7 +27,7 @@ Tài liệu mô tả các phần demo thực tế cho hệ thống xác thực v
 **Cách test**:
 - Đăng ký user mới qua POST `/users` với username và password
 - Login qua POST `/auth/login`, nhận về access_token trong response
-- Sử dụng token để truy cập protected route như `/profile` bằng cách đặt trong Authorization header với format "Bearer <token>"
+- Sử dụng token để truy cập protected route như `/profile` bằng cách đặt trong Authorization header với format `Bearer <token>`
 - Test các trường hợp lỗi: sai password (401 Unauthorized), token hết hạn (401), token không hợp lệ (401)
 
 ---
